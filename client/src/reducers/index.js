@@ -1,18 +1,19 @@
 import { combineReducers } from 'redux'
-import completionFunctions from './completion-functions'
-import samples from './samples'
-import settings from './settings'
-import templates from './templates'
-import ui from './ui'
-import users from './users'
+
+import settings from './settings.js'
+import users from './users.js'
+import applicants from './applicants.js'
+import grants from './grants.js'
+import fundings from './fundings.js'
+import categories from './categories.js'
 
 const rootReducer = combineReducers({
-  completionFunctions,
-  samples,
   settings,
-  templates,
-  ui,
   users,
+  applicants,
+  grants,
+  fundings,
+  categories,
 })
 
 export default rootReducer

@@ -7,7 +7,7 @@ import {
   assoc,
   dissoc
 } from 'ramda'
-import { COMPLETION_FUNCTIONS } from '../constants/ActionTypes'
+import { APPLICANTS } from '../constants/ActionTypes'
 
 import toLoadable from '../utils/to-loadable'
 
@@ -17,36 +17,36 @@ const initialState = {
   data: {}
 }
 
-export default function completionFunctions(state = initialState, action) {
+export default function applicants(state = initialState, action) {
   switch (action.type) {
 
-    case COMPLETION_FUNCTIONS.FETCH.REQUEST:
+    case APPLICANTS.FETCH.REQUEST:
       return { ...state, isLoading: true }
-    case COMPLETION_FUNCTIONS.FETCH.RECEIVE:
+    case APPLICANTS.FETCH.RECEIVE:
       return { ...state, isLoading: false, data: toLoadable(indexBy(prop('id'), action.payload)) }
-    case COMPLETION_FUNCTIONS.FETCH.ERROR:
+    case APPLICANTS.FETCH.ERROR:
       return { ...state, isLoading: false }
 
-    case COMPLETION_FUNCTIONS.CREATE.REQUEST:
+    case APPLICANTS.CREATE.REQUEST:
       return { ...state, isCreating: true }
-    case COMPLETION_FUNCTIONS.CREATE.RECEIVE:
+    case APPLICANTS.CREATE.RECEIVE:
       return { ...state, isCreating: false, data:
         assoc(action.payload.id, { isLoading: false, data: action.payload }, state.data) }
-    case COMPLETION_FUNCTIONS.CREATE.ERROR:
+    case APPLICANTS.CREATE.ERROR:
       return { ...state, isCreating: false }
 
-    case COMPLETION_FUNCTIONS.UPDATE.REQUEST:
+    case APPLICANTS.UPDATE.REQUEST:
       return set(lensPath(['data', action.payload.id, 'isLoading']), true, state)
-    case COMPLETION_FUNCTIONS.UPDATE.RECEIVE:
+    case APPLICANTS.UPDATE.RECEIVE:
       return set(lensPath(['data', action.meta.id]), { isLoading: false, data: action.payload }, state)
-    case COMPLETION_FUNCTIONS.UPDATE.ERROR:
+    case APPLICANTS.UPDATE.ERROR:
       return set(lensPath(['data', action.meta.id, 'isLoading']), false, state)
 
-    case COMPLETION_FUNCTIONS.DELETE.REQUEST:
+    case APPLICANTS.DELETE.REQUEST:
       return set(lensPath(['data', action.payload.id, 'isLoading']), true, state)
-    case COMPLETION_FUNCTIONS.DELETE.RECEIVE:
+    case APPLICANTS.DELETE.RECEIVE:
       return { ...state, data: dissoc(action.meta.id, state.data) }
-    case COMPLETION_FUNCTIONS.DELETE.ERROR:
+    case APPLICANTS.DELETE.ERROR:
       return set(lensPath(['data', action.meta.id, 'isLoading']), true, state)
 
     default:

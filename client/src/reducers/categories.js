@@ -7,7 +7,7 @@ import {
   assoc,
   dissoc
 } from 'ramda'
-import { TEMPLATES } from '../constants/ActionTypes'
+import { CATEGORIES } from '../constants/ActionTypes'
 
 import toLoadable from '../utils/to-loadable'
 
@@ -17,36 +17,36 @@ const initialState = {
   data: {}
 }
 
-export default function templates(state = initialState, action) {
+export default function categories(state = initialState, action) {
   switch (action.type) {
 
-    case TEMPLATES.FETCH.REQUEST:
+    case CATEGORIES.FETCH.REQUEST:
       return { ...state, isLoading: true }
-    case TEMPLATES.FETCH.RECEIVE:
+    case CATEGORIES.FETCH.RECEIVE:
       return { ...state, isLoading: false, data: toLoadable(indexBy(prop('id'), action.payload)) }
-    case TEMPLATES.FETCH.ERROR:
+    case CATEGORIES.FETCH.ERROR:
       return { ...state, isLoading: false }
 
-    case TEMPLATES.CREATE.REQUEST:
+    case CATEGORIES.CREATE.REQUEST:
       return { ...state, isCreating: true }
-    case TEMPLATES.CREATE.RECEIVE:
+    case CATEGORIES.CREATE.RECEIVE:
       return { ...state, isCreating: false, data:
         assoc(action.payload.id, { isLoading: false, data: action.payload }, state.data) }
-    case TEMPLATES.CREATE.ERROR:
+    case CATEGORIES.CREATE.ERROR:
       return { ...state, isCreating: false }
 
-    case TEMPLATES.UPDATE.REQUEST:
+    case CATEGORIES.UPDATE.REQUEST:
       return set(lensPath(['data', action.payload.id, 'isLoading']), true, state)
-    case TEMPLATES.UPDATE.RECEIVE:
+    case CATEGORIES.UPDATE.RECEIVE:
       return set(lensPath(['data', action.meta.id]), { isLoading: false, data: action.payload }, state)
-    case TEMPLATES.UPDATE.ERROR:
+    case CATEGORIES.UPDATE.ERROR:
       return set(lensPath(['data', action.meta.id, 'isLoading']), false, state)
 
-    case TEMPLATES.DELETE.REQUEST:
+    case CATEGORIES.DELETE.REQUEST:
       return set(lensPath(['data', action.payload.id, 'isLoading']), true, state)
-    case TEMPLATES.DELETE.RECEIVE:
+    case CATEGORIES.DELETE.RECEIVE:
       return { ...state, data: dissoc(action.meta.id, state.data) }
-    case TEMPLATES.DELETE.ERROR:
+    case CATEGORIES.DELETE.ERROR:
       return set(lensPath(['data', action.meta.id, 'isLoading']), true, state)
 
     default:

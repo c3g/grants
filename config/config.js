@@ -7,8 +7,8 @@ const path = require('path')
 module.exports = {
   google: {
     auth: {
-      clientID:     '328760546754-pnqvvcseea7mg6tm2fd72gk8b4cnv11b.apps.googleusercontent.com',
-      clientSecret: 'HhILyJLUiToLsmMWL8zDpBS3',
+      clientID:     '395363823406-h7lrbulohi799i6o0itcd9hn3mnam8qj.apps.googleusercontent.com',
+      clientSecret: 'OZjRikbhWQ6dwu-0LvyDsagb',
       callbackURL:  'http://localhost:3001/auth/google/callback',
     },
     callbackURL:  'http://localhost:3001/auth/google/callback',

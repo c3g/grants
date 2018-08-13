@@ -4,9 +4,7 @@
   "private": true,
   "scripts": {
     "postinstall": "cd client && npm install",
-
     "setup": "mkdir -p data/db && mkdir && cp -r config data/config",
-
     "start": "node ./bin/www",
     "start:dev": "NODE_ENV=development nodemon --ignore 'client/*' ./bin/www",
     "start:client": "cd client && npm start",
@@ -14,15 +12,11 @@
     "build:all": "npm run build:client && npm run build:server",
     "build:client": "rm -rf ./public && mkdir public && cd client && npm run build && cp -r ./build/* ../public",
     "build:server": "docker-compose build",
-
     "run:all": "npm run docker:db:daemon && npm run docker:web:daemon",
-
-    "docker:db":  "docker-compose run  -v `pwd`/data/db:/var/lib/postgresql/data  grant_db",
+    "docker:db": "docker-compose run  -v `pwd`/data/db:/var/lib/postgresql/data  grant_db",
     "docker:web": "docker-compose run  -v `pwd`/data/config:/usr/etc -p 3001:3001  grant_app",
-
-    "docker:db:daemon":  "docker-compose run  -d  -v `pwd`/data/db:/var/lib/postgresql/data grant_db",
+    "docker:db:daemon": "docker-compose run  -d  -v `pwd`/data/db:/var/lib/postgresql/data grant_db",
     "docker:web:daemon": "docker-compose run  -d  -v `pwd`/config:/usr/etc -p 3001:3001     grant_app",
-
     "docker": "docker-compose build && docker-compose up",
     "docker:dev": "docker-compose -f docker-compose.dev.yml build && docker-compose -f docker-compose.dev.yml up"
   },
@@ -46,6 +40,7 @@
     "serve-favicon": "~2.4.2"
   },
   "devDependencies": {
+    "eslint-config-prettier": "^3.0.1",
     "nodemon": "^1.12.1"
   }
 }
