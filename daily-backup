@@ -1,0 +1,9 @@
+#!/bin/bash
+
+APPLICATION_DIRECTORY=/home/rgregoir/projects/grants
+BACKUP_FILE="backup-$(date +%Y-%m-%d).zip"
+BACKUP_DIRECTORY=/home/rgregoir
+
+cd $APPLICATION_DIRECTORY
+zip $BACKUP_FILE -r data
+mv $BACKUP_FILE $BACKUP_DIRECTORY

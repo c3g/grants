@@ -1,0 +1,351 @@
+@import './_variables.scss';
+
+/* From Atom one-dark-ui */
+
+.Notifications {
+  display: block;
+  z-index: 1000;
+  position: absolute;
+  top: var(--padding);
+  right: 0;
+  bottom: 0;
+  padding: 10px;
+  font-size: 1.2em;
+  overflow-x: hidden;
+  overflow-y: auto;
+  pointer-events: none;
+}
+.Notifications::scrollbar {
+  display: none;
+}
+.Notifications .Notification .close-all {
+  display: none;
+}
+.Notifications .Notification:first-child .close-all {
+  display: block;
+}
+.Notifications .Notification:first-child .message {
+  padding-right: 115px;
+}
+.Notifications .Notification:only-child .close-all {
+  display: none;
+}
+.Notifications .Notification:only-child .message {
+  padding-right: inherit;
+}
+.Notifications .Notification:only-child.has-close .message {
+  padding-right: 34px;
+}
+.Notification {
+  float: right;
+  clear: right;
+  position: relative;
+  width: 450px;
+  padding-left: 30px;
+  margin-bottom: 2px;
+  max-height: 800px;
+  word-wrap: break-word;
+  pointer-events: auto;
+}
+.Notification .before {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 30px;
+  height: 100%;
+  padding-top: 10px;
+  text-align: center;
+  border-radius: 3px 0 0 3px;
+}
+.Notification:after {
+  content: "";
+  display: block;
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: -2px;
+  height: 2px;
+}
+.Notification .meta,
+.Notification .close,
+.Notification .details,
+.Notification .stack-toggle,
+.Notification .stack-container {
+  display: none;
+}
+.Notification.fatal .meta,
+.Notification.has-description .meta,
+.Notification.has-buttons .meta,
+.Notification.has-close .close,
+.Notification.has-details .details,
+.Notification.has-stack .stack-toggle,
+.Notification.has-stack .stack-container {
+  display: block;
+}
+.Notification .item {
+  padding: 10px;
+  border-top: 1px solid rgba(0, 0, 0, 0.1);
+}
+.Notification .item.message {
+  border-top: none;
+}
+.Notification .item.message p:last-child {
+  margin-bottom: 0;
+}
+.Notification.has-close .message {
+  padding-right: 34px;
+}
+.Notification .content {
+  border-radius: 0 3px 3px 0;
+}
+.Notification .message {
+  max-height: 200px;
+  overflow-y: auto;
+}
+.Notification .close-all {
+  position: absolute;
+  top: 10px;
+  right: var(--notification-size);
+  background: none;
+  padding: calc(1 * var(--padding));
+  border-radius: 2px;
+}
+.Notification .close {
+  position: absolute;
+  top: 0;
+  right: 0;
+  width:  var(--notification-size);
+  height: var(--notification-size);
+  line-height: var(--notification-size);
+  text-align: center;
+  font-size: 16px;
+  text-shadow: none;
+  color: black;
+  opacity: .4;
+}
+.Notification .close:hover,
+.Notification .close:focus {
+  opacity: 1;
+}
+.Notification .close:active {
+  opacity: .2;
+}
+.Notification .close:before {
+  margin: 0;
+}
+.Notification.has-details {
+  width: 450px;
+}
+.Notification .details {
+  font-size: .8em;
+  background-color: rgba(255, 255, 255, 0.3);
+  background-clip: padding-box;
+  max-height: 500px;
+  overflow-y: auto;
+}
+.Notification .details .line {
+  font-family: Consolas, "Liberation Mono", Menlo, Courier, monospace;
+}
+.Notification .details .stack-toggle {
+  margin-top: 10px;
+}
+.Notification .details .stack-toggle  .before {
+  margin: 0;
+}
+.Notification .details .details-content .line {
+  white-space: pre-wrap;
+}
+.Notification .details .stack-container {
+  margin-top: 10px;
+}
+.Notification .details .stack-container .line {
+  white-space: pre;
+}
+.Notification .description {
+  font-size: .8em;
+}
+.Notification .description p:last-child {
+  margin-bottom: 0;
+}
+.Notification .btn-toolbar.btn-toolbar {
+  margin-top: 10px;
+  margin-bottom: -5px;
+  margin-left: 0;
+}
+.Notification .btn-toolbar.btn-toolbar > .btn {
+  margin-left: 0;
+  margin-bottom: 5px;
+}
+.Notification .btn-copy-report {
+  vertical-align: middle;
+}
+.Notification .opening {
+  cursor: progress;
+}
+.Notification.error .content {
+  color: #7a1200;
+  background-color: #e89d96;
+}
+.Notification.error a {
+  color: #e02200;
+}
+.Notification.error code {
+  color: #7a1200;
+  background-color: #de857d;
+}
+.Notification.error .before {
+  color: #f2c8c4;
+  background-color: #d13b2e;
+}
+.Notification.error .close-all {
+  border: 1px solid rgba(122, 18, 0, 0.3);
+  color: rgba(122, 18, 0, 0.6);
+  text-shadow: none;
+}
+.Notification.error .close-all:hover {
+  background: none;
+  border-color: rgba(122, 18, 0, 0.8);
+  color: #7a1200;
+}
+.Notification.warning .content {
+  color: #835b21;
+  background-color: #f3bf44;
+}
+.Notification.warning a {
+  color: #ce933b;
+}
+.Notification.warning code {
+  color: #835b21;
+  background-color: #ebb128;
+}
+.Notification.warning .before {
+  color: #f6d179;
+  background-color: #ad7c0b;
+}
+.Notification.warning .close-all {
+  border: 1px solid rgba(131, 91, 33, 0.3);
+  color: rgba(131, 91, 33, 0.6);
+  text-shadow: none;
+}
+.Notification.warning .close-all:hover {
+  background: none;
+  border-color: rgba(131, 91, 33, 0.8);
+  color: #835b21;
+}
+.Notification.info .content {
+  color: #0e3377;
+  background-color: #7ebef7;
+}
+.Notification.info a {
+  color: #1959d2;
+}
+.Notification.info code {
+  color: #0e3377;
+  background-color: #60adf0;
+}
+.Notification.info .before {
+  color: #b2d9fa;
+  background-color: #0f82e6;
+}
+.Notification.info .close-all {
+  border: 1px solid rgba(14, 51, 119, 0.3);
+  color: rgba(14, 51, 119, 0.6);
+  text-shadow: none;
+}
+.Notification.info .close-all:hover {
+  background: none;
+  border-color: rgba(14, 51, 119, 0.8);
+  color: #0e3377;
+}
+.Notification.success .content {
+  color: #1f5130;
+  background-color: #72da87;
+}
+.Notification.success a {
+  color: #3c9a5b;
+}
+.Notification.success code {
+  color: #1f5130;
+  background-color: #5bcd72;
+}
+.Notification.success .before {
+  color: #9ee5ad;
+  background-color: #2ba143;
+}
+.Notification.success .close-all {
+  border: 1px solid rgba(31, 81, 48, 0.3);
+  color: rgba(31, 81, 48, 0.6);
+  text-shadow: none;
+}
+.Notification.success .close-all:hover {
+  background: none;
+  border-color: rgba(31, 81, 48, 0.8);
+  color: #1f5130;
+}
+.Notification {
+  animation: notification-show 0.16s cubic-bezier(0.175, 0.885, 0.32, 1.27499);
+}
+.Notification[type="fatal"] {
+  animation: notification-show 0.16s cubic-bezier(0.175, 0.885, 0.32, 1.27499), notification-shake 4s 2s;
+  animation-iteration-count: 1, 3;
+}
+.Notification[type="fatal"]:hover {
+  animation-play-state: paused;
+}
+.Notification.remove,
+.Notification.remove:hover {
+  animation: notification-hide 0.12s cubic-bezier(0.34, 0.07, 1, 0.2), notification-shrink 0.24s 0.12s cubic-bezier(0.5, 0, 0, 1);
+  animation-fill-mode: forwards;
+}
+@keyframes notification-show {
+  0% {
+    opacity: 0;
+    transform: perspective(450px) translate(0, -30px) rotateX(90deg);
+  }
+  100% {
+    opacity: 1;
+    transform: perspective(450px) translate(0, 0) rotateX(0deg);
+  }
+}
+@keyframes notification-hide {
+  0% {
+    opacity: 1;
+    transform: scale(1);
+  }
+  100% {
+    opacity: 0;
+    transform: scale(0.8);
+  }
+}
+@keyframes notification-shrink {
+  0% {
+    opacity: 0;
+    max-height: 800px;
+    transform: scale(0.8);
+  }
+  100% {
+    opacity: 0;
+    max-height: 0;
+    transform: scale(0.8);
+  }
+}
+@keyframes notification-shake {
+  0% {
+    transform: translateX(0);
+  }
+  2% {
+    transform: translateX(-4px);
+  }
+  4% {
+    transform: translateX(8px);
+  }
+  6% {
+    transform: translateX(-4px);
+  }
+  8% {
+    transform: translateX(0);
+  }
+  100% {
+    transform: translateX(0);
+  }
+}

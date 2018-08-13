@@ -1,0 +1,23 @@
+version: '2'
+services:
+  grant_db:
+    image: 'postgres:10'
+    ports:
+      - '5432:5432'
+    volumes:
+      - ./data/db:/var/lib/postgresql/data
+    environment:
+      POSTGRES_PASSWORD: postgres
+  grant_app:
+    build: .
+    ports:
+      - '3001:3001'
+    links:
+      - db
+    environment:
+      PGHOST: 'db'
+      PGDATABASE: postgres
+      PGUSER: postgres
+      PGPASSWORD: postgres
+      FILES_DIRECTORY: /usr/share/app
+    command: ["sh", "-c", "sleep 3; npm run start"]

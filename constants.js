@@ -1,0 +1,13 @@
+/*
+ * constants.js
+ */
+
+
+const k = {
+  ROW_NOT_FOUND: 'ROW_NOT_FOUND',
+  ACCOUNT_NOT_FOUND: 'ACCOUNT_NOT_FOUND',
+  COMPLETION_FUNCTION_FAILED: 'COMPLETION_FUNCTION_FAILED',
+}
+
+
+module.exports = k

@@ -1,0 +1,172 @@
+@import './_variables.scss';
+@import './_mixins.scss';
+
+.Button {
+  display: inline-flex;
+  height: 30px;
+  min-width: 100px;
+  padding: 0 2 * $padding;
+  font-weight: bold;
+  background-color: transparent;
+  color: $color;
+  border: 1px solid var(--light-border-color);
+  border-radius: 2px;
+  transition: all .15s;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  align-items: center;
+}
+.Button:not([disabled]) {
+  cursor: pointer;
+}
+.Button:not([disabled]):hover {
+  color: var(--hover-color);
+  background-color: var(--hover-bg-color);
+}
+.activable {
+  transition: all .15s;
+}
+.Button.active,
+.Button:active,
+.Button:focus,
+.activable.active,
+.activable:active,
+.activable:focus {
+  outline: none;
+  box-shadow: 0 0 0 1px $focus-color;
+}
+.Dropdown.open > .Button,
+.Button.active,
+.Button:active {
+  background-color: rgba(black, 0.1);
+  &:hover {
+    background-color: rgba(black, 0.1);
+  }
+}
+.Button > .Icon:not(:first-child):last-child {
+  margin-left: var(--padding);
+}
+.Button > span {
+  flex: 1 1;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.Button > .Button__icon {
+}
+.Button > .Button__iconAfter {
+}
+
+.Button.flat {
+  background-color: transparent;
+  color: var(--color);
+  border: 1px solid transparent;
+}
+.Button.flat:not([disabled]):hover {
+  color: var(--hover-color);
+  background-color: var(--hover-light-bg-color);
+}
+.Button.flat.active,
+.Button.flat:active,
+.Button.flat:focus {
+  outline: none;
+  box-shadow: 0 0 0 1px $focus-color;
+}
+.Button.flat.active,
+.Button.flat:active {
+  background-color: rgba(black, 0.1);
+  &:hover {
+    background-color: rgba(black, 0.1);
+  }
+}
+
+.Button.round {
+  min-width: 30px;
+  border-radius: 50%;
+  width: 30px;
+  padding-left: 9px;
+}
+.Button.square {
+  padding: 0;
+  width: 30px;
+  height: 30px;
+  min-width: 30px;
+  text-align: center;
+  justify-content: center;
+}
+
+.Button.small {
+  font-size: 12px;
+  min-width: 20px;
+  height: 20px;
+}
+.Button.large {
+  font-size: 24px;
+  min-width: 40px;
+  height: 40px;
+  padding-top: 2px;
+}
+
+.Button.center {
+  text-align: center !important;;
+  justify-content: center !important;;
+}
+
+.ButtonGroup {
+  padding: $padding 0;
+}
+.ButtonGroup > .Button:not(:first-child) {
+  border-top-left-radius: 0;
+  border-bottom-left-radius: 0;
+}
+.ButtonGroup > .Button:not(:last-child) {
+  border-top-right-radius: 0;
+  border-bottom-right-radius: 0;
+  border-right: 0;
+}
+
+
+// Colors
+
+.Button.highlight {
+  color: $text-color-highlight;
+  background-color: $hover-light-bg-color;
+}
+
+@each $level, $values in $colors {
+  .Button.#{$level} {
+    color: #fff;
+    background: map-get($values, bg);
+    border-color: lighten(map-get($values, bg), 10%);
+
+    & .Spinner::after {
+
+    }
+  }
+  .Button.#{$level}:hover {
+    color: #fff;
+    background-color: lighten(map-get($values, bg), 5%);
+  }
+  .Button.#{$level}.active,
+  .Button.#{$level}:active,
+  .Button.#{$level}:focus {
+    box-shadow: 0 0 0 1px mix(map-get($values, bg), #fff, 50%);
+    border-color: map-get($values, bg);
+    background-color: darken(map-get($values, bg), 2%);
+  }
+  .Dropdown.open > .Button.#{$level},
+  .Button.#{$level}.active,
+  .Button.#{$level}:active {
+    color: mix(map-get($values, bg), #fff, 30%);
+    box-shadow: 0 0 0 1px mix(map-get($values, bg), #fff, 75%);
+    background-color: darken(map-get($values, bg), 8%);
+  }
+  .Button.#{$level}.highlight {
+    background-color: lighten(map-get($values, bg), 10%);
+  }
+  .Button.#{$level}[disabled] {
+    color: #bbb;
+    border-color: mix(grey, map-get($values, bg), 50%);
+    background-color: mix(grey, map-get($values, bg), 50%);
+  }
+}

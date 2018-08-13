@@ -1,0 +1,106 @@
+@import './_variables.scss';
+@import './_mixins.scss';
+
+.Modal {
+  position: absolute;
+  z-index: 2;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  opacity: 0;
+  pointer-events: none;
+  transition: all .25s;
+}
+.Modal.open {
+  opacity: 1;
+  pointer-events: auto;
+}
+
+.Modal__background {
+  content: '';
+  position: absolute;
+  background-color: rgba(0, 0, 0, 0.85);
+  width: 100%;
+  height: 100%;
+}
+
+.Modal__scrollArea {
+  position: absolute;
+  z-index: 2;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  padding-top: 10%;
+  overflow-y: auto;
+  overflow-x: hidden;
+}
+
+.Modal__container {
+
+  background: $bg-color-dark;
+  border-radius: 2px;
+  display: flex;
+
+  width: 500px;
+  height: -webkit-max-content;
+  height:    -moz-max-content;
+  height:         max-content;
+  margin: 0 auto;
+
+  box-shadow: 1px 2px 20px 10px rgba(0, 0, 0, 0.3);
+
+  // .Modal:not(.open)
+  transition: all .25s ease-in-out;
+  transform: translateY(-20px);
+}
+.Modal.open .Modal__container {
+  transform: translateY(0);
+}
+.Modal__header {
+  padding: 2 * $padding;
+  padding-bottom: 2 * $padding;
+  border-top-left-radius: 2px;
+  border-top-right-radius: 2px;
+  background-color: $bg-color-normal;
+}
+.Modal__content {
+  flex: 1 1;
+  display: flex;
+  flex-direction: column;
+  padding: 2 * $padding;
+}
+.Modal__actions {
+  display: flex;
+  flex-direction: row;
+  padding: $padding;
+  justify-content: flex-end;
+}
+.Modal__actions > *:not(:last-child) {
+  margin-right: 2*$padding;
+}
+
+.Modal.small .Modal__container {
+  width: 300px;
+}
+.Modal.large .Modal__container {
+  width: 800px;
+}
+
+.Modal.minimal {
+  & .Modal__scrollArea {
+    padding-top: 20%;
+  }
+  & .Modal__container {
+    background: transparent;
+    box-shadow: none;
+  }
+  & .Modal__header {
+    background: transparent;
+    border-bottom: none;
+  }
+}

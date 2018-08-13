@@ -1,0 +1,25 @@
+version: '2'
+services:
+  grant_db:
+    image: 'postgres:10'
+    ports:
+      - '5432:5432'
+    environment:
+      POSTGRES_PASSWORD: postgres
+  grant_app:
+    build:
+      context: .
+      dockerfile: Dockerfile.dev
+    ports:
+      - '3001:3001'
+    volumes:
+      - ./config:/usr/etc
+      - .:/usr/src/app
+    links:
+      - db
+    environment:
+      PGHOST: 'db'
+      PGDATABASE: postgres
+      PGUSER: postgres
+      PGPASSWORD: postgres
+    command: ["sh", "-c", "sleep 3; npm run start:dev"]

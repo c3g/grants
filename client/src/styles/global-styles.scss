@@ -1,0 +1,1331 @@
+@import './_variables.scss';
+@import './_mixins.scss';
+
+html, body {
+  width: 100%;
+  height: 100%;
+  overflow: hidden;
+
+  font-family: Verdana, sans-serif;
+  font-size: 14px;
+  line-height: var(--line-height);
+  font-weight: normal;
+  color: var(--color);
+}
+
+* { box-sizing: border-box; }
+
+::selection {
+  background: var(--selection-color);
+}
+::-moz-selection {
+  background: var(--selection-color);
+}
+::-moz-focus-inner { border: 0; }
+
+
+*::-webkit-scrollbar {
+  width: 10px;
+  background-color: rgba(0, 0, 0, 0.05);
+}
+*::-webkit-scrollbar-track {
+  background-color: transparent;
+}
+*::-webkit-scrollbar-thumb {
+  border-radius: 10px;
+  background-color: rgba(0, 0, 0, 0.1);
+  box-shadow: inset 0 0 6px rgba(0,0,0,.2);
+}
+
+.vbox {
+  display: flex;
+  flex-direction: column;
+}
+.hbox {
+  display: flex;
+  flex-direction: row;
+}
+.center {
+  @include center;
+}
+.hcenter {
+  @include hcenter;
+}
+.vcenter {
+  @include vcenter;
+}
+.flex-fill {
+  display: flex;
+}
+.flex-fill>* {
+  flex: 1 1 auto;
+  min-width: -webkit-max-content !important;;
+  min-width:    -moz-max-content !important;;
+  min-width:         max-content !important;;
+}
+.text-center {
+  text-align: center !important;
+}
+.text-overflow {
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.inline {
+  display: inline-block;
+}
+.block {
+  display: block;
+}
+.full {
+  width: 100%;
+  height: 100%;
+}
+.full-width {
+  width: 100%;
+}
+.full-height {
+  height: 100%;
+}
+
+.padded {
+  padding: 2 * $padding;
+}
+.vpadded {
+  padding-top: 2 * $padding;
+  padding-bottom: 2 * $padding;
+}
+.hpadded {
+  padding-left: 2 * $padding;
+  padding-right: 2 * $padding;
+}
+
+.row {
+  display: flex;
+  flex-direction: row;
+  padding: 2*$padding;
+}
+.row > * {
+  flex: 0 0 auto;
+  margin-right: $padding;
+}
+.fill {
+  flex: 1 1;
+}
+.static {
+  flex: 0 0 auto;
+}
+.flex-hidden {
+  flex: 0 0 0;
+  height: 0;
+  width: 0;
+}
+
+.column {
+  display: flex;
+  flex-direction: column;
+  padding: 2*$padding;
+}
+
+.clickable {
+  cursor: pointer;
+}
+.clickable:hover {
+  background-color: $hover-light-bg-color;
+}
+
+.focus {
+  box-shadow: 0 0 0 1px $focus-color;
+}
+.focus-inset {
+  box-shadow: inset 0 0 0 1px $focus-color;
+}
+
+.line {
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.title {
+  font-family: Ubuntu, Roboto, Arial, sans-serif;
+  font-size: 14px;
+  line-height: 30px;
+  font-weight: bold;
+  color: $text-color-highlight;
+  margin-right: var(--padding);
+  user-select: none;
+  text-transform: uppercase;
+}
+.title.keep-case {
+  text-transform: none;
+}
+.title.small {
+  font-size: 12px;
+}
+.title.large {
+  font-size: 18px;
+}
+
+.label {
+  font-family: Ubuntu, Roboto, Arial, sans-serif;
+  font-size: 12px;
+  line-height: 30px;
+  font-weight: bold;
+}
+.label.small {
+  font-size: 12px;
+  line-height: 20px;
+  height: 20px;
+}
+.label.medium {
+  font-size: 14px;
+}
+.label.large {
+  font-size: 16px;
+}
+.label.editable.full {
+  width: 100%;
+}
+button.label.editable {
+  transition: all .25s;
+  text-transform: none;
+  text-align: left;
+  display: flex;
+  cursor: text;
+}
+button.label.editable.inline {
+  display: inline-flex;
+}
+button.label.editable:hover {
+  background-color: var(--hover-light-bg-color);
+}
+button.label.editable span {
+  flex: 1;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+  overflow: hidden;
+}
+button.label.editable .Icon {
+  margin: var(--padding);
+  opacity: 0;
+  color: #ddd;
+  transition: opacity .25s;
+  flex: 0 0;
+}
+button.label.editable:hover .Icon {
+  opacity: 1;
+}
+input.label.editable {
+  color: inherit;
+  background-color: transparent;
+  border: none;
+  padding: 0;
+}
+input.label.editable:active,
+input.label.editable:focus {
+  outline: none;
+  box-shadow: 0 0 0 1px $focus-color;
+}
+
+.text {
+  --line-height: 20px;
+  font-family: Ubuntu, Roboto, Arial, sans-serif;
+  font-size: 12px;
+  line-height: var(--line-height);
+  font-weight: normal;
+}
+.text.small {
+  font-size: 12px;
+  line-height: 25px;
+}
+.text.medium {
+  font-size: 14px;
+}
+.text.large {
+  font-size: 16px;
+}
+.text.block {
+  margin-bottom: $padding;
+}
+
+.text.editable {
+  position: relative;
+  width: 100%;
+  height: calc(3 * var(--line-height));
+}
+div.text.editable {
+  transition: all .25s;
+  text-transform: none;
+  white-space: pre;
+  overflow: auto;
+  cursor: text;
+}
+div.text.editable:hover {
+  background-color: var(--hover-light-bg-color);
+}
+div.text.editable > div {
+  flex: 1;
+  text-overflow: ellipsis;
+  overflow: auto;
+  height: calc(3 * var(--line-height));
+}
+div.text.editable > .Icon {
+  position: absolute;
+  top: -1px;
+  right: $padding;
+  margin: var(--padding);
+  opacity: 0;
+  color: #ddd;
+  transition: opacity .25s;
+  flex: 0 0;
+}
+div.text.editable:hover > .Icon {
+  opacity: 1;
+}
+textarea.text.editable {
+  color: inherit;
+  background-color: transparent;
+  border: none;
+  border-radius: 2px;
+  padding: 0 2px;
+  transition: box-shadow .25s;
+}
+textarea.text.editable:active,
+textarea.text.editable:focus {
+  outline: none;
+  box-shadow: 0 0 0 1px $focus-color;
+}
+
+
+
+.list {
+  min-width: 200px;
+}
+.list > .group {
+  position: relative;
+  display: flex;
+  width: 100%;
+  align-items: center;
+  height: 30px;
+  padding: 0 2*$padding;
+  color: var(--color);
+  font-weight: bold;
+}
+.list > .item {
+  display: block;
+  color: $text-color-highlight;
+  padding: 0 2*$padding;
+}
+.list > a.item:not(.disabled) {
+  transition: all .25s;
+  cursor: pointer;
+}
+.list > a.item:not(.disabled):hover {
+  background-color: $hover-light-bg-color;
+}
+.list > .item.active:not(.disabled),
+.list > .item.active:not(.disabled):hover {
+  color: white;
+  background-color: $focus-color;
+}
+.list > .separator {
+  width: 100%;
+  height: 2*$padding;
+  margin-bottom: 2*$padding;
+  border-bottom: 1px solid var(--light-border-color);
+}
+
+.Icon {
+  width: 15px;
+  height: 15px;
+}
+
+.Input {
+  display: inline-block;
+  position: relative;
+  color: $light-color;
+}
+.Input__icon {
+  position: absolute;
+  top: 60%;
+  left: 6px;
+  transform: translate(0, -50%);
+}
+.Input__element {
+  color: inherit;
+  background-color: rgba(0, 0, 0, 0.3);
+  outline: none;
+  border: 1px solid rgba(0, 0, 0, 0.5);
+  border-radius: 2px;
+  padding: 0 8px;
+  height: 30px;
+  width: 180px;
+  transition: box-shadow .25s;
+}
+.Input__element:active,
+.Input__element:focus {
+  outline: none;
+  box-shadow: 0 0 0 1px $focus-color;
+}
+.Input.has-icon .Input__element {
+  padding-left: 25px;
+}
+.Input.small {
+  line-height: 20px;
+}
+.Input.small .Input__element {
+  font-size: 12px;
+  height: 20px;
+}
+.Input.large {
+  line-height: 40px;
+}
+.Input.large .Input__element {
+  height: 40px;
+}
+.Input.error .Input__element {
+  box-shadow: 0 0 0 1px $bg-color-error;
+}
+.Input.badge {
+  height: 22px;
+  color: white;
+}
+.Input.badge .Input__element {
+  border-radius: 15px;
+  height: 22px;
+  width: 100px;
+  font-size: 11.2px;
+
+  background-color: $bg-color-info;
+
+  &::-webkit-input-placeholder {
+    color: inherit;
+  }
+  &::-moz-placeholder {
+    color: inherit;
+    opacity: 1;
+  }
+}
+
+
+.input-label {
+  position: relative;
+  padding-left: 5px;
+  font-weight: bold;
+  cursor: pointer;
+}
+.Checkbox {
+  vertical-align: middle;
+  -webkit-appearance: none;
+  -moz-appearance: none;
+  display: inline-block;
+  position: relative;
+  width: 16px;
+  height: 16px;
+  margin-bottom: 0;
+  font-size: inherit;
+  border-radius: 3px;
+  background-color: var(--bg-color-dark);
+  box-shadow: 0 0 0 1px var(--checkbox-border-color);
+  transition: background-color 0.16s cubic-bezier(0.5, 0.15, 0.2, 1);
+}
+.Checkbox:focus {
+  outline: 0;
+}
+.Checkbox:active {
+  background-color: #0f82e6;
+}
+.Checkbox:before,
+.Checkbox:after {
+  content: "";
+  position: absolute;
+  top: 12px;
+  left: 6.4px;
+  height: 2px;
+  border-radius: 1px;
+  background-color: #282c34;
+  transform-origin: 0 0;
+  opacity: 0;
+  transition: transform 0.1s cubic-bezier(0.5, 0.15, 0.2, 1), opacity 0.1s cubic-bezier(0.5, 0.15, 0.2, 1);
+}
+.Checkbox:before {
+  width: 5.28px;
+  transform: translate3d(0, 0, 0) rotate(225deg) scale(0);
+}
+.Checkbox:after {
+  width: 10.56px;
+  margin: -1px;
+  transform: translate3d(0, 0, 0) rotate(-45deg) scale(0);
+  transition-delay: .05s;
+}
+.Checkbox:checked {
+  background-color: #568af2;
+  box-shadow: 0 0 0 1px var(--border-color);
+}
+.Checkbox:checked:active {
+  background-color: #3f444d;
+}
+.Checkbox:checked:before {
+  opacity: 1;
+  transform: translate3d(0, 0, 0) rotate(225deg) scale(1);
+  transition-delay: .05s;
+}
+.Checkbox:checked:after {
+  opacity: 1;
+  transform: translate3d(0, 0, 0) rotate(-45deg) scale(1);
+  transition-delay: 0;
+}
+.Checkbox:indeterminate {
+  background-color: #0f82e6;
+}
+.Checkbox:indeterminate:active {
+  background-color: #3f444d;
+}
+.Checkbox:indeterminate:after {
+  opacity: 1;
+  transform: translate3d(-2.24px, -4px, 0) rotate(0deg) scale(1);
+  transition-delay: 0;
+}
+.input-label .input-radio,
+.input-label .Checkbox,
+.input-label .input-toggle {
+  margin-top: -3px;
+  margin-right: 2 * $padding;
+  margin-bottom: 0;
+}
+
+
+
+.Dropdown {
+  position: relative;
+}
+.Dropdown > .Button {
+  text-align: left;
+  width: 180px;
+}
+.Popup.open,
+.Tooltip.visible {
+  display: block;
+}
+.Popup,
+.Tooltip {
+  display: none;
+  z-index: 100;
+}
+.Popup,
+.Tooltip,
+.Dropdown__inner {
+  position: absolute;
+  cursor: default;
+  /* top & left set by js */
+  box-shadow: 1px 2px 6px 1px rgba(0, 0, 0, 0.3);
+}
+.Popup,
+.Dropdown__inner {
+  min-width: 180px;
+  padding: (2*$padding - 2px) 0;
+  border: 1px solid $light-border-color;
+  border-radius: 2px;
+  color: $light-color;
+  background-color: $bg-color-dark;
+}
+.Dropdown__menu.compact > .Dropdown__inner {
+  padding: 0;
+}
+.Tooltip {
+  color: $text-color-highlight;
+  background-color: rgba(black, 0.7);
+  border: 1px solid $border-color;
+  padding: ($padding - 1px) 2*$padding;
+  border-radius: 4px;
+}
+.Dropdown__menu {
+  position: absolute;
+  z-index: 2;
+}
+.Dropdown__inner {
+  opacity: 0;
+  transform: translateY(-10px);
+  transition: all .25s;
+  pointer-events: none;
+}
+.Dropdown__menu.open > .Dropdown__inner {
+  opacity: 1;
+  transform: translateY(0);
+  pointer-events: unset;
+}
+.Dropdown__menu.right {
+  & > .Dropdown__inner {
+    transform: translateX(-10px);
+  }
+  &.open > .Dropdown__inner {
+    transform: translateX(0);
+  }
+}
+.Tooltip {
+  pointer-events: none;
+  padding: 0 $padding;
+  line-height: 30px;
+  min-width: unset;
+}
+.Dropdown__inner, .Popup {
+  &> .content {
+    position: relative;
+    display: flex;
+    width: 100%;
+    align-items: center;
+    height: 30px;
+    padding: 0 2*$padding;
+    white-space: nowrap;
+  }
+
+  &> .item {
+    position: relative;
+    display: flex;
+    width: 100%;
+    align-items: center;
+    height: 30px;
+    padding: 0 2*$padding;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+
+  &> .item.disabled {
+    color: $text-color-muted;
+  }
+  &> .item:not(.disabled):not(.segmented):hover {
+    color: #fff;
+    background-color: $focus-color;
+  }
+
+  &> .item.segmented {
+    padding: 0 !important;
+    border-top:    1px solid rgba($light-border-color, 0.05);
+    border-bottom: 1px solid rgba($light-border-color, 0.05);
+  }
+  &> .item.segmented + .item.segmented {
+    border-top: none;
+  }
+  &> .item.segmented > .main-button {
+    padding-left: 2*$padding;
+  }
+  &> .item.segmented > .segment {
+    height: 100%;
+    line-height: 30px;
+    text-align: left;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+  &> .item.segmented > .segment:not(:first-of-type) {
+    padding: 0 2*$padding;
+    border-left: 1px solid $light-border-color;
+  }
+  &> .item.segmented > .segment:not([disabled]):hover {
+    color: #fff;
+    background-color: $focus-color;
+  }
+}
+.Popup.with-icons,
+.Dropdown__menu.with-icons > .Dropdown__inner {
+  &> .item {
+    padding: 0 2*$padding 0 (6 * $padding);
+  }
+  &> .item.segmented > .main-button {
+    padding-left: 6*$padding;
+  }
+  &> .item > .Icon.menu,
+  &> .item.segmented > .main-button > .Icon.menu {
+    position: absolute;
+    color: $color;
+    width: 2*$padding;
+    left: 2*$padding;
+  }
+  &> .item.segmented > .main-button > .Icon.menu {
+    top: $padding + 2px;
+  }
+}
+.Popup > .item[disabled] > .Icon.menu,
+.Dropdown__inner > .item[disabled] > .Icon.menu {
+  color: var(--text-color-disabled);
+}
+.Popup > .group ,
+.Dropdown__inner > .group {
+  position: relative;
+  display: flex;
+  width: 100%;
+  align-items: center;
+  height: 30px;
+  padding: 0 2*$padding;
+  color: var(--color);
+  font-weight: bold;
+  white-space: nowrap;
+}
+.Popup > .separator ,
+.Dropdown__inner > .separator {
+  width: 100%;
+  height: 2*$padding;
+  margin-bottom: 2*$padding;
+  border-bottom: 1px solid var(--light-border-color);
+}
+
+.Image {
+  display: block;
+  border: 1px solid $light-border-color;
+  border-radius: 2px;
+}
+
+.Editor {
+  position: relative;
+  overflow: hidden;
+}
+.Editor > * {
+  position: absolute;
+  top: 0;
+  left: 0;
+}
+
+
+table {
+  font-size: inherit;
+  border-spacing: 0;
+  border-collapse: collapse;
+}
+tr, td, th {
+  padding: 0;
+  height: 25px;
+  line-height: 0
+}
+
+h1 {
+  padding: 0 calc(0 * var(--padding));
+  margin: 0;
+  font-size: 28px;
+  font-weight: bold;
+  line-height: 40px;
+  color: var(--light-color);
+}
+
+abbr {
+  text-decoration: none;
+  border-bottom: 1px solid rgba(white, 0.2);
+}
+
+hr {
+  width: 100%;
+  border: none;
+  border-top: 1px solid rgba(0,0,0,0.3);
+  border-bottom: 1px solid rgba(255,255,255,0.1);
+}
+
+a.link {
+  color: $link-color;
+  text-decoration: none;
+  border-bottom: 1px solid rgba($link-color, 0.5);
+  //transition: border-bottom .25s;
+}
+a.link:visited {
+  color: $link-color;
+}
+a.link:hover {
+  //border-bottom: 1px solid $link-color;
+}
+a.link.text-normal {
+  color: white;
+  border-bottom: 1px solid rgba(white, 0.5);
+}
+a.link.text-normal:visited {
+  color: white;
+}
+
+
+.table {
+  width: 100%;
+  background-color: $table-bg-color;
+}
+.table th,
+.table td {
+  padding: 0 $padding;
+  border: 1px solid $table-border-color;
+}
+.table th {
+  text-align: left;
+}
+.table .button-column {
+  width: 30px;
+}
+.table .empty td {
+  text-align: center;
+  font-weight: bold;
+  color: $text-color-muted;
+}
+
+
+
+.bold { font-weight: bold; }
+.text-normal    { color: var(--color); }
+.text-highlight { color: var(--text-color-highlight); }
+.text-success   { color: var(--text-color-success); }
+.text-muted     { color: var(--text-color-muted); }
+.text-warning   { color: var(--text-color-warning); }
+.text-error     { color: var(--text-color-error); }
+.text-info      { color: var(--text-color-info); }
+.text-subtle    { color: var(--text-color-subtle); }
+
+.bg-dark { background-color: var(--bg-color-dark); }
+.border-left { border-left: 1px solid var(--border-color-dark); }
+.border-top { border-top: 1px solid var(--border-color-dark); }
+
+
+
+.EditableList__value {
+  color: $text-color-highlight;
+  min-width: 220px;
+  padding-right: 2 * $padding;
+}
+.EditableList__control {
+  padding-top: 2 * $padding;
+}
+
+
+.drop-zone {
+  position: relative;
+}
+.drop-zone::after {
+  position: absolute;
+  content: '';
+  width: 100%;
+  height: 100%;
+  border-radius: 5px;
+  --border: 3px;
+  top: calc(-1 * var(--border));
+  left: calc(-1 * var(--border));
+  pointer-events: none;
+}
+.drop-zone.over-document::after {
+  border: var(--border) dashed $focus-color;
+}
+.drop-zone.over::after {
+  border: var(--border) dashed lighten($focus-color, 40%);
+}
+
+.Gap {
+  display: inline-block;
+}
+
+
+
+#root {
+  width: 100%;
+  height: 100%;
+  background-color: $bg-color-default;
+}
+
+.App {
+  width:  100%;
+  height: 100%;
+}
+.App__content {
+  width:  100%;
+  overflow: hidden;
+}
+.App__sidebar {
+  flex-basis: auto;
+}
+.App__section {
+  padding: 0 2*$padding;
+}
+
+.HeaderBar {
+  height: 50px;
+  padding: 2*$padding;
+  background-color: $bg-color-dark;
+  border-left: 1px solid $border-color-dark;
+  border-bottom: 1px solid $border-color-dark;
+}
+.HeaderBar.no-border-bottom {
+  border-bottom: none;
+}
+.HeaderBar > .title:first-child {
+  margin-right: 2*$padding;
+}
+
+
+.Sidebar {
+  position: relative;
+  height: 100%;
+  background-color: var(--bg-color-dark);
+  transition: all .5s;
+}
+.Sidebar:not(.visible) {
+  flex-basis: 0;
+  width: 0;
+  transform: translateX(calc(-1 * var(--sidebar-size)));
+}
+.Sidebar.visible {
+  flex-basis: var(--sidebar-size);
+  width: var(--sidebar-size);
+  transform: translateX(0);
+}
+.Sidebar a {
+  color: inherit;
+  text-decoration: none;
+}
+.Sidebar__item {
+  width:  var(--sidebar-size);
+  height: var(--sidebar-size);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  user-select: none;
+  transition: all .25s;
+}
+.Sidebar__item:hover, .Sidebar__item.active:hover {
+  background-color: var(--hover-bg-color);
+}
+.Sidebar__item.active {
+  position: relative;
+  background-color: var(--active-bg-color);
+}
+.Sidebar__border {
+  position: absolute;
+  height: var(--sidebar-size);
+  width: 1px;
+  background-color: var(--accent-color);
+  left: calc(var(--sidebar-size) - 1px);
+  transition: top .15s;
+}
+.Sidebar__fill {
+  flex: 1 1;
+}
+
+section {
+  flex: 1 1;
+}
+
+
+.Settings__content {
+  padding: (4 * $padding) (6 * $padding);
+}
+
+
+
+.UsersTable td:first-child {
+  width: 200px;
+}
+.UsersTable td .editable.label {
+  width: 100%;
+}
+
+.CreateSample > .Button {
+  width: 190px;
+}
+.CreateSample__arrow {
+  position: relative;
+}
+.CreateSample__arrow {
+  position: relative;
+}
+.CreateSample__arrow > .Dropdown {
+  position: absolute;
+  top: 0;
+  right: 17px;
+  height: 100%;
+}
+.CreateSample__arrow > .Dropdown > span {
+  height: 100%;
+  position: absolute;
+  top: 0;
+  left: 0;
+}
+
+.FilterTags__input {
+  height: 40px !important;
+  align-items: normal !important;
+}
+
+
+$step-width: 40px;
+
+.Samples__tableContainer {
+  background-color: var(--table-bg-color);
+}
+.Samples__table {
+  flex: 1 1;
+  width: 100%;
+  table-layout: fixed;
+  border-collapse: collapse;
+
+  color: var(--table-color);
+  background-color: var(--table-bg-color);
+  border-left: 1px solid var(--table-border-color);
+}
+.Samples__header.Sample {
+  border-top: 1px solid var(--table-border-color);
+  height: 25px;
+}
+.Samples__header > div {
+  line-height: calc(var(--line-height) - 2px);
+  font-weight: bold;
+}
+.Samples__table > .Sample:not(.empty) {
+  border-bottom: 1px solid var(--table-border-color);
+}
+
+.Sample {
+  height: 25px;
+}
+.Sample:nth-child(2n + 1) { /* skip header */
+  background-color: var(--table-bg-alt-color);
+}
+.Sample:not(.Samples__header) {
+  cursor: pointer;
+  &:hover {
+    background-color: $hover-light-bg-color;
+  }
+  &.overdue {
+    background-color: rgba(lighten($bg-color-warning, 10%), 0.35);
+  }
+  &.DONE {
+    background-color: rgba($bg-color-success, 0.25);
+  }
+}
+.Sample__empty,
+.Sample__message {
+  color: $text-color-muted;
+  font-weight: bold;
+  user-select: none;
+  & td { padding: 0 $padding; }
+}
+.Sample td {
+  white-space: nowrap;
+  text-overflow: ellipsis;
+  overflow: hidden;
+}
+.Sample__icon {
+  width: 30px;
+  text-align: center;
+  border-left: 1px solid var(--table-border-color);
+}
+.Sample__name {
+  width: 150px;
+  padding: 0 $padding;
+  border-left: none;
+}
+.Sample__badges {
+  width: 120px;
+  border-left: none;
+}
+.Sample__badges > * {
+  margin-right: $padding;
+}
+.Sample__steps {
+  width: auto;
+  overflow: auto !important;
+  border-left: 1px solid var(--table-border-color);
+}
+.Sample__steps > div {
+  display: flex;
+  overflow: auto;
+}
+.Sample__created {
+  width: 100px;
+  padding: 0 $padding;
+  border-left: 1px solid var(--table-border-color);
+}
+.Sample__modified {
+  width: 100px;
+  padding: 0 $padding;
+  border-left: 1px solid var(--table-border-color);
+}
+.Sample__notes {
+  width: 200px;
+  padding: 0 $padding;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  border-left: 1px solid var(--table-border-color);
+}
+
+.Step {
+  position: relative;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  min-width: $step-width;
+  cursor: pointer;
+  padding: 0;
+  flex: 0 0 $step-width;
+  border-right: 1px solid var(--table-border-color);
+}
+.Step:hover {
+  background-color: $hover-light-bg-color;
+}
+.Step.selected {
+  box-shadow: inset 0 0 0 1px $focus-color;
+  background: rgba($focus-color, 0.3);
+}
+.Step.legend {
+  display: inline-block;
+  width: 40px;
+  height: $line-height;
+  border: 1px solid $table-border-color;
+}
+.Step > .content {
+  width: 100%;
+  height: 100%;
+  line-height: 25px;
+}
+.Step > .file-marker,
+.Step > .notes-marker {
+  position: absolute;
+  right: 0;
+  content: '';
+  border: 3px solid transparent;
+}
+.Step > .file-marker {
+  top: 0;
+  border-color: $text-color-warning $text-color-warning transparent transparent;
+}
+.Step > .notes-marker {
+  bottom: 0;
+  border-color: transparent $text-color-info $text-color-info transparent;
+}
+.Step__menu {
+  position: absolute;
+  min-width: $step-width;
+  width: auto;
+  padding: 0;
+}
+.Step__menu > .item {
+  justify-content: center;
+}
+
+
+.SampleModal__badges {
+  margin-bottom: 2 * $padding;
+}
+.SampleModal__badges > * {
+  margin-right: $padding;
+}
+.SampleModal .ButtonBar {
+  overflow: auto;
+}
+.SampleModal .ButtonGroup .Button {
+  height: 30px;
+}
+.SampleModal .Modal__content {
+  border-bottom: 1px solid $border-color-dark;
+}
+
+.StepsModal {
+  position: absolute;
+  top: 100%;
+  left: 0;
+  width: 100%;
+  transition: all .25s ease-in-out;
+  transform: translateY(40px);
+}
+.Modal.open .StepsModal {
+  transform: translateY(0);
+}
+.StepsModal__content {
+  position: absolute;
+  width: -webkit-max-content;
+  width:    -moz-max-content;
+  width:         max-content;
+  transition: all .5s ease-in-out;
+}
+.StepsModal__step {
+  background: $bg-color-dark;
+  border-bottom-right-radius: 2px;
+  border-bottom-left-radius: 2px;
+  box-shadow: 0px 20px 16px 0px rgba(0, 0, 0, 0.3);
+
+  padding: 2 * $padding;
+
+  min-height: 250px;
+  max-height: 450px;
+
+  //width: 800px;
+  //margin-right: 100px;
+
+  // .Modal:not(.open)
+  transition: all .25s;
+  //transform: translateY(-20px);
+}
+.StepsModalStep__table td {
+  padding: 0 2 * $padding;
+  height: 7 * $padding;
+}
+
+.StepsModalStep__controls {
+  flex: 1 1;
+  overflow-y: auto;
+}
+.StepsModalStep__history {
+  flex: 0 0 auto;
+  width: 300px;
+}
+
+.History {
+  //background-color: $bg-color-darker;
+  height: 100%;
+  border: 1px solid $border-color-dark;
+  overflow-y: auto;
+}
+.History__title,
+.History__entry {
+  font-size: 12px;
+  line-height: 20px;
+  position: relative;
+  &::after {
+    position: absolute;
+    content: '';
+    bottom: 0;
+    left: 0;
+    width: 100%;
+    border-bottom: 1px solid $border-color-dark;
+  }
+}
+.History__title {
+  font-weight: bold;
+  padding: 0 $padding;
+}
+.History__entry {
+  display: flex;
+  padding: 0 $padding;
+}
+.History__date {
+  flex: 0 0 65px;
+  border-right: 1px solid $border-color-dark;
+  text-align: right;
+  padding: 0 $padding 0 0;
+}
+.History__description {
+  flex: 1 1;
+  padding: 0 0 0 $padding;
+}
+.History__username {
+  font-weight: bold;
+}
+
+
+
+.Template {
+  display: flex;
+  flex-direction: row;
+  width: 100%;
+  overflow: hidden;
+}
+.Template .Template__info {
+  border-left: 1px solid var(--light-border-color);
+}
+.Template:not(:last-of-type) .Template__info {
+  border-bottom: 1px solid var(--light-border-color);
+}
+.Template:first-of-type .Steps {
+  border-top: 1px solid var(--bg-color-dark);
+}
+.Template .Steps {
+  border-bottom: 1px solid var(--bg-color-dark);
+}
+
+.Template__info {
+  padding: var(--padding) 2*$padding;
+  background-color: var(--bg-color-dark);
+  width: 175px;
+}
+.Template__info .label.editable {
+  width: 0;
+  flex: 1 1;
+}
+.Template__info .delete,
+.Template__info .Spinner {
+  flex: 0 0 auto;
+}
+.Template .Steps {
+  display: flex;
+  flex-direction: row;
+  width: 100%;
+  overflow: auto;
+  padding: calc(var(--padding) - 1px);
+}
+.TemplateStep {
+  height: calc(8 * var(--padding));
+  padding: calc(var(--padding) - 1px);
+  //min-width: 100px;
+  border: 1px solid var(--light-border-color);
+  border-radius: 2px;
+  cursor: pointer;
+}
+.TemplateStep:not(:last-child) {
+  margin-right: var(--padding);
+}
+.TemplateStep.add {
+  min-width: 50px;
+  transition: all .25s;
+}
+.TemplateStep.add:hover {
+  background-color: var(--hover-light-bg-color);
+}
+.TemplateStep .label.editable {
+  width: 0;
+  flex: 1 1;
+  width: -webkit-max-content;
+  width:    -moz-max-content;
+  width:         max-content;
+  //display: inline;
+}
+.TemplateStep .Dropdown {
+  flex: 0 0 auto;
+}
+.TemplateStep .Dropdown .Button {
+  width: unset;
+}
+
+
+.CompletionFunctions__list {
+  border-left: 1px solid $bg-color-default;
+  background-color: $bg-color-dark;
+}
+.CompletionFunctions__list > .item {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+}
+.CompletionFunctions__list > .item > .content {
+  flex: 1 1;
+}
+.CompletionFunctions__list > .item > .delete-icon {
+  padding: $padding;
+  width: unset;
+  height: unset;
+  border-radius: 2px;
+  opacity: 0;
+  transition: all .25s;
+}
+.CompletionFunctions__list > .item:hover > .delete-icon {
+  opacity: 1;
+}
+.CompletionFunctions__list > .item > .delete-icon:hover {
+  background-color: $hover-light-bg-color;
+}
+.CompletionFunctions__editor {
+  flex: 1 1;
+}
+
+
+.Question {
+  position: relative;
+  padding: 0 6*$padding;
+  margin-bottom: 4*$padding;
+}
+.Question > .Icon {
+  position: absolute;
+  top:  8px;
+  left: $padding;
+}

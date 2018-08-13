@@ -1,0 +1,51 @@
+{
+  "name": "grants",
+  "version": "0.0.1",
+  "private": true,
+  "scripts": {
+    "postinstall": "cd client && npm install",
+
+    "setup": "mkdir -p data/db && mkdir && cp -r config data/config",
+
+    "start": "node ./bin/www",
+    "start:dev": "NODE_ENV=development nodemon --ignore 'client/*' ./bin/www",
+    "start:client": "cd client && npm start",
+    "build": "npm run build:client",
+    "build:all": "npm run build:client && npm run build:server",
+    "build:client": "rm -rf ./public && mkdir public && cd client && npm run build && cp -r ./build/* ../public",
+    "build:server": "docker-compose build",
+
+    "run:all": "npm run docker:db:daemon && npm run docker:web:daemon",
+
+    "docker:db":  "docker-compose run  -v `pwd`/data/db:/var/lib/postgresql/data  grant_db",
+    "docker:web": "docker-compose run  -v `pwd`/data/config:/usr/etc -p 3001:3001  grant_app",
+
+    "docker:db:daemon":  "docker-compose run  -d  -v `pwd`/data/db:/var/lib/postgresql/data grant_db",
+    "docker:web:daemon": "docker-compose run  -d  -v `pwd`/config:/usr/etc -p 3001:3001     grant_app",
+
+    "docker": "docker-compose build && docker-compose up",
+    "docker:dev": "docker-compose -f docker-compose.dev.yml build && docker-compose -f docker-compose.dev.yml up"
+  },
+  "dependencies": {
+    "bluebird": "^3.5.1",
+    "body-parser": "~1.17.1",
+    "connect-flash": "^0.1.1",
+    "cookie-parser": "~1.4.3",
+    "debug": "~2.6.3",
+    "deep-diff": "^0.3.8",
+    "ejs": "^2.5.7",
+    "express": "~4.15.2",
+    "express-session": "^1.15.6",
+    "formidable": "^1.1.1",
+    "jade": "~1.11.0",
+    "morgan": "~1.8.1",
+    "nodemailer": "^4.4.0",
+    "passport": "^0.4.0",
+    "passport-google-oauth": "^1.0.0",
+    "pg": "^7.4.0",
+    "serve-favicon": "~2.4.2"
+  },
+  "devDependencies": {
+    "nodemon": "^1.12.1"
+  }
+}

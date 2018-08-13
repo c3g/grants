@@ -1,0 +1,29 @@
+/*
+ * reset.css
+ * Copyright (C) 2017 rgregoir
+ *
+ * Distributed under terms of the MIT license.
+ */
+
+html, body {
+  width:  100%;
+  height: 100%;
+  margin: 0;
+  padding: 0;
+}
+
+button {
+  padding: 0;
+  margin: 0;
+  color: inherit;
+  background-color: transparent;
+  border: none;
+}
+
+p {
+  margin: 0 0 var(--padding);
+}
+
+small {
+  display: inline;
+}

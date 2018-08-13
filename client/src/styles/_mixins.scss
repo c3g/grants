@@ -1,0 +1,16 @@
+@import './_variables.scss';
+
+@mixin center {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+@mixin vcenter {
+  display: flex;
+  align-items: center;
+}
+@mixin hcenter {
+  display: flex;
+  justify-content: center;
+}
+
