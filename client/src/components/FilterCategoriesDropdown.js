@@ -15,7 +15,7 @@ import Spinner from './Spinner'
 import Text from './Text'
 
 
-class FilterTagsDropdown extends React.Component {
+class FilterCategoriesDropdown extends React.Component {
   constructor(props) {
     super(props)
     this.state = {
@@ -27,32 +27,32 @@ class FilterTagsDropdown extends React.Component {
     this.setState({ value: '' })
   }
 
-  clearTags = () => {
-    this.props.setFilteringTags([])
+  clearCategories = () => {
+    this.props.setFilteringCategories([])
     this.clearValue()
   }
 
   render() {
-    const { tags, selectedTags, } = this.props
+    const { tags, selectedCategories, } = this.props
     const { value } = this.state
 
-    const visibleTags = matchSorter(tags, value)
+    const visibleCategories = matchSorter(tags, value)
 
     return (
       <Dropdown
         closeOnClick={false}
-        label={selectedTags.join(', ') || <span>&nbsp;</span>}
+        label={selectedCategories.join(', ') || <span>&nbsp;</span>}
         onOpen={this.clearValue}
       >
-        <Dropdown.Content className='FilterTags__input'>
+        <Dropdown.Content className='FilterCategories__input'>
           <Input
             value={value}
             onChange={value => this.setState({ value })}
           />
         </Dropdown.Content>
         <Dropdown.Item
-          onClick={this.clearTags}
-          disabled={selectedTags.length === 0}
+          onClick={this.clearCategories}
+          disabled={selectedCategories.length === 0}
         >
           <Icon
             muted
@@ -61,24 +61,24 @@ class FilterTagsDropdown extends React.Component {
           /> <Text bold>Clear selection</Text>
         </Dropdown.Item>
         {
-          alphabeticalSort(visibleTags).map(tag =>
+          alphabeticalSort(visibleCategories).map(tag =>
             <Dropdown.Item key={tag}
-              onClick={() => selectedTags.includes(tag) ?
+              onClick={() => selectedCategories.includes(tag) ?
                 this.props.deleteFilteringTag(tag) :
                 this.props.addFilteringTag(tag)
               }
             >
               <Icon
-                name={selectedTags.includes(tag) ? 'check-square' : 'square'}
+                name={selectedCategories.includes(tag) ? 'check-square' : 'square'}
                 marginRight={10}
               /> <Badge info>{ tag }</Badge>
             </Dropdown.Item>
           )
         }
         {
-          tags.length - visibleTags.length > 0 &&
+          tags.length - visibleCategories.length > 0 &&
             <Dropdown.Content>
-              <Text muted>{ tags.length - visibleTags.length } tags filtered</Text>
+              <Text muted>{ tags.length - visibleCategories.length } tags filtered</Text>
             </Dropdown.Content>
         }
       </Dropdown>
@@ -86,4 +86,4 @@ class FilterTagsDropdown extends React.Component {
   }
 }
 
-export default pure(FilterTagsDropdown)
+export default pure(FilterCategoriesDropdown)
