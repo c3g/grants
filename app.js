@@ -78,7 +78,7 @@ function apiProtected(req, res, next) {
   if (process.env.NODE_ENV === 'development') {
     req.user = {
       id: 2,
-      googleId: '113897916442927912291',
+      googleID: '113897916442927912291',
       token: 'asldfhaosidhfaouifhnewofuiqnwerocfnq9wejfoqwuie',
       name: 'Rom Grk',
       email: 'rom7011@gmail.com',

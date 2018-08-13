@@ -33,7 +33,7 @@ passport.use(new OAuth2Strategy(config.google.auth, (token, refreshToken, profil
   process.nextTick(() => {
 
     // Try to find the user based on their google id
-    User.findByGoogleId(profile.id)
+    User.findBygoogleID(profile.id)
     .then(user => {
 
       // if a user is found, log them in
@@ -50,7 +50,7 @@ passport.use(new OAuth2Strategy(config.google.auth, (token, refreshToken, profil
       if (err.type === k.ACCOUNT_NOT_FOUND) {
 
         const newUser = {
-          googleId: profile.id,
+          googleID: profile.id,
           token: token,
           name: profile.displayName,
           email: profile.emails[0].value,

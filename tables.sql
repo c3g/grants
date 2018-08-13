@@ -25,7 +25,7 @@ INSERT INTO settings VALUES
 
 CREATE TABLE users (
     id         serial      primary key,
-    "googleId" varchar(50) null,
+    "googleID" varchar(50) null,
     token      text        null,
     name       text        not null,
     email      text        null,
@@ -67,7 +67,7 @@ CREATE TABLE categories (
 
 -- Bootstrap data
 
-INSERT INTO users (id, "googleId", token, name, email, password) VALUES (
+INSERT INTO users (id, "googleID", token, name, email, password) VALUES (
     nextval('users_id_seq'),
     null,
     null,
@@ -79,7 +79,7 @@ INSERT INTO users (id, "googleId", token, name, email, password) VALUES (
 
 -- Test data
 
-INSERT INTO users (id, "googleId", token, name, email) VALUES (
+INSERT INTO users (id, "googleID", token, name, email) VALUES (
     nextval('users_id_seq'),
     '113897916442927912291',
     'ya2GlsZBV75c-JxuuzblrbS7WoUmuWpJDJtgOOdzUcwFOaFt_7ADAIRKpiOXA1A_TtFl1AkMoXAPcqus6_ia',

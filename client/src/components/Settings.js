@@ -214,7 +214,7 @@ class Settings extends React.Component {
                     <tr>
                       <td>
                         {
-                          user.googleId === null ?
+                          user.googleID === null ?
                             <Label>{user.name}</Label>
                             :
                             <EditableLabel
@@ -225,7 +225,7 @@ class Settings extends React.Component {
                       </td>
                       <td>
                         {
-                          user.googleId === null ?
+                          user.googleID === null ?
                             <Label>{user.email}</Label>
                             :
                             <EditableLabel
@@ -236,7 +236,7 @@ class Settings extends React.Component {
                     </td>
                       <td className='button-column'>
                         {
-                          user.googleId !== null &&
+                          user.googleID !== null &&
                             <Button
                               flat
                               square

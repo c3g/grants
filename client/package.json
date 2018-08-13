@@ -1,5 +1,5 @@
 {
-  "name": "samples-tracker",
+  "name": "grants-client",
   "description": "",
   "version": "0.1.0",
   "author": "romgrk",
@@ -11,7 +11,7 @@
     "immutable": "^3.8.2",
     "is-object": "^1.0.1",
     "match-sorter": "^2.2.0",
-    "node-sass": "^4.7.2",
+    "node-sass": "^4.9.3",
     "node-sass-chokidar": "0.0.3",
     "partial.lenses": "^13.1.1",
     "prop-types": "^15.5.0",
