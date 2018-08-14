@@ -8,18 +8,18 @@ html, body {
 
   font-family: Verdana, sans-serif;
   font-size: 14px;
-  line-height: var(--line-height);
+  line-height: $line-height;
   font-weight: normal;
-  color: var(--color);
+  color: $color;
 }
 
 * { box-sizing: border-box; }
 
 ::selection {
-  background: var(--selection-color);
+  background: $selection-color;
 }
 ::-moz-selection {
-  background: var(--selection-color);
+  background: $selection-color;
 }
 ::-moz-focus-inner { border: 0; }
 
@@ -153,7 +153,7 @@ html, body {
   line-height: 30px;
   font-weight: bold;
   color: $text-color-highlight;
-  margin-right: var(--padding);
+  margin-right: $padding;
   user-select: none;
   text-transform: uppercase;
 }
@@ -198,7 +198,7 @@ button.label.editable.inline {
   display: inline-flex;
 }
 button.label.editable:hover {
-  background-color: var(--hover-light-bg-color);
+  background-color: $hover-light-bg-color;
 }
 button.label.editable span {
   flex: 1;
@@ -207,7 +207,7 @@ button.label.editable span {
   overflow: hidden;
 }
 button.label.editable .Icon {
-  margin: var(--padding);
+  margin: $padding;
   opacity: 0;
   color: #ddd;
   transition: opacity .25s;
@@ -232,7 +232,7 @@ input.label.editable:focus {
   --line-height: 20px;
   font-family: Ubuntu, Roboto, Arial, sans-serif;
   font-size: 12px;
-  line-height: var(--line-height);
+  line-height: $line-height;
   font-weight: normal;
 }
 .text.small {
@@ -252,7 +252,7 @@ input.label.editable:focus {
 .text.editable {
   position: relative;
   width: 100%;
-  height: calc(3 * var(--line-height));
+  height: calc(3 * $line-height);
 }
 div.text.editable {
   transition: all .25s;
@@ -262,19 +262,19 @@ div.text.editable {
   cursor: text;
 }
 div.text.editable:hover {
-  background-color: var(--hover-light-bg-color);
+  background-color: $hover-light-bg-color;
 }
 div.text.editable > div {
   flex: 1;
   text-overflow: ellipsis;
   overflow: auto;
-  height: calc(3 * var(--line-height));
+  height: calc(3 * $line-height);
 }
 div.text.editable > .Icon {
   position: absolute;
   top: -1px;
   right: $padding;
-  margin: var(--padding);
+  margin: $padding;
   opacity: 0;
   color: #ddd;
   transition: opacity .25s;
@@ -309,7 +309,7 @@ textarea.text.editable:focus {
   align-items: center;
   height: 30px;
   padding: 0 2*$padding;
-  color: var(--color);
+  color: $color;
   font-weight: bold;
 }
 .list > .item {
@@ -333,7 +333,7 @@ textarea.text.editable:focus {
   width: 100%;
   height: 2*$padding;
   margin-bottom: 2*$padding;
-  border-bottom: 1px solid var(--light-border-color);
+  border-bottom: 1px solid $light-border-color;
 }
 
 .Icon {
@@ -426,8 +426,8 @@ textarea.text.editable:focus {
   margin-bottom: 0;
   font-size: inherit;
   border-radius: 3px;
-  background-color: var(--bg-color-dark);
-  box-shadow: 0 0 0 1px var(--checkbox-border-color);
+  background-color: $bg-color-dark;
+  box-shadow: 0 0 0 1px $checkbox-border-color;
   transition: background-color 0.16s cubic-bezier(0.5, 0.15, 0.2, 1);
 }
 .Checkbox:focus {
@@ -461,7 +461,7 @@ textarea.text.editable:focus {
 }
 .Checkbox:checked {
   background-color: #568af2;
-  box-shadow: 0 0 0 1px var(--border-color);
+  box-shadow: 0 0 0 1px $border-color;
 }
 .Checkbox:checked:active {
   background-color: #3f444d;
@@ -649,7 +649,7 @@ textarea.text.editable:focus {
 }
 .Popup > .item[disabled] > .Icon.menu,
 .Dropdown__inner > .item[disabled] > .Icon.menu {
-  color: var(--text-color-disabled);
+  color: $text-color-muted;
 }
 .Popup > .group ,
 .Dropdown__inner > .group {
@@ -659,7 +659,7 @@ textarea.text.editable:focus {
   align-items: center;
   height: 30px;
   padding: 0 2*$padding;
-  color: var(--color);
+  color: $color;
   font-weight: bold;
   white-space: nowrap;
 }
@@ -668,7 +668,7 @@ textarea.text.editable:focus {
   width: 100%;
   height: 2*$padding;
   margin-bottom: 2*$padding;
-  border-bottom: 1px solid var(--light-border-color);
+  border-bottom: 1px solid $light-border-color;
 }
 
 .Image {
@@ -700,12 +700,12 @@ tr, td, th {
 }
 
 h1 {
-  padding: 0 calc(0 * var(--padding));
+  padding: 0 calc(0 * $padding);
   margin: 0;
   font-size: 28px;
   font-weight: bold;
   line-height: 40px;
-  color: var(--light-color);
+  color: $light-color;
 }
 
 abbr {
@@ -765,18 +765,18 @@ a.link.text-normal:visited {
 
 
 .bold { font-weight: bold; }
-.text-normal    { color: var(--color); }
-.text-highlight { color: var(--text-color-highlight); }
-.text-success   { color: var(--text-color-success); }
-.text-muted     { color: var(--text-color-muted); }
-.text-warning   { color: var(--text-color-warning); }
-.text-error     { color: var(--text-color-error); }
-.text-info      { color: var(--text-color-info); }
-.text-subtle    { color: var(--text-color-subtle); }
+.text-normal    { color: $color; }
+.text-highlight { color: $text-color-highlight; }
+.text-success   { color: $text-color-success; }
+.text-muted     { color: $text-color-muted; }
+.text-warning   { color: $text-color-warning; }
+.text-error     { color: $text-color-error; }
+.text-info      { color: $text-color-info; }
+.text-subtle    { color: $text-color-subtle; }
 
-.bg-dark { background-color: var(--bg-color-dark); }
-.border-left { border-left: 1px solid var(--border-color-dark); }
-.border-top { border-top: 1px solid var(--border-color-dark); }
+.bg-dark { background-color: $bg-color-dark; }
+.border-left { border-left: 1px solid $border-color-dark; }
+.border-top { border-top: 1px solid $border-color-dark; }
 
 
 
@@ -800,8 +800,8 @@ a.link.text-normal:visited {
   height: 100%;
   border-radius: 5px;
   --border: 3px;
-  top: calc(-1 * var(--border));
-  left: calc(-1 * var(--border));
+  top: calc(-1 * $border);
+  left: calc(-1 * $border);
   pointer-events: none;
 }
 .drop-zone.over-document::after {
@@ -831,7 +831,7 @@ a.link.text-normal:visited {
   width:  100%;
   overflow: hidden;
 }
-.App__sidebar {
+.App__navbar {
   flex-basis: auto;
 }
 .App__section {
@@ -853,29 +853,39 @@ a.link.text-normal:visited {
 }
 
 
-.Sidebar {
+.Navbar {
   position: relative;
-  height: 100%;
-  background-color: var(--bg-color-dark);
+  background-color: $bg-color-dark;
   transition: all .5s;
+  &.vertical {
+    height: 100%;
+  }
+  &.horizontal {
+    width: 100%;
+  }
 }
-.Sidebar:not(.visible) {
+.Navbar:not(.visible) {
   flex-basis: 0;
   width: 0;
-  transform: translateX(calc(-1 * var(--sidebar-size)));
+  transform: translateX(calc(-1 * $sidebar-size));
 }
-.Sidebar.visible {
-  flex-basis: var(--sidebar-size);
-  width: var(--sidebar-size);
+.Navbar.visible {
+  flex-basis: $sidebar-size;
   transform: translateX(0);
+  &.vertical {
+    width: $sidebar-size;
+  }
+  &.horizontal {
+    height: $sidebar-size;
+  }
 }
-.Sidebar a {
+.Navbar a {
   color: inherit;
   text-decoration: none;
 }
-.Sidebar__item {
-  width:  var(--sidebar-size);
-  height: var(--sidebar-size);
+.Navbar__item {
+  width:  $sidebar-size;
+  height: $sidebar-size;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -883,22 +893,26 @@ a.link.text-normal:visited {
   user-select: none;
   transition: all .25s;
 }
-.Sidebar__item:hover, .Sidebar__item.active:hover {
-  background-color: var(--hover-bg-color);
+.Navbar__item:hover, .Navbar__item.active:hover {
+  background-color: $hover-bg-color;
 }
-.Sidebar__item.active {
+.Navbar__item.active {
   position: relative;
-  background-color: var(--active-bg-color);
+  background-color: $active-bg-color;
 }
-.Sidebar__border {
+.Navbar__border {
   position: absolute;
-  height: var(--sidebar-size);
-  width: 1px;
-  background-color: var(--accent-color);
-  left: calc(var(--sidebar-size) - 1px);
+  background-color: $accent-color;
+  left: calc($sidebar-size - 1px);
   transition: top .15s;
 }
-.Sidebar__fill {
+.Navbar.vertical .Navbar__border {
+  width: 1px;
+}
+.Navbar.horizontal .Navbar__border {
+  height: 1px;
+}
+.Navbar__fill {
   flex: 1 1;
 }
 
@@ -951,7 +965,7 @@ section {
 $step-width: 40px;
 
 .Samples__tableContainer {
-  background-color: var(--table-bg-color);
+  background-color: $table-bg-color;
 }
 .Samples__table {
   flex: 1 1;
@@ -959,27 +973,27 @@ $step-width: 40px;
   table-layout: fixed;
   border-collapse: collapse;
 
-  color: var(--table-color);
-  background-color: var(--table-bg-color);
-  border-left: 1px solid var(--table-border-color);
+  color: $table-color;
+  background-color: $table-bg-color;
+  border-left: 1px solid $table-border-color;
 }
 .Samples__header.Sample {
-  border-top: 1px solid var(--table-border-color);
+  border-top: 1px solid $table-border-color;
   height: 25px;
 }
 .Samples__header > div {
-  line-height: calc(var(--line-height) - 2px);
+  line-height: calc($line-height - 2px);
   font-weight: bold;
 }
 .Samples__table > .Sample:not(.empty) {
-  border-bottom: 1px solid var(--table-border-color);
+  border-bottom: 1px solid $table-border-color;
 }
 
 .Sample {
   height: 25px;
 }
 .Sample:nth-child(2n + 1) { /* skip header */
-  background-color: var(--table-bg-alt-color);
+  background-color: $table-bg-alt-color;
 }
 .Sample:not(.Samples__header) {
   cursor: pointer;
@@ -1008,7 +1022,7 @@ $step-width: 40px;
 .Sample__icon {
   width: 30px;
   text-align: center;
-  border-left: 1px solid var(--table-border-color);
+  border-left: 1px solid $table-border-color;
 }
 .Sample__name {
   width: 150px;
@@ -1025,7 +1039,7 @@ $step-width: 40px;
 .Sample__steps {
   width: auto;
   overflow: auto !important;
-  border-left: 1px solid var(--table-border-color);
+  border-left: 1px solid $table-border-color;
 }
 .Sample__steps > div {
   display: flex;
@@ -1034,12 +1048,12 @@ $step-width: 40px;
 .Sample__created {
   width: 100px;
   padding: 0 $padding;
-  border-left: 1px solid var(--table-border-color);
+  border-left: 1px solid $table-border-color;
 }
 .Sample__modified {
   width: 100px;
   padding: 0 $padding;
-  border-left: 1px solid var(--table-border-color);
+  border-left: 1px solid $table-border-color;
 }
 .Sample__notes {
   width: 200px;
@@ -1047,7 +1061,7 @@ $step-width: 40px;
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
-  border-left: 1px solid var(--table-border-color);
+  border-left: 1px solid $table-border-color;
 }
 
 .Step {
@@ -1059,7 +1073,7 @@ $step-width: 40px;
   cursor: pointer;
   padding: 0;
   flex: 0 0 $step-width;
-  border-right: 1px solid var(--table-border-color);
+  border-right: 1px solid $table-border-color;
 }
 .Step:hover {
   background-color: $hover-light-bg-color;
@@ -1222,21 +1236,21 @@ $step-width: 40px;
   overflow: hidden;
 }
 .Template .Template__info {
-  border-left: 1px solid var(--light-border-color);
+  border-left: 1px solid $light-border-color;
 }
 .Template:not(:last-of-type) .Template__info {
-  border-bottom: 1px solid var(--light-border-color);
+  border-bottom: 1px solid $light-border-color;
 }
 .Template:first-of-type .Steps {
-  border-top: 1px solid var(--bg-color-dark);
+  border-top: 1px solid $bg-color-dark;
 }
 .Template .Steps {
-  border-bottom: 1px solid var(--bg-color-dark);
+  border-bottom: 1px solid $bg-color-dark;
 }
 
 .Template__info {
-  padding: var(--padding) 2*$padding;
-  background-color: var(--bg-color-dark);
+  padding: $padding 2*$padding;
+  background-color: $bg-color-dark;
   width: 175px;
 }
 .Template__info .label.editable {
@@ -1252,25 +1266,25 @@ $step-width: 40px;
   flex-direction: row;
   width: 100%;
   overflow: auto;
-  padding: calc(var(--padding) - 1px);
+  padding: calc($padding - 1px);
 }
 .TemplateStep {
-  height: calc(8 * var(--padding));
-  padding: calc(var(--padding) - 1px);
+  height: calc(8 * $padding);
+  padding: calc($padding - 1px);
   //min-width: 100px;
-  border: 1px solid var(--light-border-color);
+  border: 1px solid $light-border-color;
   border-radius: 2px;
   cursor: pointer;
 }
 .TemplateStep:not(:last-child) {
-  margin-right: var(--padding);
+  margin-right: $padding;
 }
 .TemplateStep.add {
   min-width: 50px;
   transition: all .25s;
 }
 .TemplateStep.add:hover {
-  background-color: var(--hover-light-bg-color);
+  background-color: $hover-light-bg-color;
 }
 .TemplateStep .label.editable {
   width: 0;

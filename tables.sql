@@ -16,8 +16,8 @@ CREATE TYPE Status AS ENUM (
 );
 
 CREATE TABLE settings (
-    key varchar(100) primary key,
-    value jsonb      not null
+    key    varchar(100) primary key,
+    value  jsonb        not null
 );
 INSERT INTO settings VALUES
     ('whitelist',  '["rom7011@gmail.com","david.bujold@mcgill.ca"]') -- users allowed to login/signup
@@ -38,30 +38,38 @@ CREATE TABLE applicants (
 );
 
 CREATE TABLE grants (
-    id          serial    primary key,
-    name        text      not null,
-    applicants  integer[]     null,
-    categoryID  integer   not null,
-    start       timestamp not null,
-    "end"       timestamp not null,
-    status      Status    not null,
-    total       integer   not null,
-    cofunding   integer   not null,
-    fields      jsonb         null
+    id           serial    primary key,
+    name         text      not null,
+    applicants   integer[]     null,
+    "categoryID" integer   not null,
+    start        timestamp not null,
+    "end"        timestamp not null,
+    status       Status    not null,
+    total        integer   not null,
+    cofunding    integer   not null,
+    fields       jsonb         null
 );
 
 CREATE TABLE fundings (
     id             serial    primary key,
-    fromGrantID    integer   not null,
-    toGrantID      integer   not null,
+    "fromGrantID"  integer   not null,
+    "toGrantID"    integer   not null,
     amount         integer   not null
 );
-
 
 CREATE TABLE categories (
     id          serial     primary key,
     name        text       not null,
     color       varchar(7) not null
+);
+
+CREATE TABLE history (
+    id          serial      primary key,
+    "userID"    integer     not null,
+    description text        not null,
+    "date"      timestamp   not null,
+    "table"     varchar(50)     null,
+    "targetID"  integer         null
 );
 
 

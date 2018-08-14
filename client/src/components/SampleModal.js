@@ -236,14 +236,14 @@ class SampleModal extends React.Component {
     this.props.onChangeStatus(this.state.id, stepIndex, status)
   }
 
-  getUserName(userId) {
-    if (userId === null)
+  getUserName(userID) {
+    if (userID === null)
       return ''
 
     if (this.props.users.isLoading)
       return '[loading]'
 
-    return this.props.users.data[userId].name
+    return this.props.users.data[userID].name
   }
 
   openBadgeDropdown = () => {
@@ -612,7 +612,7 @@ class SampleModal extends React.Component {
                           </span>
                           <span className='History__description'>
                             <span className='History__username'>
-                              {this.getUserName(entry.userId)}
+                              {this.getUserName(entry.userID)}
                             </span> { entry.description }
                           </span>
                         </div>

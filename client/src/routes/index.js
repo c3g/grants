@@ -10,7 +10,7 @@ import { connect } from 'react-redux'
 import { createStructuredSelector, createSelector } from 'reselect'
 
 import GlobalActions from '../actions/global'
-import Sidebar from '../components/Sidebar'
+import Navbar from '../components/Navbar'
 // import CompletionFunctionsContainer from '../containers/CompletionFunctionsContainer'
 // import FAQContainer from '../containers/FAQContainer'
 // import IndexContainer from '../containers/IndexContainer'
@@ -20,37 +20,42 @@ import SettingsContainer from '../containers/SettingsContainer'
 // import TemplatesContainer from '../containers/TemplatesContainer'
 
 const items = [
-  { type: 'item', icon: 'cogs',  path: '/settings',    title: 'Settings' },
-  { type: 'item', icon: 'flask', path: '/grants',      title: 'Grants',               showTitle: false },
+  { type: 'item', icon: 'cogs',  path: '/settings', title: 'Settings' },
+  { type: 'item', icon: 'flask', path: '/grants',   title: 'List',    showTitle: false },
 ]
 
 function Routes({ isLoggedIn, isLoggingIn, logOut, showFAQ }) {
+
+  // Redirect on certain conditions
+  const checkLocation = (props) =>
+    (!isLoggedIn && !isLoggingIn && props.location.pathname !== '/') ?
+      <Redirect to='/' /> :
+    (isLoggedIn && props.location.pathname === '/') ?
+      <Redirect to='/samples' /> :
+      null
+
   return (
     <Router>
-      <div className='App hbox'>
+      <div className='App vbox'>
 
-        <Route render={(props) =>
-          (!isLoggedIn && !isLoggingIn && props.location.pathname !== '/') ?
-            <Redirect to='/' /> :
-          (isLoggedIn && props.location.pathname === '/') ?
-            <Redirect to='/samples' /> :
-            null
-        }/>
+        <Route render={checkLocation}/>
 
-        <div className='App__sidebar'>
+        <div className='App__navbar'>
           <Route render={(props) =>
 
-            <Sidebar
+            <Navbar
+              direction='horizontal'
               visible={isLoggedIn}
               index={items.findIndex(i => props.location.pathname.startsWith(i.path))}
               items={items}
             >
-              <Sidebar.Button icon='question-circle' title='Help'    onClick={showFAQ} />
-              <Sidebar.Button icon='sign-out'        title='Log Out' onClick={logOut} />
-            </Sidebar>
+              <Navbar.Button icon='question-circle' title='Help'    onClick={showFAQ} />
+              <Navbar.Button icon='sign-out'        title='Log Out' onClick={logOut} />
+            </Navbar>
 
           }/>
         </div>
+
         <div className='App__content vbox'>
 
           <Route render={(props) => {
@@ -62,7 +67,7 @@ function Routes({ isLoggedIn, isLoggingIn, logOut, showFAQ }) {
             if (!activeItem || activeItem.title === undefined)
               return null
 
-            document.title = `Follow - ${activeItem.title}`
+            document.title = `${activeItem.title} - Grants`
 
             return null
           } }/>

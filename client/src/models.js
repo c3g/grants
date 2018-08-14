@@ -167,67 +167,67 @@ const sample = {
          date: "2017-12-06T17:39:12.000Z",
          description: "changed status to ON_HOLD",
          stepIndex: 2,
-         userId: "811877316248971230109"
+         userID: "811877316248971230109"
       },
       {
          date: "2017-12-06T17:39:00.000Z",
          description: "updated sample",
          stepIndex: null,
-         userId: "811877316248971230109"
+         userID: "811877316248971230109"
       },
       {
          date: "2017-12-06T17:38:58.000Z",
          description: "updated sample",
          stepIndex: null,
-         userId: "811877316248971230109"
+         userID: "811877316248971230109"
       },
       {
          date: "2017-12-06T17:38:53.000Z",
          description: "updated sample",
          stepIndex: null,
-         userId: "811877316248971230109"
+         userID: "811877316248971230109"
       },
       {
          date: "2017-12-06T17:38:48.000Z",
          description: "updated sample",
          stepIndex: null,
-         userId: "811877316248971230109"
+         userID: "811877316248971230109"
       },
       {
          date: "2017-12-06T17:38:46.000Z",
          description: "updated sample",
          stepIndex: null,
-         userId: "811877316248971230109"
+         userID: "811877316248971230109"
       },
       {
          date: "2017-12-06T17:38:40.000Z",
          description: "added file profyle.csv to step 1",
          stepIndex: 1,
-         userId: "811877316248971230109"
+         userID: "811877316248971230109"
       },
       {
          date: "2017-12-06T17:38:35.000Z",
          description: "added file user-create.js to step 1",
          stepIndex: 1,
-         userId: "811877316248971230109"
+         userID: "811877316248971230109"
       },
       {
          date: "2017-12-06T17:38:15.000Z",
          description: "changed status to DONE",
          stepIndex: 0,
-         userId: "811877316248971230109"
+         userID: "811877316248971230109"
       },
       {
          date: "2017-12-06T17:38:13.000Z",
          description: "added file Screenshot from 2017-12-05 14-59-19.png to step 0",
          stepIndex: 0,
-         userId: "811877316248971230109"
+         userID: "811877316248971230109"
       },
       {
          date: "2017-12-06T17:37:04.000Z",
          description: "created sample",
          stepIndex: null,
-         userId: "811877316248971230109"
+         userID: "811877316248971230109"
       }
    ]
 }
