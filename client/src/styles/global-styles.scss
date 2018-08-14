@@ -6,7 +6,7 @@ html, body {
   height: 100%;
   overflow: hidden;
 
-  font-family: Verdana, sans-serif;
+  font-family: $font-family-text;
   font-size: 14px;
   line-height: $line-height;
   font-weight: normal;
@@ -148,7 +148,7 @@ html, body {
 }
 
 .title {
-  font-family: Ubuntu, Roboto, Arial, sans-serif;
+  font-family: $font-family-title;
   font-size: 14px;
   line-height: 30px;
   font-weight: bold;
@@ -168,7 +168,7 @@ html, body {
 }
 
 .label {
-  font-family: Ubuntu, Roboto, Arial, sans-serif;
+  font-family: $font-family-text;
   font-size: 12px;
   line-height: 30px;
   font-weight: bold;
@@ -230,7 +230,7 @@ input.label.editable:focus {
 
 .text {
   --line-height: 20px;
-  font-family: Ubuntu, Roboto, Arial, sans-serif;
+  font-family: $font-family-text;
   font-size: 12px;
   line-height: $line-height;
   font-weight: normal;
@@ -856,7 +856,6 @@ a.link.text-normal:visited {
 .Navbar {
   position: relative;
   background-color: $bg-color-dark;
-  transition: all .5s;
   &.vertical {
     height: 100%;
   }
@@ -883,9 +882,22 @@ a.link.text-normal:visited {
   color: inherit;
   text-decoration: none;
 }
+.Navbar__title {
+  min-width:  $sidebar-size;
+  min-height: $sidebar-size;
+  padding: 0 2*$padding;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  user-select: none;
+}
+.Navbar__items {
+  position: relative;
+}
 .Navbar__item {
-  width:  $sidebar-size;
-  height: $sidebar-size;
+  min-width:  $sidebar-size;
+  min-height: $sidebar-size;
+  padding: 0 2*$padding;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -900,17 +912,21 @@ a.link.text-normal:visited {
   position: relative;
   background-color: $active-bg-color;
 }
+.Navbar__icon {
+  margin-right: $padding;
+}
 .Navbar__border {
   position: absolute;
   background-color: $accent-color;
-  left: calc($sidebar-size - 1px);
-  transition: top .15s;
+  transition: top .15s, left .15s, height .15s, width .15s;
 }
 .Navbar.vertical .Navbar__border {
   width: 1px;
+  left: $sidebar-size - 1px;
 }
 .Navbar.horizontal .Navbar__border {
   height: 1px;
+  top: $sidebar-size - 1px;
 }
 .Navbar__fill {
   flex: 1 1;

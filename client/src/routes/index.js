@@ -1,4 +1,5 @@
 import React from 'react'
+import prop from 'prop-types'
 import { bindActionCreators } from 'redux'
 import {
   BrowserRouter as Router,
@@ -20,9 +21,10 @@ import SettingsContainer from '../containers/SettingsContainer'
 // import TemplatesContainer from '../containers/TemplatesContainer'
 
 const items = [
-  { type: 'item', icon: 'cogs',  path: '/settings', title: 'Settings' },
-  { type: 'item', icon: 'flask', path: '/grants',   title: 'List',    showTitle: false },
+  { type: 'item', icon: 'cogs',  label: 'Settings', path: '/settings' },
+  { type: 'item', icon: 'flask', label: 'Grants',   path: '/grants', index: true },
 ]
+const indexRoute = items.find(i => i.index).path
 
 function Routes({ isLoggedIn, isLoggingIn, logOut, showFAQ }) {
 
@@ -31,7 +33,7 @@ function Routes({ isLoggedIn, isLoggingIn, logOut, showFAQ }) {
     (!isLoggedIn && !isLoggingIn && props.location.pathname !== '/') ?
       <Redirect to='/' /> :
     (isLoggedIn && props.location.pathname === '/') ?
-      <Redirect to='/samples' /> :
+      <Redirect to={indexRoute} /> :
       null
 
   return (
@@ -49,6 +51,9 @@ function Routes({ isLoggedIn, isLoggingIn, logOut, showFAQ }) {
               index={items.findIndex(i => props.location.pathname.startsWith(i.path))}
               items={items}
             >
+              <Navbar.Title>
+                Grants Application
+              </Navbar.Title>
               <Navbar.Button icon='question-circle' title='Help'    onClick={showFAQ} />
               <Navbar.Button icon='sign-out'        title='Log Out' onClick={logOut} />
             </Navbar>
@@ -84,6 +89,10 @@ function Routes({ isLoggedIn, isLoggingIn, logOut, showFAQ }) {
   // <NotificationsContainer />
   // <IndexContainer />
   // <FAQContainer />
+}
+
+Routes.propTypes = {
+  location: prop.object.isRequired,
 }
 
 const mapStateToProps = createStructuredSelector({

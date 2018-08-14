@@ -7,14 +7,14 @@ import classname from 'classname'
 import Icon from './Icon'
 import Tooltip from './Tooltip'
 
-/*{
+/* {
    index: 0,
    items: [
      { type: 'item', icon: 'settings', title: 'Settings' },
      { type: 'item', icon: 'view_list' },
      { type: 'item', icon: 'edit' },
    ],
- }*/
+ } */
 
 const Item = prop.shape({
   type: prop.oneOf(['item']),
@@ -26,22 +26,27 @@ const Item = prop.shape({
 
 class Navbar extends React.Component {
   static propTypes = {
-    index: prop.number,
-    items: prop.arrayOf(Item),
+    index: prop.number.isRequired,
+    items: prop.arrayOf(Item).isRequired,
     direction: prop.oneOf(['vertical', 'horizontal']),
-    visible: prop.bool,
+    visible: prop.bool.isRequired,
+    children: prop.any,
   }
 
   static defaultProps = {
     direction: 'vertical',
+    children: undefined,
   }
 
   elements = []
+
   state = {
     borderTop: undefined,
     borderLeft: undefined,
-    borderWidth: undefined,
-    borderHeight: undefined,
+  }
+
+  componentDidMount() {
+    this.updateBorder()
   }
 
   componentWillReceiveProps() {
@@ -49,6 +54,10 @@ class Navbar extends React.Component {
   }
 
   componentDidUpdate() {
+    this.updateBorder()
+  }
+
+  updateBorder() {
     const isVertical = this.props.direction === 'vertical'
     const { index = 0 } = this.props
 
@@ -102,39 +111,59 @@ class Navbar extends React.Component {
       'vbox': direction === 'vertical',
       'hbox': direction === 'horizontal',
     })
+    const navItemsClassName = classname('Navbar__items', {
+      'vbox': direction === 'vertical',
+      'hbox': direction === 'horizontal',
+    })
+
+    const childrenArray =
+      React.Children.toArray(children)
+        .map(c => React.cloneElement(c, { direction }))
+
+    const title = childrenArray.find(c => c.type === Navbar.Title)
+    const buttons = childrenArray.filter(c => c.type === Navbar.Button)
 
     return (
       <div className={navClassName}>
-        {
-          items.map((n, i) =>
-            <Tooltip content={n.title} position='right' key={n.icon + n.title + n.path}>
-              <Link key={i}
-                className={'Navbar__item ' + (i === index ? 'active' : '')}
-                to={n.path}
-                ref={e => {
-                  if (e === null)
-                    return
-                  const node = findDOMNode(e)
-                  if (!this.elements.includes(node))
-                    this.elements.push(node)
-                }}
-              >
-                <Icon large name={n.icon} />
-              </Link>
-            </Tooltip>
-          )
-        }
+        { title }
+
+        <div className={navItemsClassName}>
+          {
+            items.map((n, i) =>
+              <Tooltip content={n.title} position='right' key={n.icon + n.title + n.path}>
+                <Link key={i}
+                  className={'Navbar__item ' + (i === index ? 'active' : '')}
+                  to={n.path}
+                  ref={e => {
+                    if (e === null)
+                      return
+                    const node = findDOMNode(e)
+                    if (!this.elements.includes(node))
+                      this.elements.push(node)
+                  }}
+                >
+                  { n.icon &&
+                    <Icon large name={n.icon} className='Navbar__icon'/>
+                  } { n.label &&
+                    n.label
+                  }
+                </Link>
+              </Tooltip>
+            )
+          }
+          <div className='Navbar__border' style={this.getBorderStyle()} />
+        </div>
+
         <div className='fill' />
 
-        { children }
+        { buttons }
 
-        <div className='Navbar__border' style={this.getBorderStyle()} />
       </div>
     )
   }
 }
 
-Navbar.Button = function({ icon, title, onClick, ...rest }) {
+Navbar.Button = function Button({ icon, title, direction, onClick, ...rest }) {
   const element = (
     <button className='Navbar__item' onClick={onClick} {...rest}>
       <Icon large name={icon} />
@@ -145,9 +174,17 @@ Navbar.Button = function({ icon, title, onClick, ...rest }) {
     return element
 
   return (
-    <Tooltip content={title} position='right'>
+    <Tooltip content={title} position={direction === 'vertical' ? 'right' : 'bottom'}>
       { element }
     </Tooltip>
+  )
+}
+
+Navbar.Title = function Title({ children }) {
+  return (
+    <div className='Navbar__title title'>
+      { children }
+    </div>
   )
 }
 

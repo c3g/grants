@@ -145,7 +145,7 @@ class Tooltip extends React.Component {
       'Tooltip',
       className,
       {
-        visible: this.state.visible
+        visible: this.state.visible && Boolean(content)
       }
     )
 
@@ -173,7 +173,6 @@ class Tooltip extends React.Component {
       onMouseOver: this.onMouseOver,
       onMouseOut: this.onMouseOut,
     }, childChildren)
-
   }
 }
 

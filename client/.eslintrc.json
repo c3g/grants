@@ -16,18 +16,20 @@
     "DEBUG": false
   },
   "rules": {
+    "react/no-did-update-set-state": ["off"],
+    "react/no-find-dom-node": ["off"],
     "react/jsx-no-bind": ["off"],
-    "react/jsx-filename-extension": [
-      1,
-      {
-        "extensions": [".js", ".jsx"]
-      }
-    ],
-    "no-unused-vars": [
-      "error",
-      { "args": "none" }
-    ],
+    "react/jsx-filename-extension": [1, { "extensions": [".js", ".jsx"] }],
+    "react/destructuring-assignment": ["off"],
+    "react/forbid-prop-types": "off",
+    "react/require-default-props": "warn",
+    "react/sort-comp": "off",
+    "react/button-has-type": "off",
+
+    "no-nested-ternary": "off",
+    "no-unused-vars": ["error", { "args": "none" }],
     "prefer-template": "off",
+
     "import/no-extraneous-dependencies": 0,
     "import/no-unresolved": 0,
     "import/extensions": 0,
