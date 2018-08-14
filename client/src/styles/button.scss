@@ -9,7 +9,7 @@
   font-weight: bold;
   background-color: transparent;
   color: $color;
-  border: 1px solid var(--light-border-color);
+  border: 1px solid $light-border-color;
   border-radius: 2px;
   transition: all .15s;
   overflow: hidden;
@@ -21,8 +21,8 @@
   cursor: pointer;
 }
 .Button:not([disabled]):hover {
-  color: var(--hover-color);
-  background-color: var(--hover-bg-color);
+  color: $hover-color;
+  background-color: $hover-bg-color;
 }
 .activable {
   transition: all .15s;
@@ -45,7 +45,7 @@
   }
 }
 .Button > .Icon:not(:first-child):last-child {
-  margin-left: var(--padding);
+  margin-left: $padding;
 }
 .Button > span {
   flex: 1 1;
@@ -59,12 +59,12 @@
 
 .Button.flat {
   background-color: transparent;
-  color: var(--color);
+  color: $color;
   border: 1px solid transparent;
 }
 .Button.flat:not([disabled]):hover {
-  color: var(--hover-color);
-  background-color: var(--hover-light-bg-color);
+  color: $hover-color;
+  background-color: $hover-light-bg-color;
 }
 .Button.flat.active,
 .Button.flat:active,

@@ -61,22 +61,29 @@ class Navbar extends React.Component {
     const isVertical = this.props.direction === 'vertical'
     const { index = 0 } = this.props
 
+    if (this.elements.length === 0 || index === -1)
+      return
+
     if (isVertical) {
       const borderTop =
         this.elements.slice(0, index)
           .map(e => e.getBoundingClientRect().height)
           .reduce((acc, cur) => acc + cur, 0)
 
-      if (borderTop !== this.state.borderTop)
-        this.setState({ borderTop })
+      const borderHeight = this.elements[this.props.index].getBoundingClientRect().height
+
+      if (borderTop !== this.state.borderTop || borderHeight !== this.state.borderHeight)
+        this.setState({ borderTop, borderHeight })
     } else {
       const borderLeft =
         this.elements.slice(0, index)
           .map(e => e.getBoundingClientRect().width)
           .reduce((acc, cur) => acc + cur, 0)
 
-      if (borderLeft !== this.state.borderLeft)
-        this.setState({ borderLeft })
+      const borderWidth = this.elements[this.props.index].getBoundingClientRect().width
+
+      if (borderLeft !== this.state.borderLeft || borderWidth !== this.state.borderWidth)
+        this.setState({ borderLeft, borderWidth })
     }
   }
 

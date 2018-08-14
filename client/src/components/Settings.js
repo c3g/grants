@@ -4,16 +4,11 @@ import pure from 'recompose/pure'
 import styled from 'styled-components'
 import { sortBy, prop } from 'ramda'
 
-import * as _ from '../constants/text'
-import * as Interval from '../utils/postgres-interval'
 import uniq from '../utils/uniq'
 import getEmails from '../utils/get-emails'
 import Button from './Button'
 import EditableLabel from './EditableLabel'
 import EditableList from './EditableList'
-import Help from './Help'
-import Icon from './Icon'
-import IntervalInput from './IntervalInput'
 import Label from './Label'
 import Text from './Text'
 import Title from './Title'
@@ -54,10 +49,6 @@ class Settings extends React.Component {
     return state
   }
 
-  changeData = (which, value) => {
-    this.setState({ [which]: { ...this.state[which], data: value }})
-  }
-
   onListAdd = (which, value) => {
     const { onChange, onError } = this.props
     const list = this.state[which]
@@ -70,7 +61,7 @@ class Settings extends React.Component {
   }
 
   onListDelete = (which, value) => {
-    const { onChange, onError } = this.props
+    const { onChange } = this.props
     const list = this.state[which]
 
     onChange(which, list.data.filter(v => v !== value))
@@ -92,32 +83,15 @@ class Settings extends React.Component {
 
   render() {
     const {
-      isLoading,
-      data,
       users,
-      onChange,
-      onError
     } = this.props
 
     const {
-      alertDelay,
-      archiveInterval,
-      alertEmails,
       whitelist
     } = this.state
 
     return (
       <section className='Settings vbox'>
-
-        <div className='HeaderBar row'>
-          <Title large keepCase muted>
-            GenAP FOLLOW
-          </Title>
-
-          <Title large keepCase>
-            Settings
-          </Title>
-        </div>
 
         <div className='Settings__content hbox'>
           <div className='Settings__left fill'>
@@ -212,15 +186,13 @@ class Settings extends React.Component {
   }
 }
 
-function getLoadable(data, which) {
-  if (data[which])
-    return data[which]
-  return { isLoading: true, data: undefined }
-}
-
 Settings.propTypes = {
-  onChange: PropTypes.func.isRequired,
   data: PropTypes.object.isRequired,
+  users: PropTypes.arrayOf(PropTypes.object).isRequired,
+  onChange: PropTypes.func.isRequired,
+  onError: PropTypes.func.isRequired,
+  deleteUser: PropTypes.func.isRequired,
+  updateUser: PropTypes.func.isRequired,
 }
 
 export default pure(Settings)

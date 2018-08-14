@@ -19,6 +19,7 @@ import Navbar from '../components/Navbar'
 // import SamplesContainer from '../containers/SamplesContainer'
 import SettingsContainer from '../containers/SettingsContainer'
 // import TemplatesContainer from '../containers/TemplatesContainer'
+import Title from '../components/Title'
 
 const items = [
   { type: 'item', icon: 'cogs',  label: 'Settings', path: '/settings' },
@@ -52,7 +53,9 @@ function Routes({ isLoggedIn, isLoggingIn, logOut, showFAQ }) {
               items={items}
             >
               <Navbar.Title>
-                Grants Application
+                <Title large keepCase muted>
+                  Grants Application
+                </Title>
               </Navbar.Title>
               <Navbar.Button icon='question-circle' title='Help'    onClick={showFAQ} />
               <Navbar.Button icon='sign-out'        title='Log Out' onClick={logOut} />

@@ -209,7 +209,7 @@ button.label.editable span {
 button.label.editable .Icon {
   margin: $padding;
   opacity: 0;
-  color: #ddd;
+  color: $text-color-muted;
   transition: opacity .25s;
   flex: 0 0;
 }
@@ -354,9 +354,9 @@ textarea.text.editable:focus {
 }
 .Input__element {
   color: inherit;
-  background-color: rgba(0, 0, 0, 0.3);
+  background-color: $input-bg-color;
   outline: none;
-  border: 1px solid rgba(0, 0, 0, 0.5);
+  border: 1px solid $input-border-color;
   border-radius: 2px;
   padding: 0 8px;
   height: 30px;
@@ -534,10 +534,10 @@ textarea.text.editable:focus {
   padding: 0;
 }
 .Tooltip {
-  color: $text-color-highlight;
+  color: $text-color-white;
   background-color: rgba(black, 0.7);
-  border: 1px solid $border-color;
-  padding: ($padding - 1px) 2*$padding;
+  border: 1px solid black;
+  padding: (2*$padding - 1px) (4 * $padding);
   border-radius: 4px;
 }
 .Dropdown__menu {
