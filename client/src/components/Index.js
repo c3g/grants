@@ -12,7 +12,6 @@ import Icon from './Icon'
 import Input from './Input'
 import Label from './Label'
 import Modal from './Modal'
-import Sample from './Sample'
 import Spinner from './Spinner'
 import Title from './Title'
 import EditableLabel from './EditableLabel'
@@ -33,7 +32,7 @@ class Index extends React.Component {
 
           <h1 className='hcenter'>
             <Title large keepCase muted>
-              GenAP FOLLOW
+              Grants Application
             </Title>
           </h1>
 

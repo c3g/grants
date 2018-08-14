@@ -14,16 +14,16 @@ import GlobalActions from '../actions/global'
 import Navbar from '../components/Navbar'
 // import CompletionFunctionsContainer from '../containers/CompletionFunctionsContainer'
 // import FAQContainer from '../containers/FAQContainer'
-// import IndexContainer from '../containers/IndexContainer'
-// import NotificationsContainer from '../containers/NotificationsContainer'
-// import SamplesContainer from '../containers/SamplesContainer'
+import IndexContainer from '../containers/IndexContainer'
+import NotificationsContainer from '../containers/NotificationsContainer'
+import GrantsContainer from '../containers/GrantsContainer'
 import SettingsContainer from '../containers/SettingsContainer'
 // import TemplatesContainer from '../containers/TemplatesContainer'
 import Title from '../components/Title'
 
 const items = [
   { type: 'item', icon: 'cogs',  label: 'Settings', path: '/settings' },
-  { type: 'item', icon: 'flask', label: 'Grants',   path: '/grants', index: true },
+  { type: 'item', icon: 'table', label: 'Grants',   path: '/grants', index: true },
 ]
 const indexRoute = items.find(i => i.index).path
 
@@ -64,7 +64,7 @@ function Routes({ isLoggedIn, isLoggingIn, logOut, showFAQ }) {
           }/>
         </div>
 
-        <div className='App__content vbox'>
+        <div className='App__content vbox fill'>
 
           <Route render={(props) => {
             /*
@@ -82,15 +82,15 @@ function Routes({ isLoggedIn, isLoggingIn, logOut, showFAQ }) {
 
           <Switch>
             <Route path='/settings' component={SettingsContainer} />
-            { /* <Route path='/grants/:id?/:stepIndex?' component={SamplesContainer} /> */ }
+            <Route path='/grants/:id?/:stepIndex?' component={GrantsContainer} />
           </Switch>
         </div>
 
+        <NotificationsContainer />
+        <IndexContainer />
       </div>
     </Router>
   )
-  // <NotificationsContainer />
-  // <IndexContainer />
   // <FAQContainer />
 }
 

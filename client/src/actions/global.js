@@ -4,12 +4,10 @@ import {
   SHOW,
   SHOW_NOTIFICATION
 } from '../constants/ActionTypes'
-import { createAction } from 'redux-actions'
-import { createFetchActions } from '../utils/create-actions'
+import { createAction, createFetchActions } from '../utils/create-actions'
 import * as requests from '../requests'
 
 import openCentered from '../utils/open-centered'
-import { getNewSample, getNewCompletionFunction } from '../models'
 import settings from './settings.js'
 import users from './users.js'
 import applicants from './applicants.js'
@@ -29,12 +27,12 @@ export const showFAQ  = createAction(UI.SHOW_FAQ)
 export const closeFAQ = createAction(UI.CLOSE_FAQ)
 
 export const checkIsLoggedIn = createFetchActions(LOGGED_IN, requests.isLoggedIn)
-export const logIn = () => {
+export function logIn() {
   return (dispatch, getState) => {
     const { ui: { loggedIn } } = getState()
 
     if (loggedIn.value === true || window.isPopupOpen)
-      return
+      return Promise.reject(new Error('Already logged in or popup already opened'))
 
     const didAuth = new Promise((resolve, reject) => {
       let popup
@@ -59,16 +57,16 @@ export const logIn = () => {
     })
 
     return didAuth
-      .then(() => dispatch(checkIsLoggedIn()))
-      .then(isLoggedIn => isLoggedIn ? dispatch(fetchAll()) : undefined)
+      .then(() => checkIsLoggedIn())
+      .then(isLoggedIn => isLoggedIn ? fetchAll() : undefined)
   }
 }
-export const logOut = () => {
+export function logOut() {
   return (dispatch, getState) => {
     const { ui: { loggedIn } } = getState()
 
     if (loggedIn.value === false || window.isPopupOpen)
-      return
+      return Promise.reject(new Error('Not logged in or popup already opened'))
 
     const didLogout = new Promise((resolve, reject) => {
       let popup
@@ -96,21 +94,21 @@ export const logOut = () => {
   }
 }
 
-export const fetchAll = () => {
+export function fetchAll() {
   return (dispatch, getState) => {
 
     const { ui: { loggedIn } } = getState()
 
     if (loggedIn.value === false && process.env.NODE_ENV !== 'development')
-      return
+      return Promise.reject(new Error('Not logged in'))
 
     return Promise.all([
-      dispatch(settings.fetch()),
-      dispatch(users.fetch()),
-      dispatch(applicants.fetch()),
-      dispatch(grants.fetch()),
-      dispatch(fundings.fetch()),
-      dispatch(categories.fetch()),
+      settings.fetch(),
+      users.fetch(),
+      applicants.fetch(),
+      grants.fetch(),
+      fundings.fetch(),
+      categories.fetch(),
     ])
   }
 }

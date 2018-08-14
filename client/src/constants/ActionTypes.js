@@ -8,7 +8,11 @@ import {
 export const UI = createConstants('UI', [
   'SHOW_FAQ',
   'CLOSE_FAQ',
+  'ADD_FILTERING_CATEGORY',
+  'DELETE_FILTERING_CATEGORY',
+  'SET_FILTERING_CATEGORIES',
 ])
+
 export const LOGGED_IN = createNetworkConstants('LOGGED_IN')
 // Notifications
 export const SHOW_NOTIFICATION = 'SHOW_NOTIFICATION'

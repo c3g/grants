@@ -2,10 +2,14 @@
  * create-actions.js
  */
 
-import { createAction } from 'redux-actions'
 import isObject from 'is-object'
 
+import store from '../store/index.js'
+
 const A = (state, ...args) => args
+const identity = x => x
+const isFunction = x => typeof x === 'function'
+const isNull = x => x == null
 
 export function createModelConstants(namespace, others = []) {
   const constants = {
@@ -14,8 +18,10 @@ export function createModelConstants(namespace, others = []) {
     UPDATE: createNetworkConstants(`${namespace}.UPDATE`),
     DELETE: createNetworkConstants(`${namespace}.DELETE`),
   }
-  others.forEach(k =>
-    constants[k] = createNetworkConstants(`${namespace}.${k}`))
+  others.forEach(k => {
+    constants[k] = createNetworkConstants(`${namespace}.${k}`)
+  })
+
   return constants
 }
 export function createNetworkConstants(namespace) {
@@ -28,8 +34,9 @@ export function createNetworkConstants(namespace) {
 
 export function createConstants(namespace, others = []) {
   const constants = {}
-  others.forEach(k =>
-    constants[k] = `${namespace}.${k}`)
+  others.forEach(k => {
+    constants[k] = `${namespace}.${k}`
+  })
 
   const handler = {
     get: (target, name) => {
@@ -79,7 +86,7 @@ export function createFetchActions(namespace, fn, contraMapFn, mapFn, errorMapFn
 }
 
 export function createFetchFunction(fn, fnMap = A) {
-  const self = function (...args) {
+  function self(...args) {
     return (dispatch, getState) => {
 
       dispatch(self.request(...args))
@@ -93,4 +100,59 @@ export function createFetchFunction(fn, fnMap = A) {
     }
   }
   return self
+}
+
+/* taken from redux-actions */
+export function createAction(type, payloadCreator = identity, metaCreator) {
+  console.assert(
+    isFunction(payloadCreator) || isNull(payloadCreator),
+    'Expected payloadCreator to be a function, undefined or null'
+  )
+
+  const finalPayloadCreator = isNull(payloadCreator) || payloadCreator === identity
+    ? identity
+    : (head, ...args) => (head instanceof Error
+      ? head : payloadCreator(head, ...args));
+
+  const hasMeta = isFunction(metaCreator);
+  const typeString = type.toString();
+
+  const actionCreator = (...args) => {
+    const action = { type }
+    const payload = finalPayloadCreator(...args)
+
+    if (payload instanceof Error) {
+      action.payload = asMessage(payload)
+      action.isError = true;
+      action.error = payload
+    } else if (payload !== undefined) {
+      action.payload = payload;
+    }
+
+    if (hasMeta)
+      action.meta = metaCreator(...args);
+
+    return action;
+  };
+
+  actionCreator.toString = () => typeString;
+
+  return (...args) => store.dispatch(actionCreator(...args))
+}
+
+export function createAsyncAction(fn) {
+  return (...args) => store.dispatch(fn(...args))
+}
+
+
+export function asMessage(error) {
+  if (typeof error === 'string')
+    return error
+  if (error.fromAPI)
+    return [error.message, error.details].join(': ')
+  return error.message
+}
+
+export function isLoading() {
+  return Promise.reject(new Error('Already loading'))
 }

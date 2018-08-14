@@ -2,7 +2,7 @@ import React from 'react'
 import { render } from 'react-dom'
 import { Provider } from 'react-redux'
 
-import configureStore from './store'
+import store from './store'
 import Routes from './routes'
 import registerServiceWorker from './utils/registerServiceWorker'
 
@@ -18,8 +18,6 @@ import './styles/spinner.css'
 
 import global from './actions/global'
 
-const store = configureStore()
-
 render(
   <Provider store={store}>
     <Routes />
@@ -30,21 +28,22 @@ render(
 
 
 if (process.env.NODE_ENV === 'development') {
-  store.dispatch(global.checkIsLoggedIn.receive(true))
-  store.dispatch(global.fetchAll())
+  global.checkIsLoggedIn.receive(true)
+  global.fetchAll()
 }
 else /* production */ {
-  store.dispatch(global.checkIsLoggedIn())
-  .then(() => store.dispatch(global.fetchAll()))
+  global.checkIsLoggedIn()
+  .then(() => global.fetchAll())
 }
 
-setInterval(() => store.dispatch(global.fetchAll()), 60 * 1000)
+setInterval(() => global.fetchAll(), 60 * 1000)
 
 
 
 // Register service worker
 
-//registerServiceWorker()
+if (process.env.NODE_ENV !== 'development')
+  registerServiceWorker()
 
 
 

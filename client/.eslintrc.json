@@ -25,7 +25,10 @@
     "react/require-default-props": "warn",
     "react/sort-comp": "off",
     "react/button-has-type": "off",
+    "react/prefer-stateless-function": "off",
 
+    "no-underscore-dangle": "off",
+    "no-use-before-define": ["error", { "functions": false }],
     "no-nested-ternary": "off",
     "no-unused-vars": ["error", { "args": "none" }],
     "prefer-template": "off",
@@ -33,6 +36,7 @@
     "import/no-extraneous-dependencies": 0,
     "import/no-unresolved": 0,
     "import/extensions": 0,
-    "import/prefer-default-export": 0
+    "import/prefer-default-export": 0,
+    "import/no-named-as-default-member": "off"
   }
 }

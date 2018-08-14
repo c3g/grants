@@ -1,2 +1,7 @@
 /* eslint-disable global-require */
-module.exports = process.env.NODE_ENV === 'production' ? require('./store.prod') : require('./store.dev')
+
+const configureStore = (process.env.NODE_ENV === 'production' ? require('./store.prod') : require('./store.dev')).default
+
+const store = configureStore()
+
+export default store
