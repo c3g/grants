@@ -23,50 +23,38 @@ export const users = {
   delete: (id) => POST(`/user/delete/${id}`),
 }
 
-export const samples = {
-  list: (includeArchived) => GET('/sample/list', { includeArchived }),
-  get: (id) => GET(`/sample/get/${id}`),
-  create: (data) => POST(`/sample/create`, data),
-  update: (id, data) => POST(`/sample/update/${id}`, data),
-  updateStepStatus: (id, index, status) => POST(`/sample/update-step-status/${id}/${index}/${status}`),
-  delete: (id) => POST(`/sample/delete/${id}`),
+export const applicants = {
+  list: () => GET('/applicant/list'),
+  get: (id) => GET(`/applicant/get/${id}`),
+  create: (data) => POST(`/applicant/create`, data),
+  update: (id, data) => POST(`/applicant/update/${id}`, data),
+  delete: (id) => POST(`/applicant/delete/${id}`),
 }
 
-export const steps = {
-  list: () => GET('/step/list'),
-  get: (id) => GET(`/step/get/${id}`),
-  update: (id, data) => POST(`/step/update/${id}`, data),
-  delete: (id) => POST(`/step/delete/${id}`),
+export const grants = {
+  list: () => GET('/grant/list'),
+  get: (id) => GET(`/grant/get/${id}`),
+  create: (data) => POST(`/grant/create`, data),
+  update: (id, data) => POST(`/grant/update/${id}`, data),
+  delete: (id) => POST(`/grant/delete/${id}`),
 }
 
-export const templates = {
-  list: () => GET('/template/list'),
-  get: (id) => GET(`/template/get/${id}`),
-  create: (data) => POST(`/template/create`, data),
-  update: (id, data) => POST(`/template/update/${id}`, data),
-  delete: (id) => POST(`/template/delete/${id}`),
+export const fundings = {
+  list: () => GET('/funding/list'),
+  get: (id) => GET(`/funding/get/${id}`),
+  create: (data) => POST(`/funding/create`, data),
+  update: (id, data) => POST(`/funding/update/${id}`, data),
+  delete: (id) => POST(`/funding/delete/${id}`),
 }
 
-export const history = {
-  list: () => GET('/history/list'),
-  get: (sampleId) => GET(`/history/sample/${sampleId}`),
-  create: (id, data) => POST(`/history/create/${id}`, data),
+export const categories = {
+  list: () => GET('/category/list'),
+  get: (id) => GET(`/category/get/${id}`),
+  create: (data) => POST(`/category/create`, data),
+  update: (id, data) => POST(`/category/update/${id}`, data),
+  delete: (id) => POST(`/category/delete/${id}`),
 }
 
-export const completionFunctions = {
-  list: () => GET('/completion-function/list'),
-  get: (id) => GET(`/completion-function/get/${id}`),
-  create: (data) => POST(`/completion-function/create`, data),
-  update: (id, data) => POST(`/completion-function/update/${id}`, data),
-  delete: (id) => POST(`/completion-function/delete/${id}`),
-}
-
-export const files = {
-  list: () => GET('/file/list'),
-  get: (id) => GET(`/file/get/${id}`),
-  create: (sampleId, stepIndex, file) => POST(`/file/create/${sampleId}/${stepIndex}`, createFormData(file)),
-  delete: (sampleId, stepIndex, fileId) => POST(`/file/delete/${fileId}`),
-}
 
 
 

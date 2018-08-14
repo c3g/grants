@@ -7,14 +7,14 @@ import Routes from './routes'
 import registerServiceWorker from './utils/registerServiceWorker'
 
 import 'font-awesome/css/font-awesome.min.css'
+import './styles/badges.css'
+import './styles/button.css'
 import './styles/export-variables.css'
+import './styles/global-styles.css'
+import './styles/modal.css'
+import './styles/notifications.css'
 import './styles/reset.css'
 import './styles/spinner.css'
-import './styles/button.css'
-import './styles/badges.css'
-import './styles/notifications.css'
-import './styles/modal.css'
-import './styles/global-styles.css'
 
 import global from './actions/global'
 
@@ -51,6 +51,8 @@ setInterval(() => store.dispatch(global.fetchAll()), 60 * 1000)
 // HMR
 
 if (module.hot) {
+  /* eslint-disable global-require */
+
   module.hot.accept(['./routes'], () => {
     const NextRoutes = require('./routes').default;
     render(
@@ -60,9 +62,18 @@ if (module.hot) {
       document.querySelector('#root')
     )
   })
-  /* eslint-disable global-require */
-  module.hot.accept('./styles/global-styles.css', () => require('styles/global-styles.css'))
-  module.hot.accept('./styles/reset.css', () => require('./styles/reset.css'))
-  module.hot.accept('./styles/button.css', () => require('./styles/button.css'))
-  module.hot.accept('./styles/badges.css', () => require('./styles/badges.css'))
+
+  const styles = [
+    './styles/badges.css',
+    './styles/button.css',
+    './styles/export-variables.css',
+    './styles/global-styles.css',
+    './styles/modal.css',
+    './styles/notifications.css',
+    './styles/reset.css',
+    './styles/spinner.css',
+  ]
+  styles.forEach(s => {
+    module.hot.accept(s, () => require(s))
+  })
 }

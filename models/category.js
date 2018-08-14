@@ -10,7 +10,6 @@ module.exports = {
   findById,
   update,
   create,
-  runById,
 }
 
 function findAll() {

@@ -10,11 +10,12 @@ import * as requests from '../requests'
 
 import openCentered from '../utils/open-centered'
 import { getNewSample, getNewCompletionFunction } from '../models'
-import completionFunctions from './completion-functions'
-import samples from './samples'
-import settings from './settings'
-import templates from './templates'
-import users from './users'
+import settings from './settings.js'
+import users from './users.js'
+import applicants from './applicants.js'
+import grants from './grants.js'
+import fundings from './fundings.js'
+import categories from './categories.js'
 
 const createPayload = (message, details) => ({ message, details })
 
@@ -104,33 +105,13 @@ export const fetchAll = () => {
       return
 
     return Promise.all([
-      dispatch(completionFunctions.fetch()),
-      dispatch(samples.fetch()),
       dispatch(settings.fetch()),
-      dispatch(templates.fetch()),
-      dispatch(users.fetch())
+      dispatch(users.fetch()),
+      dispatch(applicants.fetch()),
+      dispatch(grants.fetch()),
+      dispatch(fundings.fetch()),
+      dispatch(categories.fetch()),
     ])
-    .then(() => {
-      const state = getState()
-
-      // Prefill some data for testing FIXME remove this
-      if (process.env.NODE_ENV === 'development' && Object.keys(state.samples.data).length === 0) {
-
-        const newSample = getNewSample(state.templates.data[1].data)
-        newSample.tags = ['other', 'tags']
-        dispatch(samples.create(newSample))
-        dispatch(samples.create(getNewSample(state.templates.data[2].data)))
-        dispatch(samples.create(getNewSample(state.templates.data[1].data)))
-        dispatch(samples.create(getNewSample(state.templates.data[2].data)))
-
-        dispatch(completionFunctions.create(getNewCompletionFunction()))
-        .then(data => dispatch(completionFunctions.update(data.id, { ...data, name: 'has-one-file' })))
-        dispatch(completionFunctions.create(getNewCompletionFunction()))
-        .then(data => dispatch(completionFunctions.update(data.id, { ...data, name: 'is-not-john' })))
-        dispatch(completionFunctions.create(getNewCompletionFunction()))
-        .then(data => dispatch(completionFunctions.update(data.id, { ...data, name: 'has-some-notes' })))
-      }
-    })
   }
 }
 

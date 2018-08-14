@@ -16,7 +16,7 @@ services:
       - ./config:/usr/etc
       - .:/usr/src/app
     links:
-      - db
+      - grant_db
     environment:
       PGHOST: 'db'
       PGDATABASE: postgres

@@ -11,19 +11,17 @@ import { createStructuredSelector, createSelector } from 'reselect'
 
 import GlobalActions from '../actions/global'
 import Sidebar from '../components/Sidebar'
-import CompletionFunctionsContainer from '../containers/CompletionFunctionsContainer'
-import FAQContainer from '../containers/FAQContainer'
-import IndexContainer from '../containers/IndexContainer'
-import NotificationsContainer from '../containers/NotificationsContainer'
-import SamplesContainer from '../containers/SamplesContainer'
+// import CompletionFunctionsContainer from '../containers/CompletionFunctionsContainer'
+// import FAQContainer from '../containers/FAQContainer'
+// import IndexContainer from '../containers/IndexContainer'
+// import NotificationsContainer from '../containers/NotificationsContainer'
+// import SamplesContainer from '../containers/SamplesContainer'
 import SettingsContainer from '../containers/SettingsContainer'
-import TemplatesContainer from '../containers/TemplatesContainer'
+// import TemplatesContainer from '../containers/TemplatesContainer'
 
 const items = [
   { type: 'item', icon: 'cogs',  path: '/settings',    title: 'Settings' },
-  { type: 'item', icon: 'flask', path: '/samples',     title: 'Samples', showTitle: false },
-  { type: 'item', icon: 'list',  path: '/templates',   title: 'Templates' },
-  { type: 'item', icon: 'code',  path: '/completions', title: 'Completion Functions', showTitle: false },
+  { type: 'item', icon: 'flask', path: '/grants',      title: 'Grants',               showTitle: false },
 ]
 
 function Routes({ isLoggedIn, isLoggingIn, logOut, showFAQ }) {
@@ -47,14 +45,18 @@ function Routes({ isLoggedIn, isLoggingIn, logOut, showFAQ }) {
               index={items.findIndex(i => props.location.pathname.startsWith(i.path))}
               items={items}
             >
-              <Sidebar.Button icon='question-circle' title='Help' onClick={showFAQ} />
+              <Sidebar.Button icon='question-circle' title='Help'    onClick={showFAQ} />
               <Sidebar.Button icon='sign-out'        title='Log Out' onClick={logOut} />
             </Sidebar>
 
           }/>
         </div>
         <div className='App__content vbox'>
+
           <Route render={(props) => {
+            /*
+             * Render document title
+             */
             const activeItem = items.find(i => i.path === props.location.pathname)
 
             if (!activeItem || activeItem.title === undefined)
@@ -67,18 +69,16 @@ function Routes({ isLoggedIn, isLoggingIn, logOut, showFAQ }) {
 
           <Switch>
             <Route path='/settings' component={SettingsContainer} />
-            <Route path='/samples/:id?/:stepIndex?' component={SamplesContainer} />
-            <Route path='/templates' component={TemplatesContainer} />
-            <Route path='/completions/:id?' component={CompletionFunctionsContainer} />
+            { /* <Route path='/grants/:id?/:stepIndex?' component={SamplesContainer} /> */ }
           </Switch>
         </div>
 
-        <NotificationsContainer />
-        <IndexContainer />
-        <FAQContainer />
       </div>
     </Router>
   )
+  // <NotificationsContainer />
+  // <IndexContainer />
+  // <FAQContainer />
 }
 
 const mapStateToProps = createStructuredSelector({

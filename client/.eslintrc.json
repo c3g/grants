@@ -16,6 +16,7 @@
     "DEBUG": false
   },
   "rules": {
+    "react/jsx-no-bind": ["off"],
     "react/jsx-filename-extension": [
       1,
       {

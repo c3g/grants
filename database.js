@@ -11,7 +11,10 @@ const { rejectMessage } = require('./helpers/promise')
  * Setup SQL connection
  */
 
-const client = new pg.Client()
+const client = new pg.Client({
+  host: 'grant_db',
+  port: 5432,
+})
 
 client.connect((err) => {
   if (err)
