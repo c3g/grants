@@ -20,8 +20,10 @@ class GrantsContainer extends React.Component {
   render() {
     return (
       <Grants
+        isLoading={this.props.grants.isLoading}
+        isCreating={this.props.grants.isCreating}
+        grants={Object.values(this.props.grants.data)}
         ui={this.props.ui}
-        grants={this.props.grants}
         applicants={this.props.applicants}
         fundings={this.props.fundings}
         categories={this.props.categories}
@@ -36,15 +38,15 @@ const mapStateToProps = createStructuredSelector({
   grants: createSelector(state => state.grants, state => state),
   applicants: createSelector(state => ({
     isLoading: state.applicants.isLoading,
-    data: Object.values(fromLoadable(state.applicants.data)),
+    data: state.applicants.data,
   }), state => state),
   fundings: createSelector(state => ({
     isLoading: state.fundings.isLoading,
-    data: Object.values(fromLoadable(state.fundings.data)),
+    data: state.fundings.data,
   }), state => state),
   categories: createSelector(state => ({
     isLoading: state.categories.isLoading,
-    data: Object.values(fromLoadable(state.categories.data)),
+    data: state.categories.data,
   }), state => state),
   users: createSelector(state => ({
     isLoading: state.users.isLoading,

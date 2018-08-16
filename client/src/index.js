@@ -16,6 +16,7 @@ import './styles/notifications.css'
 import './styles/reset.css'
 import './styles/spinner.css'
 
+import * as requests from './requests.js'
 import global from './actions/global'
 
 render(
@@ -30,6 +31,8 @@ render(
 if (process.env.NODE_ENV === 'development') {
   global.checkIsLoggedIn.receive(true)
   global.fetchAll()
+
+  window.requests = requests
 }
 else /* production */ {
   global.checkIsLoggedIn()

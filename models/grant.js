@@ -18,10 +18,12 @@ function findAll() {
     SELECT *
       FROM grants
   `)
+  // .then(rows => rows.map(deserialize))
 }
 
 function findById(id) {
   return db.selectOne(`SELECT * FROM grants WHERE id = @id`, { id })
+    // .then(deserialize)
 }
 
 function update(grant) {
@@ -46,8 +48,8 @@ function create(grant) {
   return db.insert(`
     INSERT INTO grants (id, name, applicants, "categoryID", start, "end", status, total, cofunding, fields)
       VALUES (
-        nextval('samples_id_seq'),
-        ${grant.name === null ? `'Grant ' || currval('samples_id_seq')` : `@name`},
+        nextval('grants_id_seq'),
+        ${grant.name === null ? `'Grant ' || currval('grants_id_seq')` : `@name`},
         @applicants,
         @categoryID,
         @start,
@@ -57,7 +59,7 @@ function create(grant) {
         @cofunding,
         @fields
       )`,
-    grant
+    serialize(grant)
   )
 }
 
@@ -66,4 +68,17 @@ module.exports.delete = function(id) {
     db.query(`DELETE FROM grants WHERE id = @id`, { id }),
     db.query(`DELETE FROM fundings WHERE fromGrantID = @id OR toGrantID = @id`, { id }),
   ])
+}
+
+
+// Helpers
+
+function serialize(grant) {
+  grant.fields = JSON.stringify(grant.fields)
+  return grant
+}
+
+function deserialize(grant) {
+  grant.fields = JSON.parse(grant.fields)
+  return grant
 }

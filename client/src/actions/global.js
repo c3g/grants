@@ -4,7 +4,7 @@ import {
   SHOW,
   SHOW_NOTIFICATION
 } from '../constants/ActionTypes'
-import { createAction, createFetchActions } from '../utils/create-actions'
+import { createAction, createAsyncAction, createFetchActions } from '../utils/create-actions'
 import * as requests from '../requests'
 
 import openCentered from '../utils/open-centered'
@@ -26,92 +26,86 @@ export const showError        = createAction(SHOW.ERROR, createPayload)
 export const showFAQ  = createAction(UI.SHOW_FAQ)
 export const closeFAQ = createAction(UI.CLOSE_FAQ)
 
+export const fetchAll = createAsyncAction(() => (dispatch, getState) => {
+  const { ui: { loggedIn } } = getState()
+
+  if (loggedIn.value === false && process.env.NODE_ENV !== 'development')
+    return Promise.reject(new Error('Not logged in'))
+
+  return Promise.all([
+    settings.fetch(),
+    users.fetch(),
+    applicants.fetch(),
+    grants.fetch(),
+    fundings.fetch(),
+    categories.fetch(),
+  ])
+})
+
 export const checkIsLoggedIn = createFetchActions(LOGGED_IN, requests.isLoggedIn)
-export function logIn() {
-  return (dispatch, getState) => {
-    const { ui: { loggedIn } } = getState()
+export const logIn = createAsyncAction(() => (dispatch, getState) => {
+  const { ui: { loggedIn } } = getState()
 
-    if (loggedIn.value === true || window.isPopupOpen)
-      return Promise.reject(new Error('Already logged in or popup already opened'))
+  if (loggedIn.value === true || window.isPopupOpen)
+    return Promise.reject(new Error('Already logged in or popup already opened'))
 
-    const didAuth = new Promise((resolve, reject) => {
-      let popup
-      let interval
+  const didAuth = new Promise((resolve, reject) => {
+    let popup
+    let interval
 
-      window.oauthDone = () => {
-        popup.close()
+    window.oauthDone = () => {
+      popup.close()
+      window.isPopupOpen = false
+      clearInterval(interval)
+      resolve()
+    }
+
+    window.isPopupOpen = true
+    popup = openCentered('/auth/google', 600, 600)
+    interval = setInterval(() => {
+      if (popup.closed) {
         window.isPopupOpen = false
         clearInterval(interval)
-        resolve()
+        reject()
       }
+    }, 200)
+  })
 
-      window.isPopupOpen = true
-      popup = openCentered('/auth/google', 600, 600)
-      interval = setInterval(() => {
-        if (popup.closed) {
-          window.isPopupOpen = false
-          clearInterval(interval)
-          reject()
-        }
-      }, 200)
-    })
+  return didAuth
+    .then(() => checkIsLoggedIn())
+    .then(isLoggedIn => isLoggedIn ? fetchAll() : undefined)
+})
 
-    return didAuth
-      .then(() => checkIsLoggedIn())
-      .then(isLoggedIn => isLoggedIn ? fetchAll() : undefined)
-  }
-}
-export function logOut() {
-  return (dispatch, getState) => {
-    const { ui: { loggedIn } } = getState()
+export const logOut = createAsyncAction(() => (dispatch, getState) => {
+  const { ui: { loggedIn } } = getState()
 
-    if (loggedIn.value === false || window.isPopupOpen)
-      return Promise.reject(new Error('Not logged in or popup already opened'))
+  if (loggedIn.value === false || window.isPopupOpen)
+    return Promise.reject(new Error('Not logged in or popup already opened'))
 
-    const didLogout = new Promise((resolve, reject) => {
-      let popup
-      let interval
+  const didLogout = new Promise((resolve, reject) => {
+    let popup
+    let interval
 
-      window.oauthDone = () => {
-        popup.close()
+    window.oauthDone = () => {
+      popup.close()
+      window.isPopupOpen = false
+      clearInterval(interval)
+      resolve()
+    }
+
+    window.isPopupOpen = true
+    popup = openCentered('/auth/logout', 600, 600)
+    interval = setInterval(() => {
+      if (popup.closed) {
         window.isPopupOpen = false
         clearInterval(interval)
-        resolve()
+        reject()
       }
+    }, 200)
+  })
 
-      window.isPopupOpen = true
-      popup = openCentered('/auth/logout', 600, 600)
-      interval = setInterval(() => {
-        if (popup.closed) {
-          window.isPopupOpen = false
-          clearInterval(interval)
-          reject()
-        }
-      }, 200)
-    })
-
-    return didLogout.then(() => dispatch(checkIsLoggedIn()))
-  }
-}
-
-export function fetchAll() {
-  return (dispatch, getState) => {
-
-    const { ui: { loggedIn } } = getState()
-
-    if (loggedIn.value === false && process.env.NODE_ENV !== 'development')
-      return Promise.reject(new Error('Not logged in'))
-
-    return Promise.all([
-      settings.fetch(),
-      users.fetch(),
-      applicants.fetch(),
-      grants.fetch(),
-      fundings.fetch(),
-      categories.fetch(),
-    ])
-  }
-}
+  return didLogout.then(() => dispatch(checkIsLoggedIn()))
+})
 
 export default {
   showNotification,

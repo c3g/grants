@@ -27,8 +27,8 @@ function findById(id) {
 function update(funding) {
   return db.query(`
     UPDATE fundings
-      SET fromGrantID = @fromGrantID
-        , toGrantID = @toGrantID
+      SET "fromGrantID" = @fromGrantID
+        , "toGrantID" = @toGrantID
         , amount = @amount
     WHERE id = @id`,
     funding
@@ -38,7 +38,7 @@ function update(funding) {
 
 function create(funding) {
   return db.insert(`
-    INSERT INTO fundings (fromGrantID, toGrantID, amount)
+    INSERT INTO fundings ("fromGrantID", "toGrantID", amount)
       VALUES (
         @fromGrantID,
         @toGrantID,

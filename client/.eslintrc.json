@@ -32,6 +32,7 @@
     "no-nested-ternary": "off",
     "no-unused-vars": ["error", { "args": "none" }],
     "prefer-template": "off",
+    "class-methods-use-this": "off",
 
     "import/no-extraneous-dependencies": 0,
     "import/no-unresolved": 0,

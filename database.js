@@ -20,8 +20,9 @@ client.connect((err) => {
   if (err)
     throw err
 
-  selectOne(`SELECT * FROM information_schema.tables WHERE table_name = 'samples'`)
-  .then(row => console.log('Database already setup', row))
+  selectOne(`SELECT * FROM information_schema.tables WHERE table_name = 'grants'`)
+  .then(row => console.log('Database already setup', row) || selectAll(`SELECT * FROM grants`))
+  .then(rows => console.log(rows))
   .catch(err => {
     if (err.type === k.ROW_NOT_FOUND) {
       query(fs.readFileSync('./tables.sql').toString())
