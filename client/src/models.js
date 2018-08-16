@@ -24,3 +24,9 @@ export const getNewField = () => ({
   name: 'Field',
   amount: 0,
 })
+
+export const getNewFunding = (fromGrantID) => ({
+  fromGrantID,
+  toGrantID: null,
+  amount: null,
+})

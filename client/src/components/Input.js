@@ -10,6 +10,10 @@ class Input extends React.Component {
     return !equals(this.props, nextProps)
   }
 
+  focus() {
+    this.element.focus()
+  }
+
   accept(ev) {
     this.props.onEnter && this.props.onEnter(ev.target.value, ev)
     if (this.props.clearOnEnter)

@@ -963,6 +963,27 @@ section {
 
 .Grants {
   height: 100%;
+  position: relative;
+}
+.Grants__canvas {
+  position: absolute;
+  width: 100%;
+  height: 100%;
+}
+.Grants__mouseDate {
+  position: absolute;
+  color: white;
+  background-color: rgba(black, 0.6);
+  padding: 2px 5px;
+}
+.Grants__shadow {
+  position: absolute;
+  width: 100%;
+  height: 100%;
+  background-color: rgba(black, 0.5);
+}
+.Grants__input {
+  position: absolute;
 }
 
 

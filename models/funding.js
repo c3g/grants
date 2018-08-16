@@ -46,6 +46,7 @@ function create(funding) {
       )`,
     funding
   )
+  .then(id => findById(id))
 }
 
 module.exports.delete = function(id) {

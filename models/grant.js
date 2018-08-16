@@ -61,6 +61,7 @@ function create(grant) {
       )`,
     serialize(grant)
   )
+  .then(id => findById(id))
 }
 
 module.exports.delete = function(id) {

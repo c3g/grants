@@ -26,6 +26,7 @@
     "react/sort-comp": "off",
     "react/button-has-type": "off",
     "react/prefer-stateless-function": "off",
+    "react/no-access-state-in-setstate": "off",
 
     "no-underscore-dangle": "off",
     "no-use-before-define": ["error", { "functions": false }],
@@ -33,6 +34,7 @@
     "no-unused-vars": ["error", { "args": "none" }],
     "prefer-template": "off",
     "class-methods-use-this": "off",
+    "object-shorthand": "off",
 
     "import/no-extraneous-dependencies": 0,
     "import/no-unresolved": 0,

@@ -1,5 +1,5 @@
 import React from 'react'
-import PropTypes from 'prop-types'
+import Prop from 'prop-types'
 import pure from 'recompose/pure'
 import styled from 'styled-components'
 import { withRouter } from 'react-router'
@@ -17,19 +17,22 @@ import {
 } from 'date-fns'
 import Color from 'color'
 import { decay, pointer, value } from 'popmotion'
-import { clamp, groupBy, prop, path } from 'ramda'
+import { clamp, groupBy, path } from 'ramda'
 
 import Global from '../actions/global'
 import UI from '../actions/ui'
 import Grant from '../actions/grants'
+import Funding from '../actions/fundings'
+import Category from '../actions/categories'
 
 import filterTags from '../utils/filter-tags'
 import uniq from '../utils/uniq'
-import { getNewGrant } from '../models'
+import { getNewGrant, getNewFunding } from '../models'
 import Checkbox from './Checkbox'
 import Dropdown from './Dropdown'
 import FilterCategoriesDropdown from './FilterCategoriesDropdown'
 import Gap from './Gap'
+import Input from './Input'
 import Label from './Label'
 import Spinner from './Spinner'
 import Title from './Title'
@@ -49,6 +52,7 @@ const LINE_COLOR  = '#999'
 const YEAR_LINE_COLOR  = LINE_COLOR
 const MONTH_LINE_COLOR = '#ddd'
 const CURSOR_LINE_COLOR = '#ffa0a0'
+const TIMELINE_BACKGROUND = BACKGROUND_COLOR
 
 const TIMELINE_HEIGHT = 30
 const GRANT_HEIGHT = 100
@@ -63,6 +67,11 @@ const INITIAL_DATE = startOfYear(new Date())
 
 
 class Grants extends React.Component {
+  static propTypes = {
+    grants: Prop.arrayOf(Prop.object).isRequired,
+    fundings: Prop.object.isRequired,
+    categories: Prop.object.isRequired,
+  }
 
   /**
    * @type HTMLCanvasElement
@@ -74,15 +83,30 @@ class Grants extends React.Component {
    */
   element = undefined
 
-  state = {
-    width: window.innerWidth || 500,
-    height: 200,
-    scrollTop: 0,
-    startDate: INITIAL_DATE,
-    endDate: endOfYear(addYears(INITIAL_DATE, 2)),
-  }
-
   space = {}
+
+  constructor(props) {
+    super(props)
+
+    this.state = {
+      width: window.innerWidth || 500,
+      height: 200,
+      scrollTop: 0,
+      startDate: INITIAL_DATE,
+      endDate: endOfYear(addYears(INITIAL_DATE, 2)),
+
+      grant: null,
+      funding: null,
+
+      // derived
+      grants: props.grants.reduce((acc, grant) => {
+        acc[grant.data.id] = {
+          hover: false,
+        }
+        return acc
+      }, {}),
+    }
+  }
 
   componentDidMount() {
     this.updateDimensions()
@@ -114,6 +138,18 @@ class Grants extends React.Component {
     document.removeEventListener('mouseup', this.onDocumentMouseUp)
     document.removeEventListener('touchend', this.onDocumentTouchEnd)
     this.canvas.removeEventListener('mousewheel', this.onMouseWheel)
+  }
+
+  componentWillReceiveProps(props, state) {
+    if (props.grants !== this.props.grants)
+      this.setState({
+        grants: props.grants.reduce((acc, grant) => {
+          acc[grant.data.id] = {
+            hover: false,
+          }
+          return acc
+        }, {})
+      })
   }
 
   updateDimensions() {
@@ -214,6 +250,12 @@ class Grants extends React.Component {
     return x >= rect[0][0] && x <= rect[1][0] && y >= rect[0][1] && y <= rect[1][1]
   }
 
+  getClickedGrant(event) {
+    const index = this.grantsDimensions.findIndex(d => this.isEventInRect(event, d))
+    const grant = index !== -1 ? this.props.grants[index] : undefined
+    return grant
+  }
+
   drawText(position, text) {
     this.form.fill(TEXT_COLOR).font(14, 'bold')
       .text(position, text)
@@ -239,10 +281,19 @@ class Grants extends React.Component {
     })
   }
 
+  drawCursorLine() {
+    const pointerX = this.space.pointer.x
+    this.drawLine(
+      [[pointerX, TIMELINE_HEIGHT], [pointerX, this.state.height]],
+      CURSOR_LINE_COLOR,
+      1
+    )
+  }
+
   drawTimeline(years, months) {
     const { width } = this.state
 
-    this.form.fillOnly('#fff').rect([[0, 0], [width, TIMELINE_HEIGHT]])
+    this.form.fillOnly(TIMELINE_BACKGROUND).rect([[0, 0], [width, TIMELINE_HEIGHT]])
     this.drawLine([[0, TIMELINE_HEIGHT], [width, TIMELINE_HEIGHT]])
 
     this.form.font(14, 'bold')
@@ -286,26 +337,42 @@ class Grants extends React.Component {
   }
 
   drawGrants() {
-    const {scrollTop} = this.state
+    const {width, height, scrollTop} = this.state
 
+    const visibleRect = addPadding([[0, 0], [width, height]], 10)
     let currentY = 0 + TIMELINE_HEIGHT + GRANT_MARGIN
+
     this.grantsDimensions = []
 
     this.props.grants.forEach((grant, i) => {
       const startX = this.dateToX(grant.data.start)
       const endX   = this.dateToX(grant.data.end)
-      const height = this.getGrantHeight(i)
+      const grantHeight = this.getGrantHeight(i)
 
       const startY = currentY + scrollTop
-      const endY   = startY + height
+      const endY   = startY + grantHeight
 
-      currentY += height + GRANT_MARGIN
+      currentY += grantHeight + GRANT_MARGIN
 
       const rect = Group.fromArray([[startX, startY], [endX, endY]])
-      const innerRect = Group.fromArray(addPadding([[startX, startY], [endX, endY]], GRANT_PADDING))
+      const innerRect = Group.fromArray(
+        clipRect(
+          addPadding([[startX, startY], [endX, endY]], GRANT_PADDING),
+          visibleRect
+        )
+      )
+
       this.grantsDimensions.push(rect)
 
       const isHover = this.isMouseInRect(rect)
+      const {hover} = this.state.grants[grant.data.id]
+
+      if (isHover && !hover)
+        this.onMouseEnterGrant(grant)
+      else if (!isHover && hover)
+        this.onMouseLeaveGrant(grant)
+
+      this.state.grants[grant.data.id].hover = isHover
 
       const color = isHover ? Color(this.getGrantColor(grant)).lighten(0.2) : Color(this.getGrantColor(grant))
       const borderColor = Color(this.getGrantColor(grant)).darken(0.5).toString()
@@ -352,8 +419,12 @@ class Grants extends React.Component {
   }
 
   drawFundings() {
-    const fromGrant = groupBy(path(['data', 'fromGrantID']), Object.values(this.props.fundings.data))
-    const toGrant   = groupBy(path(['data', 'toGrantID']),   Object.values(this.props.fundings.data))
+    const fundings = Object.values(this.props.fundings.data)
+    if (this.state.funding)
+      fundings.unshift(this.state.funding) // XXX push
+
+    const fromGrant = groupBy(path(['data', 'fromGrantID']), fundings)
+    const toGrant   = groupBy(path(['data', 'toGrantID']),   fundings)
 
     const detailsByGrant = {}
     this.props.grants.forEach((grant, i) => {
@@ -390,6 +461,12 @@ class Grants extends React.Component {
             + (detail.to.length * detail.sectionHeight)
             + ((1 + detail.fromCount++) * detail.sectionHeight)
         }
+
+        if (funding.data.toGrantID === null) {
+          links.push({ funding, start, end: null, detail })
+          return
+        }
+
         const otherDetail = detailsByGrant[funding.data.toGrantID]
         const end = {
           x: this.dateToX(otherDetail.grant.data.start),
@@ -401,15 +478,21 @@ class Grants extends React.Component {
       })
     })
 
+    this.fundingsPositions = {}
+
     links.forEach(link => {
 
-      const start = new Pt(link.start)
-      const end   = new Pt(link.end)
+      const {isPartial} = link.funding
 
+      const start = new Pt(link.start)
+      const end   = !link.end ? new Pt(this.space.pointer) : new Pt(link.end)
+
+      const isReversed = end.x < start.x
       const smallerX = Math.min(start.x, end.x)
-      const dx = Math.abs(link.end.x - link.start.x)
-      const dy = Math.abs(link.end.y - link.start.y)
-      const anchorX = smallerX - 30 - (dx / 10)
+      const dx = Math.abs(end.x - start.x)
+      const dy = Math.abs(end.y - start.y)
+      const fx = 1 - Math.sqrt(dx/100)
+      const anchorX = smallerX - 30 - (dx / 10) - (100 * (fx < 0 ? 0 : fx)) - (isReversed ? 100 : 0)
 
       const heightOffset = ((link.detail.height - (start.y - link.detail.y)) / 2)
 
@@ -424,34 +507,42 @@ class Grants extends React.Component {
       ]
       // points.forEach(p => this.form.fillOnly('#000').point(p, 3, 'circle'))
 
-      const color = Color(this.getGrantColor(link.detail.grant)).darken(0.1).toString()
+      const color =
+        Color(this.getGrantColor(link.detail.grant))
+          .darken(0.1)
+          .fade(isPartial ? 0.5 : 0)
 
-      this.form.strokeOnly(color, 2).line(Curve.bezier(points, 50))
-      this.form.strokeOnly(color, 2, undefined, 'round').line([end, end.$subtract(10, 8)])
-      this.form.strokeOnly(color, 2, undefined, 'round').line([end, end.$subtract(10, -8)])
+      this.form.strokeOnly(color.toString(), 2).line(Curve.bezier(points, 50))
+      this.form.strokeOnly(color.toString(), 2, undefined, 'round').line([end, end.$subtract(10, 8)])
+      this.form.strokeOnly(color.toString(), 2, undefined, 'round').line([end, end.$subtract(10, -8)])
 
       const middlePoint = new Pt(calculateBezierPoint(0.6, points))
 
-      const text = formatAmount(link.funding.data.amount)
-      const rect = [middlePoint, middlePoint.$add(this.form.getTextWidth(text) - 2, TEXT_HEIGHT- 2)]
+      if (!isPartial) {
+        const text = formatAmount(link.funding.data.amount)
+        this.form.fill(TEXT_COLOR, 1).font(TEXT_SIZE, 'bold')
+          .text(middlePoint.$add(10, (2 - TEXT_HEIGHT / 2)), text)
+        this.form.fillOnly('#000').point(middlePoint, 2, 'circle')
+      }
 
-      // this.form.stroke(TEXT_COLOR, 1).fill('#fff').rect(rect)
-      this.form.fill(TEXT_COLOR, 1).font(TEXT_SIZE, 'bold')
-        .text(middlePoint.$add(10, (2 - TEXT_HEIGHT / 2)), text)
-      this.form.fillOnly('#000').point(middlePoint, 2, 'circle')
+      this.fundingsPositions[link.funding.data.id] = middlePoint
+
+      if (isPartial && link.end && !this.state.funding.position) {
+        this.setState({
+          funding: {
+            ...this.state.funding,
+            position: middlePoint,
+          }
+        })
+      }
     })
   }
 
   onUpdateSpace = (time, ftime) => {
-    const {startDate, endDate, width, height, scrollTop} = this.state
-
-    const visibleDays = this.getVisibleDays()
-    const pixelsPerDay = width / visibleDays
+    const {height} = this.state
 
     const years = this.getVisibleYears()
     const months = this.getVisibleMonths()
-
-    const context = this.canvas.getContext('2d')
 
     /*
      * Drawing
@@ -459,17 +550,23 @@ class Grants extends React.Component {
 
     this.setCursor('default')
 
-
     this.drawBackground(years, months)
 
-    const pointerX = this.space.pointer.x
-    this.drawLine([[pointerX, TIMELINE_HEIGHT], [pointerX, height]], CURSOR_LINE_COLOR, 2)
+    this.drawCursorLine()
 
     this.drawGrants()
 
     this.drawFundings()
 
     this.drawTimeline(years, months)
+  }
+
+  onMouseEnterGrant = (grant) => {
+
+  }
+
+  onMouseLeaveGrant = (grant) => {
+
   }
 
   onWindowResize = () => {
@@ -497,7 +594,7 @@ class Grants extends React.Component {
       this.setState({ startDate, endDate })
       this.setupDragging()
     }
-    else if (event.deltaX === 0 && event.deltaY !== 0) {
+    else if (event.deltaX === 0 && event.deltaY !== 0 && !event.shiftKey) {
       /*
        * Vertical scroll
        */
@@ -517,7 +614,6 @@ class Grants extends React.Component {
         newVelocity = 0 */
 
       // console.log(delta, velocity, isOpposed)
-
       console.assert(this.state.scrollTop === scrollTop, 'Invalid scrollTop')
 
       this.scrollSlider.stop()
@@ -539,6 +635,41 @@ class Grants extends React.Component {
           return scrollTop // clamp(-diffHeight, diffHeight, scrollTop)
         })
         .start(this.scrollSlider)
+    }
+    else if (event.deltaX === 0 && event.deltaY !== 0 && event.shiftKey) {
+      /*
+       * Horizontal scroll
+       */
+
+      const direction = -event.deltaY / Math.abs(event.deltaY)
+      const delta = direction * 600
+      const scrollTop = this.scrollSlider.get()
+      const velocity =  this.scrollSlider.getVelocity()
+      const isOpposed = (delta < 0 && velocity > 0) || (delta > 0 && velocity < 0)
+      let newVelocity =
+        clampScrollVelocity(isOpposed ?
+          delta :
+          delta + this.scrollSlider.getVelocity())
+
+      /* if ((scrollTop <= 0 && newVelocity < 0)
+          || (scrollTop >= this.getMaxScrollHeight() && newVelocity > 0))
+        newVelocity = 0 */
+
+      // console.log(delta, velocity, isOpposed)
+      console.assert(this.state.scrollTop === scrollTop, 'Invalid scrollTop')
+
+      this.scrollSlider.stop()
+      this.xSlider.stop()
+
+      decay({
+        from: this.xSlider.get(),
+        velocity: newVelocity,
+        power: 0.3,
+        timeConstant: 200,
+        // restDelta: 0.9,
+        // modifyTarget: v => Math.round(v / 10) * 10
+      })
+        .start(this.xSlider)
     }
   }
 
@@ -592,9 +723,68 @@ class Grants extends React.Component {
   onClick = (event) => {
     if (this.didDrag)
       return
-    const index = this.grantsDimensions.findIndex(d => this.isEventInRect(event, d))
-    const grant = index !== -1 ? this.props.grants[index] : undefined
-    console.log(grant)
+
+    const grant = this.getClickedGrant(event)
+
+    if (!grant)
+      return
+
+    if (event.ctrlKey && !this.state.funding) {
+      this.setState({
+        funding: {
+          isPartial: true,
+          isLoading: false,
+          data: getNewFunding(grant.data.id),
+        }
+      })
+    }
+
+    else if (this.state.funding) {
+      if (grant.data.id === this.state.funding.data.fromGrantID) {
+        this.setState({ funding: null })
+        return
+      }
+
+      this.setState({
+        funding: {
+          isPartial: true,
+          isLoading: false,
+          data: { ...this.state.funding.data, toGrantID: grant.data.id },
+        }
+      })
+    }
+  }
+
+  onBlurInput = () => {
+    // if (this.state.funding)
+      // this.setState({ funding: null })
+  }
+
+  onEnterInput = (value) => {
+    if (this.state.funding) {
+      const amount = parseInt(value)
+
+      if (!Number.isInteger(amount)) {
+        this.setState({ funding: null })
+        return
+      }
+
+      const funding = {
+        ...this.state.funding,
+        isLoading: true,
+        data: {
+          ...this.state.funding.data,
+          amount: amount,
+        }
+      }
+
+      this.setState({ funding })
+
+      Funding.create(funding.data)
+        .then(() => {
+          this.setState({ funding: null })
+        })
+    }
   }
 
   setupScrolling() {
@@ -634,6 +824,33 @@ class Grants extends React.Component {
       this.canvas = ref
   }
 
+  renderInput() {
+    const {funding} = this.state
+
+    if (!funding || !funding.position)
+      return null
+
+    const {position} = funding
+
+    return (
+      <div className='Grants__shadow'>
+        <div className='Grants__input'
+          style={{
+            top:  position.y,
+            left: position.x + 20,
+          }}
+        >
+          <Input
+            placeHolder='Enter amount'
+            onBlur={this.onBlurInput}
+            onEnter={this.onEnterInput}
+            ref={e => e && e.focus()}
+          />
+        </div>
+      </div>
+    )
+  }
+
   render() {
     const {width, height} = this.state
 
@@ -663,6 +880,8 @@ class Grants extends React.Component {
         >
           { hasPointer ? format(this.getMouseDate(), 'MMM D, YYYY') : null }
         </div>
+
+        { this.renderInput() }
       </div>
     )
   }
@@ -672,6 +891,19 @@ function addPadding(r, top, right = top, bottom = top, left = right) {
   return [
     [r[0][0] + left, r[0][1] + top],
     [r[1][0] - right, r[1][1] - bottom],
+  ]
+}
+
+function clipRect(inner, outer) {
+  return [
+    [
+      Math.min(Math.max(inner[0][0], outer[0][0]), inner[1][0]),
+      Math.max(inner[0][1], outer[0][1])
+    ],
+    [
+      Math.max(Math.min(inner[1][0], outer[1][0]), inner[0][0]),
+      Math.min(inner[1][1], outer[1][1])
+    ],
   ]
 }
 
