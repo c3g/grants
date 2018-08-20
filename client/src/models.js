@@ -8,12 +8,12 @@ import endOfMonth from 'date-fns/end_of_month'
 import Status from './constants/status'
 
 
-export const getNewGrant = (template) => ({
+export const getNewGrant = (start = startOfToday(), end = endOfMonth()) => ({
   name:       'New Grant',
   applicants: [],
   categoryID: undefined,
-  start:      startOfToday(),
-  end:        endOfMonth(),
+  start:      start,
+  end:        null,
   status:     Status.SUBMITTED,
   total:      0,
   cofunding:  0,

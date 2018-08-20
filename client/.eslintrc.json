@@ -35,6 +35,7 @@
     "prefer-template": "off",
     "class-methods-use-this": "off",
     "object-shorthand": "off",
+    "no-param-reassign": "warn",
 
     "import/no-extraneous-dependencies": 0,
     "import/no-unresolved": 0,

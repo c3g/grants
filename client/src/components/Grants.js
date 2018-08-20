@@ -9,6 +9,7 @@ import {
   endOfYear,
   startOfMonth,
   endOfMonth,
+  startOfDay,
   addDays,
   addYears,
   addMonths,
@@ -17,8 +18,9 @@ import {
 } from 'date-fns'
 import Color from 'color'
 import { decay, pointer, value } from 'popmotion'
-import { clamp, groupBy, path } from 'ramda'
+import { clamp, groupBy, path, lensPath, set } from 'ramda'
 
+import {formatISO} from '../utils/time'
 import Global from '../actions/global'
 import UI from '../actions/ui'
 import Grant from '../actions/grants'
@@ -32,18 +34,23 @@ import Checkbox from './Checkbox'
 import Dropdown from './Dropdown'
 import FilterCategoriesDropdown from './FilterCategoriesDropdown'
 import Gap from './Gap'
+import GrantEditor from './GrantEditor'
 import Input from './Input'
 import Label from './Label'
 import Spinner from './Spinner'
 import Title from './Title'
 
 
-const formatISO = date => format(date, 'YYYY-MM-DD')
 const formatAmount = n => `$ ${Number(n).toLocaleString()}`
+const parseAmount = s => parseInt(s.replace(/,/g, ''))
+
+
+const I = () => {}
 
 const MAX_SCROLL_VELOCITY = 900
 const clampScrollVelocity = clamp(-MAX_SCROLL_VELOCITY, MAX_SCROLL_VELOCITY)
 
+const BLACK = '#000'
 const BACKGROUND_COLOR = '#f7f7f7'
 const TEXT_COLOR = '#333'
 const TEXT_COLOR_DARK = TEXT_COLOR
@@ -53,6 +60,7 @@ const YEAR_LINE_COLOR  = LINE_COLOR
 const MONTH_LINE_COLOR = '#ddd'
 const CURSOR_LINE_COLOR = '#ffa0a0'
 const TIMELINE_BACKGROUND = BACKGROUND_COLOR
+const SELECTION_COLOR = 'rgba(166, 203, 255, 0.4)'
 
 const TIMELINE_HEIGHT = 30
 const GRANT_HEIGHT = 100
@@ -60,6 +68,7 @@ const GRANT_MARGIN = 15
 const GRANT_PADDING = 10
 const TITLE_SIZE = 16
 const TEXT_SIZE = 14
+const TEXT_SIZE_SMALL = 12
 const TITLE_HEIGHT = TITLE_SIZE * 1.2
 const TEXT_HEIGHT  = TEXT_SIZE * 1.5
 
@@ -95,7 +104,10 @@ class Grants extends React.Component {
       startDate: INITIAL_DATE,
       endDate: endOfYear(addYears(INITIAL_DATE, 2)),
 
+      grantMode: false,
       grant: null,
+
+      fundingMode: false,
       funding: null,
 
       // derived
@@ -115,6 +127,8 @@ class Grants extends React.Component {
 
     document.addEventListener('mouseup', this.onDocumentMouseUp)
     document.addEventListener('touchend', this.onDocumentTouchEnd)
+    document.addEventListener('keydown', this.onDocumentKeyDown)
+    document.addEventListener('keyup', this.onDocumentKeyUp)
 
     this.canvas.addEventListener('mousewheel', this.onMouseWheel)
 
@@ -204,6 +218,10 @@ class Grants extends React.Component {
     return Math.abs(this.state.height - grantsHeight)
   }
 
+  getGrantByID(id) {
+    return this.props.grants.find(g => g.data.id === id)
+  }
+
   getGrantHeight(i) {
     return (
       2 * GRANT_PADDING
@@ -217,6 +235,14 @@ class Grants extends React.Component {
     if (this.props.categories.isLoading)
       return '#bbb'
     return this.props.categories.data[grant.data.categoryID].data.color
+  }
+
+  getGrantCofunding(grant) {
+    return (
+      grant.data.cofunding
+      - Object.values(this.props.fundings.data).reduce((total, f) =>
+          total + (f.data.fromGrantID === grant.data.id ? f.data.amount : 0), 0)
+    )
   }
 
   setCursor(type) {
@@ -244,16 +270,23 @@ class Grants extends React.Component {
     return x >= rect[0][0] && x <= rect[1][0] && y >= rect[0][1] && y <= rect[1][1]
   }
 
-  isEventInRect(event, rect) {
-    const x = event.clientX
-    const y = event.clientY
-    return x >= rect[0][0] && x <= rect[1][0] && y >= rect[0][1] && y <= rect[1][1]
+  isMouseInCircle(center, radius) {
+    const {x, y} = this.space.pointer
+    const dx = center[0] - x
+    const dy = center[1] - y
+    return Math.sqrt(dx*dx + dy*dy) < radius
   }
 
   getClickedGrant(event) {
-    const index = this.grantsDimensions.findIndex(d => this.isEventInRect(event, d))
+    // We use this.space.pointer.x/y rather than event.clientX/clientY
+    const index = this.grantsDimensions.findIndex(d => this.isMouseInRect(d))
     const grant = index !== -1 ? this.props.grants[index] : undefined
     return grant
+  }
+
+  getClickedFundingID() {
+    const entry = Object.entries(this.fundingsPositions).find(([id, { hover }]) => hover)
+    return entry ? entry[0] : undefined
   }
 
   drawText(position, text) {
@@ -263,6 +296,13 @@ class Grants extends React.Component {
 
   drawLine(position, color = LINE_COLOR, width = 1) {
     this.form.stroke(color, width).line(position)
+  }
+
+  drawCross(position, color, width = 2, length = 5) {
+    this.form.stroke(color, width, undefined, 'round')
+      .line([[position.x - length, position.y - length], [position.x + length, position.y + length]])
+    this.form.stroke(color, width, undefined, 'round')
+      .line([[position.x + length, position.y - length], [position.x - length, position.y + length]])
   }
 
   drawBackground(years, months) {
@@ -282,7 +322,26 @@ class Grants extends React.Component {
   }
 
   drawCursorLine() {
+    const {grantMode, grant, height} = this.state
     const pointerX = this.space.pointer.x
+
+    const isCreatingGrant = grantMode && grant.data.end === null
+
+    if (isCreatingGrant) {
+      const startX = this.dateToX(grant.data.start)
+
+      this.form.fillOnly(SELECTION_COLOR).rect([
+        [Math.min(pointerX, startX), TIMELINE_HEIGHT],
+        [Math.max(pointerX, startX), height],
+      ])
+
+      this.drawLine(
+        [[startX, TIMELINE_HEIGHT], [startX, this.state.height]],
+        'rgba(0, 0, 0, 0.3)',
+        1
+      )
+    }
+
     this.drawLine(
       [[pointerX, TIMELINE_HEIGHT], [pointerX, this.state.height]],
       CURSOR_LINE_COLOR,
@@ -345,6 +404,8 @@ class Grants extends React.Component {
     this.grantsDimensions = []
 
     this.props.grants.forEach((grant, i) => {
+      const cofunding = this.getGrantCofunding(grant)
+
       const startX = this.dateToX(grant.data.start)
       const endX   = this.dateToX(grant.data.end)
       const grantHeight = this.getGrantHeight(i)
@@ -356,7 +417,7 @@ class Grants extends React.Component {
 
       const rect = Group.fromArray([[startX, startY], [endX, endY]])
       const innerRect = Group.fromArray(
-        clipRect(
+        clipHorizontalRect(
           addPadding([[startX, startY], [endX, endY]], GRANT_PADDING),
           visibleRect
         )
@@ -374,54 +435,118 @@ class Grants extends React.Component {
 
       this.state.grants[grant.data.id].hover = isHover
 
-      const color = isHover ? Color(this.getGrantColor(grant)).lighten(0.2) : Color(this.getGrantColor(grant))
+      const isPickingFrom = this.state.fundingMode && !this.state.funding
+      const isActive = !this.state.fundingMode ? isHover : (cofunding > 0 || !isPickingFrom) ? isHover : false
+
+      const color =
+        this.state.fundingMode && isPickingFrom && cofunding <= 0 ?
+          Color(this.getGrantColor(grant)).lighten(0.3).desaturate(0.1) :
+        isActive ?
+          Color(this.getGrantColor(grant)).lighten(0.2) :
+          Color(this.getGrantColor(grant))
       const borderColor = Color(this.getGrantColor(grant)).darken(0.5).toString()
-      const textColor = color.isDark() ? TEXT_COLOR_LIGHT : TEXT_COLOR_DARK
+      const matchingTextColor =
+        color.isDark() ?
+          TEXT_COLOR_LIGHT :
+          TEXT_COLOR_DARK
+      const textColor =
+        this.state.fundingMode && isPickingFrom && cofunding <= 0 ?
+          'rgba(0, 0, 0, 0.3)' :
+          matchingTextColor
 
+      // Box
 
-      this.form.stroke(borderColor, 2).fill(color.toString()).rect(rect)
+      if (!this.state.fundingMode)
+        this.form
+          .stroke(borderColor, 2)
+          .fill(color.toString())
+          .rect(rect)
+      else if (cofunding > 0 || !isPickingFrom)
+        this.form
+          .stroke(borderColor, 3)
+          .fill(color.toString())
+          .rect(rect)
+      else
+        this.form
+          .fillOnly(color.toString())
+          .rect(rect)
 
       // Text
 
-      this.form.fill(textColor).font(TITLE_SIZE, 'bold').alignText('left')
-        .textBox(innerRect, grant.data.name, "top", '…')
-      innerRect[0].y += TITLE_HEIGHT
+      const drawLabel = ({
+          label,
+          labelStyle = I,
+          value,
+          valueStyle = I,
+          height = TEXT_HEIGHT,
+          preferValue = true,
+        }) => {
+        if (preferValue) {
+          const originalRight = innerRect[1].x
+          const valueWidth = this.form.getTextWidth(value)
+          if (valueStyle)
+            valueStyle()
+          this.form.alignText('right').textBox(innerRect, value, 'top', '…')
+          innerRect[1].x -= valueWidth + 5
+
+          if (labelStyle)
+            labelStyle()
+          this.form.alignText('left').textBox(innerRect, label, 'top', '…')
+          innerRect[1].x = originalRight
+          innerRect[0].y += height
+        }
+        else {
+          const originalLeft = innerRect[0].x
+          const labelWidth = this.form.getTextWidth(label)
+          if (labelStyle)
+            labelStyle()
+          this.form.alignText('left').textBox(innerRect, label, 'top', '…')
+          innerRect[0].x += labelWidth + 5
+
+          if (valueStyle)
+            valueStyle()
+          this.form.alignText('right').textBox(innerRect, value, 'top', '…')
+          innerRect[0].x = originalLeft
+          innerRect[0].y += height
+        }
+      }
+
+      drawLabel({
+        label: grant.data.name,
+        labelStyle: () => this.form.fill(textColor).font(TITLE_SIZE, 'bold'),
+        value: `[${grant.data.status}]`,
+        valueStyle: () => this.form.fill(textColor).font(TEXT_SIZE_SMALL, 'normal'),
+        preferValue: false,
+        height: TITLE_HEIGHT,
+      })
 
       this.form.fill(textColor).font(TEXT_SIZE, 'normal').alignText('left')
         .textBox(innerRect, `${formatISO(grant.data.start)} - ${formatISO(grant.data.end)}`, "top", '…')
       innerRect[0].y += TEXT_HEIGHT
 
-
-      const drawLabel = (label, value) => {
-        const valueWidth = this.form.getTextWidth(value)
-
-        this.form.alignText('right').textBox(innerRect, value, 'top', '…')
-        const originalRight = innerRect[1].x
-        innerRect[1].x -= valueWidth + 5
-        this.form.alignText('left').textBox(innerRect, label, 'top', '…')
-        innerRect[1].x = originalRight
-        innerRect[0].y += TEXT_HEIGHT
-      }
-
       this.form.fill(textColor).font(TEXT_SIZE, 'normal')
-      drawLabel('Project total:', formatAmount(grant.data.total))
+      drawLabel({ label: 'Project total:', value: formatAmount(grant.data.total) })
 
       grant.data.fields.forEach(field => {
-        drawLabel(`${field.name}:`, formatAmount(field.amount))
+        drawLabel({ label: `${field.name}:`, value: formatAmount(field.amount) })
       })
 
       this.form.fill(textColor).font(TEXT_SIZE, 'bold')
-      drawLabel(`Available co-funding:`, formatAmount(grant.data.cofunding))
+      drawLabel({ label: `Available co-funding:`, value: formatAmount(cofunding) })
 
-      if (isHover)
-        this.setCursor('pointer')
+      if (isHover) {
+        if (isActive)
+          this.setCursor('pointer')
+        else
+          this.setCursor('not-allowed')
+      }
     })
   }
 
   drawFundings() {
     const fundings = Object.values(this.props.fundings.data)
     if (this.state.funding)
-      fundings.unshift(this.state.funding) // XXX push
+      fundings.push(this.state.funding)
 
     const fromGrant = groupBy(path(['data', 'fromGrantID']), fundings)
     const toGrant   = groupBy(path(['data', 'toGrantID']),   fundings)
@@ -505,7 +630,6 @@ class Grants extends React.Component {
         endAnchor,
         end,
       ]
-      // points.forEach(p => this.form.fillOnly('#000').point(p, 3, 'circle'))
 
       const color =
         Color(this.getGrantColor(link.detail.grant))
@@ -518,14 +642,26 @@ class Grants extends React.Component {
 
       const middlePoint = new Pt(calculateBezierPoint(0.6, points))
 
+      this.fundingsPositions[link.funding.data.id] = { position: middlePoint }
+
       if (!isPartial) {
         const text = formatAmount(link.funding.data.amount)
         this.form.fill(TEXT_COLOR, 1).font(TEXT_SIZE, 'bold')
           .text(middlePoint.$add(10, (2 - TEXT_HEIGHT / 2)), text)
-        this.form.fillOnly('#000').point(middlePoint, 2, 'circle')
+        if (!this.state.fundingMode) {
+          this.form.fillOnly(BLACK).point(middlePoint, 2, 'circle')
+        }
+        else {
+          const isHover = this.isMouseInCircle(middlePoint, 10)
+          if (!isHover) {
+            this.drawCross(middlePoint, BLACK)
+          } else {
+            this.setCursor('pointer')
+            this.drawCross(middlePoint, BLACK, 3)
+            this.fundingsPositions[link.funding.data.id].hover = true
+          }
+        }
       }
-
-      this.fundingsPositions[link.funding.data.id] = middlePoint
 
       if (isPartial && link.end && !this.state.funding.position) {
         this.setState({
@@ -686,6 +822,17 @@ class Grants extends React.Component {
       this.onStartDrag()
       return
     }
+
+    const start = startOfDay(this.xToDate(this.space.pointer.x))
+
+    this.setState({
+      grantMode: 'new',
+      grant: {
+        isPartial: true,
+        isLoading: false,
+        data: getNewGrant(start, null),
+      },
+    })
   }
 
   onDocumentMouseUp = (event) => {
@@ -694,6 +841,13 @@ class Grants extends React.Component {
       return
     }
 
+    const {grantMode, grant} = this.state
+    const isCreatingGrant = grantMode && grant.data.end === null
+
+    const end = this.xToDate(this.space.pointer.x)
+    this.setState({
+      grant: set(lensPath(['data', 'end']), end, this.state.grant)
+    })
   }
 
   onTouchStart = this.onStartDrag
@@ -721,26 +875,17 @@ class Grants extends React.Component {
   }
 
   onClick = (event) => {
-    if (this.didDrag)
+    if (this.didDrag) {
+      console.log('didDrag')
       return
-
-    const grant = this.getClickedGrant(event)
-
-    if (!grant)
-      return
-
-    if (event.ctrlKey && !this.state.funding) {
-      this.setState({
-        funding: {
-          isPartial: true,
-          isLoading: false,
-          data: getNewFunding(grant.data.id),
-        }
-      })
     }
 
-    else if (this.state.funding) {
-      if (grant.data.id === this.state.funding.data.fromGrantID) {
+    const grant = this.getClickedGrant(event)
+    const fundingID = this.getClickedFundingID()
+
+    if (this.state.funding) {
+
+      if (!grant || grant.data.id === this.state.funding.data.fromGrantID) {
         this.setState({ funding: null })
         return
       }
@@ -753,6 +898,48 @@ class Grants extends React.Component {
         }
       })
     }
+    else if (event.ctrlKey) {
+
+      // Create new funding
+      if (grant && !this.state.funding && this.getGrantCofunding(grant) > 0) {
+        this.setState({
+          funding: {
+            isPartial: true,
+            isLoading: false,
+            data: getNewFunding(grant.data.id),
+          }
+        })
+      }
+      // Click delete funding
+      else if (fundingID) {
+        Funding.delete(fundingID)
+      }
+
+    }
+  }
+
+  onDocumentKeyDown = (event) => {
+    if (isControlKey(event)) {
+      this.setState({ fundingMode: true })
+    }
+    if (isEscapeKey(event)) {
+      this.onEscape()
+    }
+  }
+
+  onDocumentKeyUp = (event) => {
+    if (isControlKey(event) && !this.state.funding) {
+      this.setState({ fundingMode: false })
+    }
+  }
+
+  onEscape = () => {
+    if (this.state.fundingMode) {
+      this.setState({ fundingMode: false, funding: null })
+    }
+    if (this.state.grantMode) {
+      this.setState({ grantMode: false, grant: null })
+    }
   }
 
   onBlurInput = () => {
@@ -762,7 +949,7 @@ class Grants extends React.Component {
 
   onEnterInput = (value) => {
     if (this.state.funding) {
-      const amount = parseInt(value)
+      const amount = parseAmount(value)
 
       if (!Number.isInteger(amount)) {
         this.setState({ funding: null })
@@ -782,7 +969,7 @@ class Grants extends React.Component {
 
       Funding.create(funding.data)
         .then(() => {
-          this.setState({ funding: null })
+          this.setState({ fundingMode: false, funding: null })
         })
     }
   }
@@ -814,6 +1001,27 @@ class Grants extends React.Component {
     })
   }
 
+  validateFunding = (value) => {
+    const {funding} = this.state
+    const amount = parseAmount(value)
+
+    if (Number.isNaN(amount)) {
+      this.setState({ inputMessage: 'Not a valid number' })
+      return false
+    }
+
+    const grant = this.getGrantByID(funding.data.fromGrantID)
+    const maximum = this.getGrantCofunding(grant)
+
+    if (amount > maximum) {
+      this.setState({ inputMessage: 'Maximum amount is ' + formatAmount(maximum) })
+      return false
+    }
+
+    this.setState({ inputMessage: undefined })
+    return true
+  }
+
   onRef = (ref) => {
     if (ref)
       this.element = ref
@@ -824,6 +1032,24 @@ class Grants extends React.Component {
       this.canvas = ref
   }
 
+  onCreateGrant = (grant) => {
+    Grant.create(grant.data)
+    .then(() => {
+      this.exitGrantMode()
+    })
+  }
+
+  onUpdateGrant = (grant) => {
+    Grant.update(grant.data.id, grant.data)
+    .then(() => {
+      this.exitGrantMode()
+    })
+  }
+
+  exitGrantMode = () => {
+    this.setState({ grantMode: false, grant: null })
+  }
+
   renderInput() {
     const {funding} = this.state
 
@@ -831,24 +1057,48 @@ class Grants extends React.Component {
       return null
 
     const {position} = funding
+    const grant = this.getGrantByID(funding.data.fromGrantID)
+    const maximum = this.getGrantCofunding(grant)
 
-    return (
-      <div className='Grants__shadow'>
-        <div className='Grants__input'
-          style={{
-            top:  position.y,
-            left: position.x + 20,
-          }}
-        >
-          <Input
-            placeHolder='Enter amount'
-            onBlur={this.onBlurInput}
-            onEnter={this.onEnterInput}
-            ref={e => e && e.focus()}
-          />
-        </div>
+    return [
+      <div className='Grants__shadow' onClick={this.onEscape} />,
+      <div className='Grants__input'
+        style={{
+          top:  position.y,
+          left: position.x + 20,
+        }}
+      >
+        <Input
+          fillWidth
+          placeholder={ `Enter amount (maximum: ${formatAmount(maximum)})` }
+          onBlur={this.onBlurInput}
+          onEnter={this.onEnterInput}
+          validate={this.validateFunding}
+          ref={e => e && e.focus()}
+        />
       </div>
-    )
+    ]
+  }
+
+  renderGrantEditor() {
+    const {grantMode, grant} = this.state
+
+    if  (grantMode === false)
+      return null
+
+    if (grantMode === 'new' && grant.data.end === null)
+      return null
+
+    return [
+      <div className='Grants__shadow' onClick={this.onEscape} />,
+      <GrantEditor
+        grant={grant}
+        categories={this.props.categories}
+        availableCofunding={this.getGrantCofunding(grant)}
+        onDone={grantMode === 'new' ? this.onCreateGrant : this.onUpdateGrant}
+        onCancel={this.exitGrantMode}
+      />
+    ]
   }
 
   render() {
@@ -882,10 +1132,12 @@ class Grants extends React.Component {
         </div>
 
         { this.renderInput() }
+        { this.renderGrantEditor() }
       </div>
     )
   }
 }
+
 
 function addPadding(r, top, right = top, bottom = top, left = right) {
   return [
@@ -894,15 +1146,15 @@ function addPadding(r, top, right = top, bottom = top, left = right) {
   ]
 }
 
-function clipRect(inner, outer) {
+function clipHorizontalRect(inner, outer) {
   return [
     [
       Math.min(Math.max(inner[0][0], outer[0][0]), inner[1][0]),
-      Math.max(inner[0][1], outer[0][1])
+      inner[0][1]
     ],
     [
       Math.max(Math.min(inner[1][0], outer[1][0]), inner[0][0]),
-      Math.min(inner[1][1], outer[1][1])
+      inner[1][1]
     ],
   ]
 }
@@ -934,6 +1186,24 @@ function calculateBezierPoint(t, p) {
     x: a * p[0].x + b * p[1].x + c * p[2].x + d * p[3].x,
     y: a * p[0].y + b * p[1].y + c * p[2].y + d * p[3].y,
   }
+}
+
+function isControlKey(event) {
+  return (
+    event.code.startsWith('Control')
+    || event.key === 'Control'
+    || event.which === 17 /* Control */
+    || event.which === 20 /* CapsLock */
+  )
+}
+
+function isEscapeKey(event) {
+  return (
+    event.code.startsWith('Control')
+    || event.key === 'Escape'
+    || event.code === 'Escape'
+    || event.which === 27 /* Escape */
+  )
 }
 
 export default withRouter(pure(Grants))
