@@ -3,6 +3,7 @@ import Prop from 'prop-types'
 import classname from 'classname'
 import { equals } from 'ramda'
 
+import Button from './Button'
 import Icon from './Icon'
 
 class Input extends React.Component {
@@ -39,13 +40,17 @@ class Input extends React.Component {
     return this.state.value
   }
 
-  onChange = (ev) => {
+  change(value) {
     if (this.props.onChange)
-      this.props.onChange(ev.target.value, ev)
+      this.props.onChange(value)
     if (!this.isControlled()) {
-      this.setState({ value: ev.target.value })
+      this.setState({ value })
       this.forceUpdate()
     }
+  }
+
+  onChange = (ev) => {
+    this.change(ev.target.value)
   }
 
   onKeyDown = (ev) => {
@@ -87,6 +92,7 @@ class Input extends React.Component {
       loading,
       status,
       autoSelect,
+      showClearButton,
       clearOnEnter,
       clearOnBlur,
       onEnter,
@@ -126,6 +132,14 @@ class Input extends React.Component {
           ref={ref => { if (ref) this.element = ref }}
         />
         { loading && <span className='loading-spinner-tiny'/> }
+        { showClearButton && actualValue &&
+          <Button
+            iconButton
+            className='Input__clearButton'
+            icon='times-circle'
+            onClick={() => this.change('')}
+          />
+        }
       </div>
     )
   }

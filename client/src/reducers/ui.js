@@ -16,23 +16,21 @@ const initialState = {
 }
 
 export default function ui(state = initialState, action) {
-  if (action.error === true) {
-    console.error(action.payload)
+  if (action.isError) {
+    console.error(action.error)
 
     const message =
-      (action.payload.fromServer ? 'Server: ' : '') +
-        action.payload.message.replace(/^Error: /, '')
+      (action.error.fromServer ? 'Server ' : '')
+      + action.error.message
+    const details = undefined
 
-    const details =
-        undefined
-
-    state = {
+    return {
       ...state,
       notifications: state.notifications.concat({
         type: 'error',
         message: message,
         details: details,
-        //stack: getStack(action.payload),
+        // stack: getStack(action.payload),
       })
     }
   }

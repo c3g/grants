@@ -4,18 +4,26 @@ import pure from 'recompose/pure'
 import styled from 'styled-components'
 import { sortBy, prop } from 'ramda'
 
+import Global from '../actions/global'
+import Setting from '../actions/settings'
+import User from '../actions/users'
+import Applicant from '../actions/applicants'
+import Category from '../actions/categories'
+
 import uniq from '../utils/uniq'
 import getEmails from '../utils/get-emails'
 import Button from './Button'
+import ColorPicker from './ColorPicker'
 import EditableLabel from './EditableLabel'
 import EditableList from './EditableList'
+import Gap from './Gap'
 import Label from './Label'
 import Text from './Text'
 import Title from './Title'
 
 
 const Group = styled.div`
-  margin-bottom: calc(6 * var(--padding));
+  margin-bottom: 30px;
 `
 
 class Settings extends React.Component {
@@ -50,40 +58,40 @@ class Settings extends React.Component {
   }
 
   onListAdd = (which, value) => {
-    const { onChange, onError } = this.props
     const list = this.state[which]
 
     const emails = uniq(getEmails(value))
     if (emails.length > 0)
-      onChange(which, uniq(list.data.concat(emails)))
+      Setting.update(which, uniq(list.data.concat(emails)))
     else
-      onError(`Couldn't find any email in the input value.`)
+      Global.showError(`Couldn't find any email in the input value.`)
   }
 
   onListDelete = (which, value) => {
-    const { onChange } = this.props
     const list = this.state[which]
 
-    onChange(which, list.data.filter(v => v !== value))
+    Setting.update(which, list.data.filter(v => v !== value))
   }
 
   onDeleteUser = (id) => {
-    this.props.deleteUser(id)
+    User.delete(id)
   }
 
   onUpdateUserName = (id, name) => {
     const user = { ...this.props.users.find(u => u.id === id), name }
-    this.props.updateUser(id, user)
+    User.update(id, user)
   }
 
   onUpdateUserEmail = (id, email) => {
     const user = { ...this.props.users.find(u => u.id === id), email }
-    this.props.updateUser(id, user)
+    User.update(id, user)
   }
 
   render() {
     const {
       users,
+      applicants,
+      categories,
     } = this.props
 
     const {
@@ -95,6 +103,7 @@ class Settings extends React.Component {
 
         <div className='Settings__content hbox'>
           <div className='Settings__left fill'>
+
             <Group>
               <Title>Whitelist</Title>
               <Text block muted>
@@ -109,75 +118,183 @@ class Settings extends React.Component {
                 onDelete={value => this.onListDelete('whitelist', value)}
               />
             </Group>
+
+            <Group>
+              <Title>Users</Title>
+              <Text block muted>
+                This is the list of users with an account. <br/>
+              </Text>
+
+              <table className='table Settings__table'>
+                <thead>
+                  <tr>
+                    <th>Name</th>
+                    <th>Email</th>
+                    <th></th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {
+                    sortBy(prop('id'), users).map(user =>
+                      <tr>
+                        <td>
+                          {
+                            user.googleID === null ?
+                              <Label>{user.name}</Label>
+                              :
+                              <EditableLabel
+                                value={user.name}
+                                onEnter={name => this.onUpdateUserName(user.id, name)}
+                              />
+                          }
+                        </td>
+                        <td>
+                          {
+                            user.googleID === null ?
+                              <Label>{user.email}</Label>
+                              :
+                              <EditableLabel
+                                value={user.email}
+                                onEnter={email => this.onUpdateUserEmail(user.id, email)}
+                              />
+                          }
+                      </td>
+                        <td className='button-column'>
+                          {
+                            user.googleID !== null &&
+                              <Button
+                                flat
+                                square
+                                small
+                                icon='close'
+                                onClick={() => this.onDeleteUser(user.id)}
+                              />
+                          }
+                        </td>
+                      </tr>
+                    )
+                  }
+                  {
+                    users.length === 0 &&
+                      <tr className='empty'>
+                        <td colSpan='3'>
+                          No users yet
+                        </td>
+                      </tr>
+                  }
+                </tbody>
+              </table>
+            </Group>
           </div>
+
+          <Gap fill='10px' />
 
           <div className='Settings__right fill'>
 
-            <Title>Users</Title>
-            <Text block muted>
-              This is the list of users with an account. <br/>
-            </Text>
+            <Group>
+              <Title>Applicants</Title>
+              <Text block muted>
+                This is the list of grant applicants. <br/>
+              </Text>
 
-            <table className='table UsersTable'>
-              <thead>
-                <tr>
-                  <th>Name</th>
-                  <th>Email</th>
-                  <th></th>
-                </tr>
-              </thead>
-              <tbody>
-                {
-                  sortBy(prop('id'), users).map(user =>
-                    <tr>
-                      <td>
-                        {
-                          user.googleID === null ?
-                            <Label>{user.name}</Label>
-                            :
+              <table className='table Settings__table Settings__table__first'>
+                <thead>
+                  <tr>
+                    <th>Name</th>
+                    <th></th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {
+                    sortBy(prop('id'), applicants).map(applicant =>
+                      <tr>
+                        <td>
+                          {
                             <EditableLabel
-                              value={user.name}
-                              onEnter={name => this.onUpdateUserName(user.id, name)}
+                              value={applicant.data.name}
+                              onEnter={name => Applicant.update(applicant.data.id, { name })}
                             />
-                        }
-                      </td>
-                      <td>
-                        {
-                          user.googleID === null ?
-                            <Label>{user.email}</Label>
-                            :
-                            <EditableLabel
-                              value={user.email}
-                              onEnter={email => this.onUpdateUserEmail(user.id, email)}
-                            />
-                        }
-                    </td>
-                      <td className='button-column'>
-                        {
-                          user.googleID !== null &&
-                            <Button
-                              flat
-                              square
-                              small
-                              icon='close'
-                              onClick={() => this.onDeleteUser(user.id)}
-                            />
-                        }
-                      </td>
-                    </tr>
-                  )
-                }
-                {
-                  users.length === 0 &&
-                    <tr className='empty'>
-                      <td colSpan='3'>
-                        No users yet
-                      </td>
-                    </tr>
-                }
-              </tbody>
-            </table>
+                          }
+                        </td>
+                        <td className='button-column'>
+                          <Button
+                            flat
+                            square
+                            small
+                            icon='close'
+                            disabled={applicant.isLoading}
+                            onClick={() => Applicant.delete(applicant.data.id)}
+                          />
+                        </td>
+                      </tr>
+                    )
+                  }
+                  {
+                    applicants.length === 0 &&
+                      <tr className='empty'>
+                        <td colSpan='2'>
+                          No applicants yet
+                        </td>
+                      </tr>
+                  }
+                </tbody>
+              </table>
+            </Group>
 
+            <Group>
+              <Title>Categories</Title>
+              <Text block muted>
+                This is the list of grant categories. <br/>
+              </Text>
+
+              <table className='table Settings__table Settings__table__first'>
+                <thead>
+                  <tr>
+                    <th>Name</th>
+                    <th>Color</th>
+                    <th />
+                  </tr>
+                </thead>
+                <tbody>
+                  {
+                    sortBy(prop('id'), categories).map(category =>
+                      <tr>
+                        <td>
+                          <EditableLabel
+                            value={category.data.name}
+                            onEnter={name => Category.update(category.data.id, { ...category.data, name })}
+                          />
+                        </td>
+                        <td>
+                          <ColorPicker
+                            value={category.data.color}
+                            onChange={color => Category.update(category.data.id, { ...category.data, color })}
+                          />
+                        </td>
+                        <td className='button-column'>
+                          <Button
+                            flat
+                            square
+                            small
+                            icon='close'
+                            disabled={category.isLoading}
+                            onClick={() => Category.delete(category.data.id)}
+                          />
+                        </td>
+                      </tr>
+                    )
+                  }
+                  {
+                    categories.length === 0 &&
+                      <tr className='empty'>
+                        <td colSpan='3'>
+                          No categories yet
+                        </td>
+                      </tr>
+                  }
+                </tbody>
+              </table>
+            </Group>
           </div>
         </div>
 
@@ -189,10 +306,6 @@ class Settings extends React.Component {
 Settings.propTypes = {
   data: PropTypes.object.isRequired,
   users: PropTypes.arrayOf(PropTypes.object).isRequired,
-  onChange: PropTypes.func.isRequired,
-  onError: PropTypes.func.isRequired,
-  deleteUser: PropTypes.func.isRequired,
-  updateUser: PropTypes.func.isRequired,
 }
 
 export default pure(Settings)

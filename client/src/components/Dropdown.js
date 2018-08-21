@@ -169,6 +169,7 @@ class Dropdown extends React.Component {
 
     style.left += this.props.offset ? (this.props.offset.left || 0) : 0
     style.top  += this.props.offset ? (this.props.offset.top || 0) : 0
+    style.width = element.width
 
     return style
   }
@@ -264,7 +265,11 @@ class Dropdown extends React.Component {
                 style={this.state.position}
                 ref={ref => ref && (this.menu = findDOMNode(ref))}
             >
-              <div className='Dropdown__inner' ref={ref => ref && (this.inner = findDOMNode(ref))}>
+              <div
+                className='Dropdown__inner'
+                style={{ width: this.state.position.width }}
+                ref={ref => ref && (this.inner = findDOMNode(ref))}
+              >
                 { children }
               </div>
             </div>

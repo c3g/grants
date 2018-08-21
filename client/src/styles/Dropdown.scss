@@ -101,6 +101,7 @@
 
   &> .item.disabled {
     color: $text-color-muted;
+    opacity: 0.6;
   }
   &> .item:not(.disabled):not(.segmented):hover {
     color: #fff;

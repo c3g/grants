@@ -1,0 +1,60 @@
+@import './_variables.scss';
+
+.ColorPicker {
+  position: relative;
+  width: 100px;
+  text-align: left;
+  padding: 0 $padding;
+  cursor: pointer;
+  &:hover {
+    background-color: $hover-bg-color;
+  }
+  &:active {
+    background-color: $active-bg-color;
+  }
+}
+.ColorPicker__color {
+  display: inline-block;
+  content: '';
+  width:  12px;
+  height: 12px;
+  border-radius: 3px;
+  box-shadow: inset 0px 0px 1px 1px rgba(0, 0, 0, 0.26);
+}
+.ColorPicker__inner {
+  position: absolute;
+  cursor: default;
+  /* top & left set by js */
+  box-shadow: 1px 2px 6px 1px rgba(0, 0, 0, 0.3);
+}
+.ColorPicker__inner {
+  min-width: 142px;
+  padding: $padding;
+  border: 1px solid $light-border-color;
+  border-radius: 2px;
+  color: $light-color;
+  background-color: $dropdown-bg-color;
+}
+.ColorPicker__menu {
+  position: absolute;
+  z-index: 2;
+}
+.ColorPicker__inner {
+  opacity: 0;
+  transform: translateY(-10px);
+  transition: all .25s;
+  pointer-events: none;
+}
+.ColorPicker__menu.open > .ColorPicker__inner {
+  opacity: 1;
+  transform: translateY(0);
+  pointer-events: unset;
+}
+.ColorPicker__menu.bottom {
+  & > .ColorPicker__inner {
+    transform: translateY(-10px);
+  }
+  &.open > .ColorPicker__inner {
+    transform: translateY(0);
+  }
+}

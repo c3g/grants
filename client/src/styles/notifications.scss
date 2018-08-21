@@ -6,7 +6,7 @@
   display: block;
   z-index: 1000;
   position: absolute;
-  top: var(--padding);
+  top: $padding;
   right: 0;
   bottom: 0;
   padding: 10px;
@@ -105,18 +105,18 @@
 .Notification .close-all {
   position: absolute;
   top: 10px;
-  right: var(--notification-size);
+  right: $notification-size;
   background: none;
-  padding: calc(1 * var(--padding));
+  padding: $padding;
   border-radius: 2px;
 }
 .Notification .close {
   position: absolute;
   top: 0;
   right: 0;
-  width:  var(--notification-size);
-  height: var(--notification-size);
-  line-height: var(--notification-size);
+  width:  $notification-size;
+  height: $notification-size;
+  line-height: $notification-size;
   text-align: center;
   font-size: 16px;
   text-shadow: none;

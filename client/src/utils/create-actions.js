@@ -87,14 +87,14 @@ export function createFetchActions(namespace, fn, contraMapFn, mapFn, errorMapFn
 
 export function createFetchFunction(fn, fnMap = A) {
   const self = (...args) => store.dispatch((dispatch, getState) => {
-    dispatch(self.request(...args))
+    self.request(...args)
 
     return fn(...fnMap(getState(), ...args))
     .then(result => {
-      dispatch(self.receive(result, ...args))
+      self.receive(result, ...args)
       return result
     })
-    .catch(err =>   dispatch(self.error(err, ...args)))
+    .catch(err => self.error(err, ...args))
   })
   return self
 }

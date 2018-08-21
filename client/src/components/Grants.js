@@ -33,7 +33,7 @@ import { getNewGrant, getNewFunding } from '../models'
 import Button from './Button'
 import Checkbox from './Checkbox'
 import Dropdown from './Dropdown'
-import FilterCategoriesDropdown from './FilterCategoriesDropdown'
+import FilteringDropdown from './FilteringDropdown'
 import Gap from './Gap'
 import GrantEditor from './GrantEditor'
 import Input from './Input'
@@ -534,9 +534,9 @@ class Grants extends React.Component {
       this.form.fill(textColor).font(TEXT_SIZE, 'normal')
       drawLabel({ label: 'Project total:', value: formatAmount(grant.data.total) })
 
-      // grant.data.fields.forEach(field => {
-      //   drawLabel({ label: `${field.name}:`, value: formatAmount(field.amount) })
-      // })
+      grant.data.fields.forEach(field => {
+        drawLabel({ label: `${field.name}:`, value: formatAmount(field.amount) })
+      })
 
       this.form.fill(textColor).font(TEXT_SIZE, 'bold')
       drawLabel({ label: `Available co-funding:`, value: formatAmount(cofunding) })
@@ -1141,6 +1141,7 @@ class Grants extends React.Component {
       <GrantEditor
         grant={grant}
         categories={this.props.categories}
+        applicants={this.props.applicants}
         availableCofunding={this.getGrantCofunding(grant)}
         onDone={grantMode === 'new' ? this.onCreateGrant : this.onUpdateGrant}
         onCancel={this.exitGrantMode}
@@ -1158,9 +1159,10 @@ class Grants extends React.Component {
       <Button
         square
         icon='close'
+        className='default'
         style={{
           position: 'absolute',
-          transform: `translate(${dimension[1].x + 5}px, ${dimension[0].y}px)`,
+          transform: `translate(${dimension[1].x - 35}px, ${dimension[0].y + 5}px)`,
         }}
         onClick={() => this.onDeleteGrant(this.props.grants[i]) }
       />

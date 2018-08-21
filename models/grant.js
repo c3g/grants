@@ -65,10 +65,14 @@ function create(grant) {
 }
 
 module.exports.delete = function(id) {
-  return Promise.all([
-    db.query(`DELETE FROM grants WHERE id = @id`, { id }),
-    db.query(`DELETE FROM fundings WHERE fromGrantID = @id OR toGrantID = @id`, { id }),
-  ])
+  return db.query(`BEGIN`)
+  .then(() => db.query(`DELETE FROM grants WHERE id = @id`, { id }))
+  .then(() => db.query(`DELETE FROM fundings WHERE "fromGrantID" = @id OR "toGrantID" = @id`, { id }))
+  .then(() => db.query(`COMMIT`))
+  .catch(err => {
+    return db.query('ROLLBACK')
+      .then(() => Promise.reject(err))
+  })
 }
 
 

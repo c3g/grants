@@ -17,27 +17,18 @@ import Color from 'color'
 import { over, lensPath, set } from 'ramda'
 
 import Status from '../constants/status'
-import Global from '../actions/global'
-import UI from '../actions/ui'
-import Grant from '../actions/grants'
-import Funding from '../actions/fundings'
-import Category from '../actions/categories'
+import Applicant from '../actions/applicants'
 
 import {formatISO} from '../utils/time'
 import filterTags from '../utils/filter-tags'
 import uniq from '../utils/uniq'
-import { getNewGrant, getNewFunding } from '../models'
 import Button from './Button'
-import Checkbox from './Checkbox'
 import Dropdown from './Dropdown'
 import EditableLabel from './EditableLabel'
-import FilterCategoriesDropdown from './FilterCategoriesDropdown'
-import Gap from './Gap'
+import FilteringDropdown from './FilteringDropdown'
 import Input from './Input'
 import Label from './Label'
-import Spinner from './Spinner'
-import StatusIcon from './StatusIcon'
-import Title from './Title'
+import Text from './Text'
 
 
 const formatAmount = n => `$ ${Number(n).toLocaleString()}`
@@ -50,13 +41,9 @@ class GrantEditor extends React.Component {
   static propTypes = {
     grant: Prop.object.isRequired,
     categories: Prop.object.isRequired,
+    applicants: Prop.object.isRequired,
     onDone: Prop.func.isRequired,
     onCancel: Prop.func.isRequired,
-  }
-
-  static getDerivedStateFromProps(props, state) {
-    debugger
-    return null
   }
 
   constructor(props) {
@@ -69,15 +56,6 @@ class GrantEditor extends React.Component {
       start: formatISO(props.grant.data.start),
       end: formatISO(props.grant.data.end)
     }
-  }
-
-  componentDidMount() {
-  }
-
-  componentDidUpdate() {
-  }
-
-  componentWillUnmount() {
   }
 
   componentWillReceiveProps(props, state) {
@@ -167,12 +145,45 @@ class GrantEditor extends React.Component {
     })
   }
 
+  onChangeApplicants = (applicants) => {
+    this.setState({
+      grant: set(lensPath(['data', 'applicants']), applicants, this.state.grant )
+    })
+  }
+
+  onSelectApplicant = (applicantID) => {
+    this.setState({
+      grant: over(
+        lensPath(['data', 'applicants']),
+        applicants => applicants.concat(applicantID),
+        this.state.grant
+      )
+    })
+  }
+
+  onDeselectApplicant = (applicantID) => {
+    this.setState({
+      grant: over(
+        lensPath(['data', 'applicants']),
+        applicants => applicants.filter(id => id !== applicantID),
+        this.state.grant
+      )
+    })
+  }
+
   onDone = () => {
     this.props.onDone(this.state.grant)
   }
 
   onCancel = () => {
     this.props.onCancel()
+  }
+
+  onCreateApplicant = name => {
+    Applicant.create({ name })
+    .then(applicant => {
+      this.onSelectApplicant(applicant.id)
+    })
   }
 
   render() {
@@ -279,8 +290,25 @@ class GrantEditor extends React.Component {
                 />
               </td>
             </tr>
+            <tr>
+              <td><Label>Applicants:</Label></td>
+              <td>
+                <FilteringDropdown
+                  className='full-width input-like'
+                  label={grant.data.applicants.map(id => this.props.applicants.data[id].data.name).join(', ')}
+                  items={Object.values(this.props.applicants.data).map(a => a.data.id)}
+                  selectedItems={grant.data.applicants}
+                  getItemText={id => this.props.applicants.data[id].data.name}
+                  setItems={this.onChangeApplicants}
+                  selectItem={this.onSelectApplicant}
+                  deselectItem={this.onDeselectApplicant}
+                  onCreate={this.onCreateApplicant}
+                />
+              </td>
+            </tr>
           </tbody>
           </table>
+          <br/>
           <br/>
           <table className='GrantEditor__fields'>
           <thead>
