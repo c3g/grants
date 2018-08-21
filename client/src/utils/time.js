@@ -18,5 +18,7 @@ export function isOlderThan(date, interval) {
 
 export function formatISO(date) {
   const d = new Date(date)
+  if (Number.isNaN(d.getTime()))
+    return date
   return format(new Date(+d + d.getTimezoneOffset()*60000), 'YYYY-MM-DD')
 }

@@ -39,7 +39,7 @@ function update(grant) {
         , cofunding = @cofunding
         , fields = @fields
     WHERE id = @id`,
-    grant
+    serialize(grant)
   )
   .then(() => findById(grant.id))
 }

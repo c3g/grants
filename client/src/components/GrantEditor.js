@@ -66,6 +66,8 @@ class GrantEditor extends React.Component {
       fieldName: '',
       fieldAmount: '',
       grant: props.grant,
+      start: formatISO(props.grant.data.start),
+      end: formatISO(props.grant.data.end)
     }
   }
 
@@ -80,24 +82,41 @@ class GrantEditor extends React.Component {
 
   componentWillReceiveProps(props, state) {
     if (props.grant !== this.props.grant)
-      this.setState({ grant: props.grant })
+      this.setState({
+        grant: props.grant,
+        start: formatISO(props.grant.data.start),
+        end: formatISO(props.grant.data.end)
+      })
   }
 
   getGrantColor(grant) {
-    if (this.props.categories.isLoading || !grant.data.categoryID)
+    const category = this.props.categories.data[grant.data.categoryID]
+    if (!category)
       return '#f7f7f7'
-    return this.props.categories.data[grant.data.categoryID].data.color
+    return category.data.color
+  }
+
+  onChangeName = name => {
+    this.setState({ grant: set(lensPath(['data', 'name']), name, this.state.grant) })
   }
 
   onChangeStart = start => {
-    const date = new Date(start)
+    this.setState({ start })
+  }
+
+  onBlurStart = () => {
+    const date = new Date(this.state.start)
     if (Number.isNaN(date.getTime()))
       return
     this.setState({ grant: set(lensPath(['data', 'start']), date.toISOString(), this.state.grant) })
   }
 
   onChangeEnd = end => {
-    const date = new Date(end)
+    this.setState({ end })
+  }
+
+  onBlurEnd = () => {
+    const date = new Date(this.state.end)
     if (Number.isNaN(date.getTime()))
       return
     this.setState({ grant: set(lensPath(['data', 'end']), date.toISOString(), this.state.grant) })
@@ -117,6 +136,14 @@ class GrantEditor extends React.Component {
 
   onChangeCategory = category => {
     this.setState({ grant: set(lensPath(['data', 'categoryID']), category.data.id, this.state.grant) })
+  }
+
+  onChangeTotal = total => {
+    this.setState({ grant: set(lensPath(['data', 'total']), total, this.state.grant) })
+  }
+
+  onChangeCofunding = cofunding => {
+    this.setState({ grant: set(lensPath(['data', 'cofunding']), cofunding, this.state.grant) })
   }
 
   onAddField = (index) => {
@@ -155,177 +182,185 @@ class GrantEditor extends React.Component {
     const color = this.getGrantColor(grant)
 
     return (
-      <div className='GrantEditor vbox' style={{ borderColor: color }}>
-        <div className='GrantEditor__name'>
-          <EditableLabel
-            className='fill-width'
-            value={grant.data.name}
-          />
-        </div>
-        <table className='GrantEditor__table'>
-        <tbody>
-          <tr>
-            <td><Label>Category:</Label></td>
-            <td>
-              <Dropdown
-                className='full-width'
-                label={
-                  <span className={!category ? 'text-muted' : ''}>
-                    {category ? category.data.name : 'Empty'}
-                  </span>
-                }
-              >
-                {
-                  Object.values(this.props.categories.data).map(category =>
-                    <Dropdown.Item onClick={() => this.onChangeCategory(category)}>
-                       <span
-                         className='color'
-                         style={{ backgroundColor: category.data.color }}
-                       /> { category.data.name }
-                    </Dropdown.Item>
-                  )
-                }
-              </Dropdown>
-            </td>
-          </tr>
-          <tr>
-            <td><Label>Status:</Label></td>
-            <td>
-              <Dropdown
-                className='full-width'
-                label={<span>{grant.data.status}</span>}
-              >
-                {
-                  Object.values(Status).map(status =>
-                    <Dropdown.Item onClick={() => this.onChangeStatus(status)}>
-                      { status }
-                    </Dropdown.Item>
-                  )
-                }
-              </Dropdown>
-            </td>
-          </tr>
-          <tr>
-            <td><Label>Start:</Label></td>
-            <td>
-              <EditableLabel
-                className='fill-width'
-                value={formatISO(grant.data.start)}
-                onEnter={this.onChangeStart}
-              />
-            </td>
-          </tr>
-          <tr>
-            <td><Label>End:</Label></td>
-            <td>
-              <EditableLabel
-                className='fill-width'
-                value={formatISO(grant.data.end)}
-                onEnter={this.onChangeEnd}
-              />
-            </td>
-          </tr>
-          <tr>
-            <td><Label>Total:</Label></td>
-            <td>
-              <EditableLabel
-                className='fill-width'
-                value={''+grant.data.total}
-                onEnter={this.onChangeTotal}
-              />
-            </td>
-          </tr>
-          <tr>
-            <td><Label>Co-funding:</Label></td>
-            <td>
-              <EditableLabel
-                className='fill-width'
-                value={''+grant.data.cofunding}
-                onEnter={this.onChangeCofunding}
-              />
-            </td>
-          </tr>
-        </tbody>
-        </table>
-        <br/>
-        <table className='GrantEditor__fields'>
-        <thead>
-          <tr>
-            <th colSpan='3'>
-              Fields:
-            </th>
-          </tr>
-        </thead>
-        <tbody>
-          {
-            grant.data.fields.map((field, i) =>
-              <tr>
-                <td>
-                  <EditableLabel
-                    className='fill-width'
-                    value={field.name}
-                  />
-                </td>
-                <td>
-                  <EditableLabel
-                    className='fill-width'
-                    value={field.amount}
-                  />
-                </td>
-                <td>
-                  <Button
-                    flat
-                    square
-                    small
-                    icon='close'
-                    onClick={() => this.onDeleteField(i)}
-                  />
-                </td>
-              </tr>
-            )
-          }
-          <tr>
-            <td>
-              <Input
-                placeholder='Name'
-                value={fieldName}
-                onChange={this.onChangeFieldName}
-                onEnter={this.onAddField}
-              />
-            </td>
-            <td>
-              <Input
-                placeholder='Amount'
-                value={fieldAmount}
-                onChange={this.onChangeFieldAmount}
-                onEnter={this.onAddField}
-              />
-            </td>
-            <td>
-              <Button
-                flat
-                square
-                small
-                icon='plus'
-                onClick={this.onAddField}
-              />
-            </td>
-          </tr>
-        </tbody>
-        </table>
+      <div className='GrantEditor vbox' style={{ backgroundColor: color }}>
+        <div className='GrantEditor__inner vbox'>
+          <table className='GrantEditor__table'>
+          <tbody>
+            <tr>
+              <td><Label>Title:</Label></td>
+              <td>
+                <Input
+                  className='fill-width'
+                  value={grant.data.name}
+                  onChange={this.onChangeName}
+                />
+              </td>
+            </tr>
+            <tr>
+              <td><Label>Category:</Label></td>
+              <td>
+                <Dropdown
+                  className='full-width input-like'
+                  label={
+                    <span className={!category ? 'text-muted' : ''}>
+                      {category ? category.data.name : 'Empty'}
+                    </span>
+                  }
+                >
+                  {
+                    Object.values(this.props.categories.data).map(category =>
+                      <Dropdown.Item onClick={() => this.onChangeCategory(category)}>
+                         <span
+                           className='color'
+                           style={{ backgroundColor: category.data.color }}
+                         /> { category.data.name }
+                      </Dropdown.Item>
+                    )
+                  }
+                </Dropdown>
+              </td>
+            </tr>
+            <tr>
+              <td><Label>Status:</Label></td>
+              <td>
+                <Dropdown
+                  className='full-width input-like'
+                  label={<span>{grant.data.status}</span>}
+                >
+                  {
+                    Object.values(Status).map(status =>
+                      <Dropdown.Item onClick={() => this.onChangeStatus(status)}>
+                        { status }
+                      </Dropdown.Item>
+                    )
+                  }
+                </Dropdown>
+              </td>
+            </tr>
+            <tr>
+              <td><Label>Start:</Label></td>
+              <td>
+                <Input
+                  className='fill-width'
+                  value={this.state.start}
+                  onChange={this.onChangeStart}
+                  onBlur={this.onBlurStart}
+                />
+              </td>
+            </tr>
+            <tr>
+              <td><Label>End:</Label></td>
+              <td>
+                <Input
+                  className='fill-width'
+                  value={this.state.end}
+                  onChange={this.onChangeEnd}
+                  onBlur={this.onBlurEnd}
+                />
+              </td>
+            </tr>
+            <tr>
+              <td><Label>Total:</Label></td>
+              <td>
+                <Input
+                  className='fill-width'
+                  value={''+grant.data.total}
+                  onChange={this.onChangeTotal}
+                />
+              </td>
+            </tr>
+            <tr>
+              <td><Label>Co-funding:</Label></td>
+              <td>
+                <Input
+                  className='fill-width'
+                  value={''+grant.data.cofunding}
+                  onChange={this.onChangeCofunding}
+                />
+              </td>
+            </tr>
+          </tbody>
+          </table>
+          <br/>
+          <table className='GrantEditor__fields'>
+          <thead>
+            <tr>
+              <th colSpan='3'>
+                Fields:
+              </th>
+            </tr>
+          </thead>
+          <tbody>
+            {
+              grant.data.fields.map((field, i) =>
+                <tr>
+                  <td>
+                    <EditableLabel
+                      className='fill-width'
+                      value={field.name}
+                    />
+                  </td>
+                  <td>
+                    <EditableLabel
+                      className='fill-width'
+                      value={field.amount}
+                    />
+                  </td>
+                  <td>
+                    <Button
+                      flat
+                      square
+                      small
+                      icon='close'
+                      onClick={() => this.onDeleteField(i)}
+                    />
+                  </td>
+                </tr>
+              )
+            }
+            <tr>
+              <td>
+                <Input
+                  placeholder='Name'
+                  value={fieldName}
+                  onChange={this.onChangeFieldName}
+                  onEnter={this.onAddField}
+                />
+              </td>
+              <td>
+                <Input
+                  placeholder='Amount'
+                  value={fieldAmount}
+                  onChange={this.onChangeFieldAmount}
+                  onEnter={this.onAddField}
+                />
+              </td>
+              <td>
+                <Button
+                  flat
+                  square
+                  small
+                  icon='plus'
+                  onClick={this.onAddField}
+                />
+              </td>
+            </tr>
+          </tbody>
+          </table>
 
-        <div className='fill' />
-
-        <div className='row'>
           <div className='fill' />
-          <Button onClick={this.onCancel}>
-            Cancel
-          </Button>
-          <Button success onClick={this.onDone}>
-            Done
-          </Button>
-        </div>
 
+          <div className='row'>
+            <div className='fill' />
+            <Button onClick={this.onCancel} disabled={grant.isLoading}>
+              Cancel
+            </Button>
+            <Button className='default' onClick={this.onDone} loading={grant.isLoading}>
+              Done
+            </Button>
+          </div>
+
+        </div>
       </div>
     )
   }

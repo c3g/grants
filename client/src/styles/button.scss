@@ -7,7 +7,6 @@
   min-width: 100px;
   padding: 0 2 * $padding;
   font-weight: bold;
-  background-color: transparent;
   color: $color;
   border: 1px solid $light-border-color;
   border-radius: 2px;
@@ -131,6 +130,18 @@
 .Button.highlight {
   color: $text-color-highlight;
   background-color: $hover-light-bg-color;
+}
+
+.Button.default {
+  background-color: $bg-color-default;
+}
+.Button.default:hover {
+  background-color: darken($bg-color-default, 5%);
+}
+.Button.default.active,
+.Button.default:active,
+.Button.default:focus {
+  background-color: darken($bg-color-default, 10%);
 }
 
 @each $level, $values in $colors {

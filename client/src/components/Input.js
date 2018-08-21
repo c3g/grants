@@ -86,7 +86,6 @@ class Input extends React.Component {
       value,
       loading,
       status,
-      fillWidth,
       autoSelect,
       clearOnEnter,
       clearOnBlur,
@@ -109,7 +108,6 @@ class Input extends React.Component {
       {
         small,
         large,
-        'fill-width': fillWidth,
         'has-icon': icon !== undefined,
       }
     )

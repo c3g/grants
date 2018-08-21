@@ -31,7 +31,8 @@ function Button(props) {
     children,
     icon,
     iconAfter,
-    onClick
+    onClick,
+    ...rest
   } = props
 
   const buttonClassName = classname(
@@ -62,6 +63,7 @@ function Button(props) {
     <button className={buttonClassName}
       onClick={onClick}
       disabled={loading || disabled}
+      {...rest}
     >
       { icon !== undefined && <Icon name={icon} marginRight={(round || square) ? 0 : 5} className='Button__icon' /> }
       {

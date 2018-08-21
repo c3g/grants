@@ -16,14 +16,27 @@ html, body {
 
 * { box-sizing: border-box; }
 
-::selection {
-  background: $selection-color;
-}
-::-moz-selection {
-  background: $selection-color;
-}
+
+/*
+ * Selection
+ */
+
+::selection { background: $selection-color; }
+::-moz-selection { background: $selection-color; }
 ::-moz-focus-inner { border: 0; }
 
+/*
+ * Placeholders
+ */
+
+::-webkit-input-placeholder { color: $text-color-subtle; }
+::-moz-placeholder { color: $text-color-subtle; }
+:-ms-input-placeholder { color: $text-color-subtle; }
+:-moz-placeholder { color: $text-color-subtle; }
+
+/*
+ * Scrollbar
+ */
 
 *::-webkit-scrollbar {
   width: 10px;
@@ -37,6 +50,11 @@ html, body {
   background-color: rgba(0, 0, 0, 0.1);
   box-shadow: inset 0 0 6px rgba(0,0,0,.2);
 }
+
+
+/*
+ * Layout
+ */
 
 .vbox {
   display: flex;
@@ -346,6 +364,7 @@ textarea.text.editable:focus {
   display: inline-block;
   position: relative;
   color: $light-color;
+  width: 180px;
 }
 .Input__icon {
   position: absolute;
@@ -361,7 +380,7 @@ textarea.text.editable:focus {
   border-radius: 2px;
   padding: 0 8px;
   height: 30px;
-  width: 180px;
+  width: 100%;
   transition: box-shadow .25s;
 }
 .Input__element:active,
@@ -843,13 +862,22 @@ section {
   transform: translate(-50%, -50%);
   width: 500px;
   height: 600px;
-  padding: 4 * $padding;
-  border: 3px solid $border-color;
+  padding: 2 * $padding;
+  border: 3px solid #333;
+  border-radius: 2px;
   background-color: $bg-color-default;
+}
+.GrantEditor__inner {
+  background-color: rgba(white, 0.5);
+  padding: 2 * $padding;
+  height: 100%;
 }
 .GrantEditor__table {
   width: 100%;
   table-layout: fixed;
+  & td {
+    padding: 2.5px 0;
+  }
 }
 .GrantEditor__fields {
   width: 100%;

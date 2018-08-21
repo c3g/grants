@@ -30,6 +30,7 @@ import Category from '../actions/categories'
 import filterTags from '../utils/filter-tags'
 import uniq from '../utils/uniq'
 import { getNewGrant, getNewFunding } from '../models'
+import Button from './Button'
 import Checkbox from './Checkbox'
 import Dropdown from './Dropdown'
 import FilterCategoriesDropdown from './FilterCategoriesDropdown'
@@ -97,6 +98,7 @@ class Grants extends React.Component {
   constructor(props) {
     super(props)
 
+    sortByStartDate(props.grants)
     this.state = {
       width: window.innerWidth || 500,
       height: 200,
@@ -155,7 +157,8 @@ class Grants extends React.Component {
   }
 
   componentWillReceiveProps(props, state) {
-    if (props.grants !== this.props.grants)
+    if (props.grants !== this.props.grants) {
+      sortByStartDate(props.grants)
       this.setState({
         grants: props.grants.reduce((acc, grant) => {
           acc[grant.data.id] = {
@@ -164,6 +167,7 @@ class Grants extends React.Component {
           return acc
         }, {})
       })
+    }
   }
 
   updateDimensions() {
@@ -232,9 +236,10 @@ class Grants extends React.Component {
   }
 
   getGrantColor(grant) {
-    if (this.props.categories.isLoading)
+    const category = this.props.categories.data[grant.data.categoryID]
+    if (!category)
       return '#bbb'
-    return this.props.categories.data[grant.data.categoryID].data.color
+    return category.data.color
   }
 
   getGrantCofunding(grant) {
@@ -285,6 +290,8 @@ class Grants extends React.Component {
   }
 
   getClickedFundingID() {
+    if (!this.state.fundingMode)
+      return undefined
     const entry = Object.entries(this.fundingsPositions).find(([id, { hover }]) => hover)
     return entry ? entry[0] : undefined
   }
@@ -325,7 +332,7 @@ class Grants extends React.Component {
     const {grantMode, grant, height} = this.state
     const pointerX = this.space.pointer.x
 
-    const isCreatingGrant = grantMode && grant.data.end === null
+    const isCreatingGrant = grantMode && grant && grant.data.end === null
 
     if (isCreatingGrant) {
       const startX = this.dateToX(grant.data.start)
@@ -527,9 +534,9 @@ class Grants extends React.Component {
       this.form.fill(textColor).font(TEXT_SIZE, 'normal')
       drawLabel({ label: 'Project total:', value: formatAmount(grant.data.total) })
 
-      grant.data.fields.forEach(field => {
-        drawLabel({ label: `${field.name}:`, value: formatAmount(field.amount) })
-      })
+      // grant.data.fields.forEach(field => {
+      //   drawLabel({ label: `${field.name}:`, value: formatAmount(field.amount) })
+      // })
 
       this.form.fill(textColor).font(TEXT_SIZE, 'bold')
       drawLabel({ label: `Available co-funding:`, value: formatAmount(cofunding) })
@@ -842,12 +849,14 @@ class Grants extends React.Component {
     }
 
     const {grantMode, grant} = this.state
-    const isCreatingGrant = grantMode && grant.data.end === null
+    const isCreatingGrant = grantMode && grant && grant.data.end === null
 
-    const end = this.xToDate(this.space.pointer.x)
-    this.setState({
-      grant: set(lensPath(['data', 'end']), end, this.state.grant)
-    })
+    if (isCreatingGrant) {
+      const end = this.xToDate(this.space.pointer.x)
+      this.setState({
+        grant: set(lensPath(['data', 'end']), end, this.state.grant)
+      })
+    }
   }
 
   onTouchStart = this.onStartDrag
@@ -876,16 +885,34 @@ class Grants extends React.Component {
 
   onClick = (event) => {
     if (this.didDrag) {
-      console.log('didDrag')
       return
     }
 
     const grant = this.getClickedGrant(event)
     const fundingID = this.getClickedFundingID()
 
-    if (this.state.funding) {
+    if (fundingID) {
+      this.onClickFunding(event, fundingID)
+      return
+    }
 
-      if (!grant || grant.data.id === this.state.funding.data.fromGrantID) {
+    if (grant) {
+      this.onClickGrant(event, grant)
+      return
+    }
+
+    if (this.state.funding) {
+      this.setState({ funding: null })
+    }
+  }
+
+  onClickFunding = (event, id) => {
+    Funding.delete(id)
+  }
+
+  onClickGrant = (event, grant) => {
+    if (this.state.funding) {
+      if (grant.data.id === this.state.funding.data.fromGrantID) {
         this.setState({ funding: null })
         return
       }
@@ -899,7 +926,6 @@ class Grants extends React.Component {
       })
     }
     else if (event.ctrlKey) {
-
       // Create new funding
       if (grant && !this.state.funding && this.getGrantCofunding(grant) > 0) {
         this.setState({
@@ -910,26 +936,39 @@ class Grants extends React.Component {
           }
         })
       }
-      // Click delete funding
-      else if (fundingID) {
-        Funding.delete(fundingID)
-      }
-
+    }
+    else {
+      this.setState({
+        grantMode: 'edit',
+        grant: grant,
+      })
     }
   }
 
   onDocumentKeyDown = (event) => {
+    const {fundingMode, grantMode} = this.state
+
+    if (isEscapeKey(event)) {
+      this.onEscape()
+    }
+
+    if (fundingMode || grantMode)
+      return
+
     if (isControlKey(event)) {
       this.setState({ fundingMode: true })
     }
-    if (isEscapeKey(event)) {
-      this.onEscape()
+    if (isShiftKey(event)) {
+      this.setState({ grantMode: true })
     }
   }
 
   onDocumentKeyUp = (event) => {
     if (isControlKey(event) && !this.state.funding) {
       this.setState({ fundingMode: false })
+    }
+    if (isShiftKey(event) && !this.state.grant) {
+      this.exitGrantMode()
     }
   }
 
@@ -1001,12 +1040,11 @@ class Grants extends React.Component {
     })
   }
 
-  validateFunding = (value) => {
+  validateFunding = (newValue) => {
     const {funding} = this.state
-    const amount = parseAmount(value)
+    const amount = parseAmount(newValue)
 
     if (Number.isNaN(amount)) {
-      this.setState({ inputMessage: 'Not a valid number' })
       return false
     }
 
@@ -1014,11 +1052,9 @@ class Grants extends React.Component {
     const maximum = this.getGrantCofunding(grant)
 
     if (amount > maximum) {
-      this.setState({ inputMessage: 'Maximum amount is ' + formatAmount(maximum) })
       return false
     }
 
-    this.setState({ inputMessage: undefined })
     return true
   }
 
@@ -1037,6 +1073,7 @@ class Grants extends React.Component {
     .then(() => {
       this.exitGrantMode()
     })
+    .catch(() => { /* FIXME(assert we're showing the message) */})
   }
 
   onUpdateGrant = (grant) => {
@@ -1044,6 +1081,13 @@ class Grants extends React.Component {
     .then(() => {
       this.exitGrantMode()
     })
+    .catch(() => { /* FIXME(assert we're showing the message) */})
+  }
+
+  onDeleteGrant = (grant) => {
+    Grant.delete(grant.data.id)
+    .then(() => { /* FIXME(anything to do here?) */ })
+    .catch(() => { /* FIXME(assert we're showing the message) */})
   }
 
   exitGrantMode = () => {
@@ -1069,7 +1113,7 @@ class Grants extends React.Component {
         }}
       >
         <Input
-          fillWidth
+          className='fill-width'
           placeholder={ `Enter amount (maximum: ${formatAmount(maximum)})` }
           onBlur={this.onBlurInput}
           onEnter={this.onEnterInput}
@@ -1086,6 +1130,9 @@ class Grants extends React.Component {
     if  (grantMode === false)
       return null
 
+    if  (grantMode === true)
+      return null
+
     if (grantMode === 'new' && grant.data.end === null)
       return null
 
@@ -1099,6 +1146,25 @@ class Grants extends React.Component {
         onCancel={this.exitGrantMode}
       />
     ]
+  }
+
+  renderGrantButtons() {
+    const {grantMode} = this.state
+
+    if (grantMode !== true)
+      return null
+
+    return this.grantsDimensions.map((dimension, i) =>
+      <Button
+        square
+        icon='close'
+        style={{
+          position: 'absolute',
+          transform: `translate(${dimension[1].x + 5}px, ${dimension[0].y}px)`,
+        }}
+        onClick={() => this.onDeleteGrant(this.props.grants[i]) }
+      />
+    )
   }
 
   render() {
@@ -1133,6 +1199,7 @@ class Grants extends React.Component {
 
         { this.renderInput() }
         { this.renderGrantEditor() }
+        { this.renderGrantButtons() }
       </div>
     )
   }
@@ -1197,13 +1264,24 @@ function isControlKey(event) {
   )
 }
 
+function isShiftKey(event) {
+  return (
+       event.code.startsWith('Shift')
+    || event.key === 'Shift'
+    || event.which === 16 /* Shift */
+  )
+}
+
 function isEscapeKey(event) {
   return (
-    event.code.startsWith('Control')
+       event.code === 'Escape'
     || event.key === 'Escape'
-    || event.code === 'Escape'
     || event.which === 27 /* Escape */
   )
+}
+
+function sortByStartDate(/* mutable */ grants) {
+  grants.sort((a, b) => new Date(a.data.start) - new Date(b.data.start))
 }
 
 export default withRouter(pure(Grants))
