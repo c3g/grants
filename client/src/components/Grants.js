@@ -106,6 +106,8 @@ class Grants extends React.Component {
       startDate: INITIAL_DATE,
       endDate: endOfYear(addYears(INITIAL_DATE, 2)),
 
+      mouseHover: false,
+
       grantMode: false,
       grant: null,
 
@@ -329,8 +331,11 @@ class Grants extends React.Component {
   }
 
   drawCursorLine() {
-    const {grantMode, grant, height} = this.state
+    const {grantMode, grant, height, mouseHover} = this.state
     const pointerX = this.space.pointer.x
+
+    if (!mouseHover)
+      return
 
     const isCreatingGrant = grantMode && grant && grant.data.end === null
 
@@ -394,7 +399,7 @@ class Grants extends React.Component {
         })
       })
     }
-    
+
     years.forEach(year => {
       const x = this.dateToX(year)
       const text = format(year, 'YYYY')
@@ -822,7 +827,10 @@ class Grants extends React.Component {
   onMouseMove = (event) => {
     if (this.isDragging)
       this.didDrag = true
-    this.forceUpdate()
+    if (!this.state.mouseHover)
+      this.setState({ mouseHover: true })
+    else
+      this.forceUpdate()
   }
 
   onMouseDown = (event) => {
@@ -843,6 +851,14 @@ class Grants extends React.Component {
         data: getNewGrant(start, null),
       },
     })
+  }
+
+  onMouseEnter = (event) => {
+    this.setState({ mouseHover: true })
+  }
+
+  onMouseLeave = (event) => {
+    this.setState({ mouseHover: false })
   }
 
   onDocumentMouseUp = (event) => {
@@ -1173,9 +1189,10 @@ class Grants extends React.Component {
   }
 
   render() {
-    const {width, height} = this.state
+    const {width, height, mouseHover} = this.state
 
     const hasPointer = this.space.pointer
+    const showTooltip = hasPointer && mouseHover
     const {pointer = {x: -100, y: -100}} = this.space
 
     return (
@@ -1190,11 +1207,13 @@ class Grants extends React.Component {
           onMouseMove={this.onMouseMove}
           onMouseDown={this.onMouseDown}
           onTouchStart={this.onTouchStart}
+          onMouseEnter={this.onMouseEnter}
+          onMouseLeave={this.onMouseLeave}
         />
 
         <div className='Grants__mouseDate'
           style={{
-            display: hasPointer ? 'block' : 'none',
+            display: showTooltip ? 'block' : 'none',
             top:  pointer.y,
             left: pointer.x + 20,
           }}

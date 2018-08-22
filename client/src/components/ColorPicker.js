@@ -3,11 +3,13 @@ import Prop from 'prop-types'
 import { createPortal, findDOMNode } from 'react-dom'
 import pure from 'recompose/pure'
 import classname from 'classname'
+import objectEquals from 'object-equals'
 
 import COLORS from '../constants/colors'
 import size from '../utils/size'
 import Button from './Button'
 import Icon from './Icon'
+import Input from './Input'
 import Tooltip from './Tooltip'
 import Text from './Text'
 
@@ -39,6 +41,7 @@ class ColorPicker extends React.Component {
         top: 0,
         left: 0
       },
+      value: props.value || '',
     }
   }
 
@@ -60,10 +63,14 @@ class ColorPicker extends React.Component {
   componentDidUpdate() {
     const position = this.getPosition()
 
-    if (position.left !== this.state.position.left
-      || position.top !== this.state.position.top) {
+    if (!objectEquals(position, this.state.position)) {
       this.setState({ position })
     }
+  }
+
+  componentWillReceiveProps(props, state) {
+    if (props.value !== this.props.value)
+      this.setState({ value: props.value })
   }
 
   onDocumentClick(ev) {
@@ -87,80 +94,87 @@ class ColorPicker extends React.Component {
     if (!this.element)
       return { top: 0, left: 0 }
 
+    const gap = 5
+    const colorSize = 4
     const element = this.element.getBoundingClientRect()
     const inner   = this.inner.getBoundingClientRect()
 
-    let style
+    let menu
+    let arrow
 
-    if (this.props.position === 'bottom left')
-      style = {
-        top:  element.top + element.height,
+    if (this.props.position === 'bottom left') {
+      menu = {
+        top:  element.top + element.height + gap,
         left: element.left - inner.width + element.width,
       }
-    else if (this.props.position === 'right')
-      style = {
+      arrow = {
+        top:  -8,
+        left: element.left - inner.left + colorSize,
+      }
+    }
+    else if (this.props.position === 'right') {
+      menu = {
         top:  element.top,
         left: element.right,
       }
-    else
-      style = {
+      arrow = {
+        top: element.top,
+        left: element.left,
+      }
+    }
+    else {
+      menu = {
         top:  element.top + element.height,
         left: element.left,
       }
+      arrow = {
+        top: element.top,
+        left: element.left,
+      }
+    }
 
-    style.left += this.props.offset ? (this.props.offset.left || 0) : 0
-    style.top  += this.props.offset ? (this.props.offset.top || 0) : 0
+    return { menu, arrow }
+  }
 
-    return style
+  open = (ev) => {
+    this.setState({ open: true })
   }
 
   close = (ev) => {
-    const isControlled = 'open' in this.props
-
-    if (isControlled)
-      this.props.onClose && this.props.onClose(ev)
-    else
-      this.setState({ open: false })
+    this.setState({ open: false })
   }
 
   toggle = () => {
     const open = !this.state.open
     this.setState({ open })
-
-    if (open && this.props.onOpen)
-      this.props.onOpen()
-  }
-
-  getColorStyle(color) {
-    return {
-      backgroundColor: color,
-    }
   }
 
   change(color) {
-    const isControlled = 'open' in this.props
     this.props.onChange(color)
-    if (isControlled)
-      this.props.onClose()
-    else
-      this.close()
+    this.close()
+  }
+
+  onChangeInput = (value) => {
+    this.setState({ value })
+  }
+
+  onAcceptInput = (event) => {
+    this.change(this.state.value)
   }
 
   render() {
     const {
       className,
       position,
-      value,
       loading,
-      closeOnClick = true,
     } = this.props
+    const { value } = this.state
 
     const isControlled = 'open' in this.props
     const open = isControlled ? this.props.open : this.state.open
 
     const colorPickerClassName = classname(
       'ColorPicker',
-      'label',
       className,
       {
         'open': open,
@@ -175,37 +189,49 @@ class ColorPicker extends React.Component {
       })
 
     return [
-        <button
+        <span
           className={colorPickerClassName}
-          onClick={isControlled ? undefined : this.toggle}
           ref={this.onRef}
         >
-          <span className='ColorPicker__color' style={{ backgroundColor: value }}/>{' '}
-          { value }
-        </button>,
+          <span
+            className='ColorPicker__color ColorPicker__color--main'
+            style={{ backgroundColor: value }}
+          />{' '}
+          <Input
+            className='ColorPicker__input'
+            value={value}
+            onFocus={this.open}
+            onChange={this.onChangeInput}
+            onBlur={this.onAcceptInput}
+            onEnter={this.onAcceptInput}
+          />
+        </span>,
 
         createPortal(
           <div className={menuClassName}
-              style={this.state.position}
+              style={this.state.position.menu}
               ref={ref => ref && (this.menu = findDOMNode(ref))}
           >
             <div
               className='ColorPicker__inner'
               ref={ref => ref && (this.inner = findDOMNode(ref))}
             >
+              <div
+                style={this.state.position.arrow}
+                className='ColorPicker__arrow'
+              />
               {
                 groupByNumber(COLORS, 4).map(colors =>
                   <div>
                     {
                       colors.map(color =>
-                        <Button
+                        <button
                           flat
                           square
-                          className='fill center'
+                          className='ColorPicker__color ColorPicker__color--button'
+                          style={{ backgroundColor: color }}
                           onClick={() => this.change(color)}
-                        >
-                          <span className='ColorPicker__color' style={{ backgroundColor: color }}/>
-                        </Button>
+                        />
                       )
                     }
                   </div>

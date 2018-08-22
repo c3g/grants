@@ -17,6 +17,7 @@ import ColorPicker from './ColorPicker'
 import EditableLabel from './EditableLabel'
 import EditableList from './EditableList'
 import Gap from './Gap'
+import Input from './Input'
 import Label from './Label'
 import Text from './Text'
 import Title from './Title'
@@ -27,12 +28,22 @@ const Group = styled.div`
 `
 
 class Settings extends React.Component {
+
+  static propTypes = {
+    users: PropTypes.arrayOf(PropTypes.object).isRequired,
+    applicants: PropTypes.object.isRequired,
+    categories: PropTypes.object.isRequired,
+  }
+
   constructor(props) {
     super(props)
 
-    this.state = Object.assign({
+    this.state = {
       whitelist: {},
-    }, this.parseProps(props))
+      newApplicant: '',
+      newCategory: { name: '', color: '#' },
+      ...this.parseProps(props)
+    }
   }
 
   componentWillReceiveProps(props) {
@@ -87,6 +98,34 @@ class Settings extends React.Component {
     User.update(id, user)
   }
 
+  onChangeNewApplicant = newApplicant => {
+    this.setState({ newApplicant })
+  }
+
+  onCreateNewApplicant = () => {
+    const {newApplicant} = this.state
+    if (!newApplicant)
+      return
+    Applicant.create({ name: newApplicant })
+    .then(() => this.setState({ newApplicant: '' }))
+  }
+
+  onChangeNewCategoryName = name => {
+    this.setState({ newCategory: { ...this.state.newCategory, name } })
+  }
+
+  onChangeNewCategoryColor = color => {
+    this.setState({ newCategory: { ...this.state.newCategory, color } })
+  }
+
+  onCreateNewCategory = () => {
+    const {newCategory} = this.state
+    if (!newCategory.name || !/^#([0-9a-fA-F]{3}|[0-9a-fA-F]{6})$/.test(newCategory.color))
+      return
+    Category.create(newCategory)
+    .then(() => this.setState({ newCategory: { name: '', color: '#' } }))
+  }
+
   render() {
     const {
       users,
@@ -95,7 +134,9 @@ class Settings extends React.Component {
     } = this.props
 
     const {
-      whitelist
+      whitelist,
+      newApplicant,
+      newCategory,
     } = this.state
 
     return (
@@ -209,12 +250,10 @@ class Settings extends React.Component {
                     sortBy(prop('id'), applicants).map(applicant =>
                       <tr>
                         <td>
-                          {
-                            <EditableLabel
-                              value={applicant.data.name}
-                              onEnter={name => Applicant.update(applicant.data.id, { name })}
-                            />
-                          }
+                          <EditableLabel
+                            value={applicant.data.name}
+                            onEnter={name => Applicant.update(applicant.data.id, { name })}
+                          />
                         </td>
                         <td className='button-column'>
                           <Button
@@ -237,6 +276,28 @@ class Settings extends React.Component {
                         </td>
                       </tr>
                   }
+                  <tr>
+                    <td className='Settings__table__inputCell'>
+                      <Input
+                        placeholder='Create new applicant'
+                        className='fill-width'
+                        disabled={applicants.isCreating}
+                        value={newApplicant}
+                        onChange={this.onChangeNewApplicant}
+                        onEnter={this.onCreateNewApplicant}
+                      />
+                    </td>
+                    <td className='button-column'>
+                      <Button
+                        flat
+                        square
+                        small
+                        icon='plus'
+                        disabled={applicants.isCreating || applicants.isLoading}
+                        onClick={this.onCreateNewApplicant}
+                      />
+                    </td>
+                  </tr>
                 </tbody>
               </table>
             </Group>
@@ -292,6 +353,34 @@ class Settings extends React.Component {
                         </td>
                       </tr>
                   }
+                  <tr>
+                    <td className='Settings__table__inputCell'>
+                      <Input
+                        placeholder='Create new category'
+                        className='fill-width'
+                        disabled={categories.isCreating}
+                        value={newCategory.name}
+                        onChange={this.onChangeNewCategoryName}
+                        onEnter={this.onCreateNewCategory}
+                      />
+                    </td>
+                    <td>
+                      <ColorPicker
+                        value={newCategory.color}
+                        onChange={this.onChangeNewCategoryColor}
+                      />
+                    </td>
+                    <td className='button-column'>
+                      <Button
+                        flat
+                        square
+                        small
+                        icon='plus'
+                        disabled={applicants.isCreating || applicants.isLoading}
+                        onClick={this.onCreateNewApplicant}
+                      />
+                    </td>
+                  </tr>
                 </tbody>
               </table>
             </Group>
@@ -301,11 +390,6 @@ class Settings extends React.Component {
       </section>
     )
   }
-}
-
-Settings.propTypes = {
-  data: PropTypes.object.isRequired,
-  users: PropTypes.arrayOf(PropTypes.object).isRequired,
 }
 
 export default pure(Settings)
