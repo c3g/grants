@@ -375,8 +375,26 @@ class Grants extends React.Component {
       monthsAfterYear++
     }
 
-    const monthsByYear = groupBy(d => d.getFullYear(), months)
+    if (monthsAfterYear <= 6) {
+      const monthsByYear = groupBy(d => d.getFullYear(), months)
 
+      Object.values(monthsByYear).forEach(months => {
+        const offset = months[0].getMonth() === 0 ? 0 : 12 - months.length
+        months.forEach((month, i) => {
+          if (month.getTime() === startOfYear(month).getTime())
+            return
+
+          if ((i + offset) % monthsAfterYear !== 0)
+            return
+
+          const x = this.dateToX(month)
+          const text = format(month, 'MMM')
+          this.form.fill(MONTH_LINE_COLOR).text([x + 5, 5], text)
+          this.drawLine([[x, 0], [x, TIMELINE_HEIGHT]], MONTH_LINE_COLOR)
+        })
+      })
+    }
+    
     years.forEach(year => {
       const x = this.dateToX(year)
       const text = format(year, 'YYYY')
@@ -385,21 +403,6 @@ class Grants extends React.Component {
       this.drawLine([[x, 0], [x, TIMELINE_HEIGHT]], YEAR_LINE_COLOR)
     })
 
-    Object.values(monthsByYear).forEach(months => {
-      const offset = months[0].getMonth() === 0 ? 0 : 12 - months.length
-      months.forEach((month, i) => {
-        if (month.getTime() === startOfYear(month).getTime())
-          return
-
-        if ((i + offset) % monthsAfterYear !== 0)
-          return
-
-        const x = this.dateToX(month)
-        const text = format(month, 'MMM')
-        this.form.fill(MONTH_LINE_COLOR).text([x + 5, 5], text)
-        this.drawLine([[x, 0], [x, TIMELINE_HEIGHT]], MONTH_LINE_COLOR)
-      })
-    })
   }
 
   drawGrants() {

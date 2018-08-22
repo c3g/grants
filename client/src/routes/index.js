@@ -13,7 +13,7 @@ import { createStructuredSelector, createSelector } from 'reselect'
 import GlobalActions from '../actions/global'
 import Navbar from '../components/Navbar'
 // import CompletionFunctionsContainer from '../containers/CompletionFunctionsContainer'
-// import FAQContainer from '../containers/FAQContainer'
+import FAQContainer from '../containers/FAQContainer'
 import IndexContainer from '../containers/IndexContainer'
 import NotificationsContainer from '../containers/NotificationsContainer'
 import GrantsContainer from '../containers/GrantsContainer'
@@ -88,10 +88,10 @@ function Routes({ isLoggedIn, isLoggingIn, logOut, showFAQ }) {
 
         <NotificationsContainer />
         <IndexContainer />
+        <FAQContainer />
       </div>
     </Router>
   )
-  // <FAQContainer />
 }
 
 Routes.propTypes = {

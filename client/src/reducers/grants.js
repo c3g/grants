@@ -1,5 +1,5 @@
 import {
-  get,
+  over,
   set,
   lensPath,
   indexBy,
@@ -7,8 +7,9 @@ import {
   assoc,
   dissoc
 } from 'ramda'
-import { GRANTS } from '../constants/ActionTypes'
+import { GRANTS, APPLICANTS } from '../constants/ActionTypes'
 
+import objectMap from '../utils/object-map'
 import toLoadable from '../utils/to-loadable'
 
 const initialState = {
@@ -48,6 +49,19 @@ export default function grants(state = initialState, action) {
       return { ...state, data: dissoc(action.meta.id, state.data) }
     case GRANTS.DELETE.ERROR:
       return set(lensPath(['data', action.meta.id, 'isLoading']), true, state)
+
+    case APPLICANTS.DELETE.RECEIVE: {
+      return {
+        ...state,
+        data: objectMap(state.data, grant =>
+          over(
+            lensPath(['data', 'applicants']),
+            applicants => applicants.filter(id => id !== action.meta.id),
+            grant
+          )
+        )
+      }
+    }
 
     default:
       return state

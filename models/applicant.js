@@ -39,5 +39,6 @@ function create(applicant) {
 
 module.exports.delete = function(id) {
   return db.query('DELETE FROM applicants WHERE id = @id', { id })
+    .then(() => db.query('UPDATE grants SET applicants = ARRAY_REMOVE(applicants, @id)', { id }))
     .then(() => id)
 }
