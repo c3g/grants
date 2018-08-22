@@ -10,6 +10,7 @@ import User from '../actions/users'
 import Applicant from '../actions/applicants'
 import Category from '../actions/categories'
 
+import isColor from '../utils/is-color'
 import uniq from '../utils/uniq'
 import getEmails from '../utils/get-emails'
 import Button from './Button'
@@ -120,7 +121,7 @@ class Settings extends React.Component {
 
   onCreateNewCategory = () => {
     const {newCategory} = this.state
-    if (!newCategory.name || !/^#([0-9a-fA-F]{3}|[0-9a-fA-F]{6})$/.test(newCategory.color))
+    if (!newCategory.name || !isColor(newCategory.color))
       return
     Category.create(newCategory)
     .then(() => this.setState({ newCategory: { name: '', color: '#' } }))
@@ -181,7 +182,7 @@ class Settings extends React.Component {
                         <td>
                           {
                             user.googleID === null ?
-                              <Label>{user.name}</Label>
+                              <Label style={{ padding: '0 5px' }}>{user.name}</Label>
                               :
                               <EditableLabel
                                 value={user.name}
@@ -358,7 +359,7 @@ class Settings extends React.Component {
                       <Input
                         placeholder='Create new category'
                         className='fill-width'
-                        disabled={categories.isCreating}
+                        disabled={categories.isCreating || categories.isLoading}
                         value={newCategory.name}
                         onChange={this.onChangeNewCategoryName}
                         onEnter={this.onCreateNewCategory}
@@ -376,8 +377,8 @@ class Settings extends React.Component {
                         square
                         small
                         icon='plus'
-                        disabled={applicants.isCreating || applicants.isLoading}
-                        onClick={this.onCreateNewApplicant}
+                        disabled={categories.isCreating || categories.isLoading}
+                        onClick={this.onCreateNewCategory}
                       />
                     </td>
                   </tr>

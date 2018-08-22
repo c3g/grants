@@ -40,5 +40,6 @@ function create(category) {
 
 module.exports.delete = function(id) {
   return db.query('DELETE FROM categories WHERE id = @id', { id })
-    .then(() => id)
+  .then(() => db.query('UPDATE grants SET "categoryID" = NULL WHERE "categoryID" = @id', { id }))
+  .then(() => id)
 }

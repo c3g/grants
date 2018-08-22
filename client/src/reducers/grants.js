@@ -7,7 +7,7 @@ import {
   assoc,
   dissoc
 } from 'ramda'
-import { GRANTS, APPLICANTS } from '../constants/ActionTypes'
+import { GRANTS, APPLICANTS, CATEGORIES } from '../constants/ActionTypes'
 
 import objectMap from '../utils/object-map'
 import toLoadable from '../utils/to-loadable'
@@ -57,6 +57,19 @@ export default function grants(state = initialState, action) {
           over(
             lensPath(['data', 'applicants']),
             applicants => applicants.filter(id => id !== action.meta.id),
+            grant
+          )
+        )
+      }
+    }
+
+    case CATEGORIES.DELETE.RECEIVE: {
+      return {
+        ...state,
+        data: objectMap(state.data, grant =>
+          over(
+            lensPath(['data', 'categoryID']),
+            categoryID => categoryID === action.meta.id ? null : categoryID,
             grant
           )
         )

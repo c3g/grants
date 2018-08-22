@@ -208,6 +208,10 @@ input, textarea, select, button {
 .label.large {
   font-size: 16px;
 }
+
+.label.editable {
+  padding: 0 $padding;
+}
 .label.editable.fill-width {
   width: 100%;
 }
@@ -244,12 +248,12 @@ input.label.editable {
   color: inherit;
   background-color: transparent;
   border: none;
-  padding: 0;
 }
 input.label.editable:active,
 input.label.editable:focus {
   outline: none;
   box-shadow: 0 0 0 1px $focus-color;
+  background-color: $input-bg-color;
 }
 
 .text {
@@ -733,12 +737,17 @@ section {
 }
 
 
+/*
+ * Settings
+ */
+
 .Settings__content {
   padding: (4 * $padding) (6 * $padding);
 }
 
-
-
+.Settings__table td {
+  padding: 0;
+}
 .Settings__table td:first-child {
   width: 200px;
 }

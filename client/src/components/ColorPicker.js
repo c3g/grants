@@ -5,6 +5,7 @@ import pure from 'recompose/pure'
 import classname from 'classname'
 import objectEquals from 'object-equals'
 
+import isColor from '../utils/is-color'
 import COLORS from '../constants/colors'
 import size from '../utils/size'
 import Button from './Button'
@@ -195,7 +196,7 @@ class ColorPicker extends React.Component {
         >
           <span
             className='ColorPicker__color ColorPicker__color--main'
-            style={{ backgroundColor: value }}
+            style={{ backgroundColor: isColor(value) ? value : 'transparent' }}
           />{' '}
           <Input
             className='ColorPicker__input'
