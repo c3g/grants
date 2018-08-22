@@ -22,11 +22,14 @@ import Title from './Title'
 const Images = {
 }
 
-function Question({ children }) {
+function Question({ label, children }) {
   return (
     <div className='Question'>
       <Icon name='question-circle' />
-      { children }
+      <Label medium>{ label }</Label>
+      <Text medium block>
+        { children }
+      </Text>
     </div>
   )
 }
@@ -46,32 +49,29 @@ class FAQ extends React.Component {
       >
         <Modal.Content>
 
-          <Title>Grants</Title>
-
-          <div className='row'>
-            <Text medium block>
-            </Text>
-          </div>
-
-          <hr/>
-
-          <Title>Questions</Title>
-          <Gap v={10}/>
-
-          <Question>
-            <Label medium>What is a “completion function”?</Label>
-            <Text medium block>
-              A completion function is a snippet of code that is run when a user wants to set a step status
-              to “DONE”. It can either succeed or return an error message.<br/>
-              You can edit any completion function by clicking on the <Icon name='code' highlight/> icon on the sidebar.
-            </Text>
+          <Question label='How can I view a different region of time?'>
+            You can move the timeline along the X axis by dragging it or
+            by <code>Shift</code> + scrolling, and you can move through
+            the Y axis by scrolling. <br/>
+            You can also zoom in and out by <code>Control</code> + scrolling.
           </Question>
 
-          <Question>
-            <Label medium>I have another question</Label>
-            <Text medium block>
-              <Link href='mailto:support@genap.ca'>Contact us</Link>
-            </Text>
+          <Question label='How can I create/delete grants & fundings?'>
+            To create a new grant, hold the <code>Shift</code> key down and drag
+            over the region for which you want to create the grant.
+            <br />
+            To delete a grant, hold the <code>Shift</code> key down and delete
+            buttons will appear in the top right corners of each grant.
+            <br />
+            To create a new funding, hold the <code>Control</code> key down and
+            click on the grants from then to which you want to create a funding.
+            <br />
+            To delete a funding, hold the <code>Control</code> key down and close
+            buttons will appear.
+          </Question>
+
+          <Question label='I have another question'>
+            <Link href='mailto:support@genap.ca'>Contact us</Link>
           </Question>
 
         </Modal.Content>
