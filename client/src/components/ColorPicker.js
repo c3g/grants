@@ -4,6 +4,7 @@ import { createPortal, findDOMNode } from 'react-dom'
 import pure from 'recompose/pure'
 import classname from 'classname'
 import objectEquals from 'object-equals'
+import Color from 'color'
 
 import isColor from '../utils/is-color'
 import COLORS from '../constants/colors'
@@ -13,6 +14,13 @@ import Icon from './Icon'
 import Input from './Input'
 import Tooltip from './Tooltip'
 import Text from './Text'
+
+const TRACK_BACKGROUND = (() => {
+  const n = 10
+  const hueStep = 360 / n
+  const steps = Array(n).fill(0).map((_, i) => Color.hsl(i * hueStep, 80, 60).hex())
+  return `linear-gradient(to left, ${steps.join(', ')})`
+})()
 
 const colorPickers = []
 
@@ -159,8 +167,18 @@ class ColorPicker extends React.Component {
     this.setState({ value })
   }
 
+  onBlurInput = (event) => {
+    if (this.state.value !== this.props.value)
+      this.props.onChange(this.state.value)
+  }
+
   onAcceptInput = (event) => {
     this.change(this.state.value)
+  }
+
+  onClickColor = (event) => {
+    this.input.focus()
+    this.input.select()
   }
 
   render() {
@@ -194,17 +212,19 @@ class ColorPicker extends React.Component {
           className={colorPickerClassName}
           ref={this.onRef}
         >
-          <span
+          <button
             className='ColorPicker__color ColorPicker__color--main'
             style={{ backgroundColor: isColor(value) ? value : 'transparent' }}
+            onClick={this.onClickColor}
           />{' '}
           <Input
             className='ColorPicker__input'
             value={value}
             onFocus={this.open}
             onChange={this.onChangeInput}
-            onBlur={this.onAcceptInput}
+            onBlur={this.onBlurInput}
             onEnter={this.onAcceptInput}
+            ref={ref => ref && (this.input = ref)}
           />
         </span>,
 
@@ -221,6 +241,7 @@ class ColorPicker extends React.Component {
                 style={this.state.position.arrow}
                 className='ColorPicker__arrow'
               />
+
               {
                 groupByNumber(COLORS, 4).map(colors =>
                   <div>
@@ -259,5 +280,6 @@ function groupByNumber(list, n) {
     groups.push(currentGroup)
   return groups
 }
+
 
 export default pure(ColorPicker)

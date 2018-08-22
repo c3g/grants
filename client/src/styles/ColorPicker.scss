@@ -1,7 +1,8 @@
 @import './_variables.scss';
+@import './_mixins.scss';
 
 $width: 100px;
-$color-size: 12px;
+$color-size: 15px;
 
 .ColorPicker {
   display: inline-block;
@@ -23,8 +24,8 @@ $color-size: 12px;
 .ColorPicker__color {
   display: inline-block;
   content: '';
-  width:  12px;
-  height: 12px;
+  width:  $color-size;
+  height: $color-size;
   border-radius: 3px;
   box-shadow: inset 0px 0px 1px 1px rgba(0, 0, 0, 0.25);
 }
@@ -33,13 +34,19 @@ $color-size: 12px;
   z-index: 1;
   left: 5px;
   top: calc(50% - #{$color-size/2});
+  cursor: pointer;
+  &:active, &:focus {
+    outline: none;
+  }
 }
 .ColorPicker__color--button {
   display: inline-block;
   margin: $padding;
   cursor: pointer;
+  transition: all .25s;
   &:hover {
-    box-shadow: inset 0px 0px 1px 1px rgba(white, 0.3);
+    // box-shadow: inset 0px 0px 1px 1px rgba(white, 0.3);
+    transform: scale(1.2);
   }
 }
 .ColorPicker__input {
@@ -63,14 +70,10 @@ $color-size: 12px;
 
 .ColorPicker__inner {
   position: absolute;
-  min-width: 100px;
-  padding: $padding;
-  color: $light-color;
-  background-color: $dropdown-bg-color;
-  border: 1px solid $dark-border-color;
-  border-radius: 2px;
-  box-shadow: 1px 2px 10px 1px rgba(0, 0, 0, 0.3);
+  min-width: 112px;
   cursor: default;
+  padding: $padding;
+  @include popup();
 }
 .ColorPicker__menu {
   position: absolute;
@@ -83,7 +86,7 @@ $color-size: 12px;
   display: inline-block;
   border-style: solid;
   border-color: transparent;
-  border-bottom-color: $dark-border-color;
+  border-bottom-color: $border-color-dark;
   border-width: 0 6px 8px 6px;
   &::after {
     position: absolute;
@@ -116,4 +119,11 @@ $color-size: 12px;
   &.open > .ColorPicker__inner {
     transform: translateY(0);
   }
+}
+.ColorPicker__track {
+  display: inline-block;
+  height: 15px;
+  width: 100%;
+  border: 1px solid $border-color-dark;
+  border-radius: 4px;
 }

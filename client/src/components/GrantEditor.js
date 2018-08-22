@@ -308,8 +308,9 @@ class GrantEditor extends React.Component {
             </tr>
           </tbody>
           </table>
+
           <br/>
-          <br/>
+
           <table className='GrantEditor__fields'>
           <thead>
             <tr>
@@ -350,6 +351,7 @@ class GrantEditor extends React.Component {
               <td>
                 <Input
                   placeholder='Name'
+                  className='fill-width'
                   value={fieldName}
                   onChange={this.onChangeFieldName}
                   onEnter={this.onAddField}
@@ -358,6 +360,7 @@ class GrantEditor extends React.Component {
               <td>
                 <Input
                   placeholder='Amount'
+                  className='fill-width'
                   value={fieldAmount}
                   onChange={this.onChangeFieldAmount}
                   onEnter={this.onAddField}

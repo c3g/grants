@@ -12,8 +12,9 @@ $hover-color: rgba(black, 0.8);
 $hover-bg-color: rgba(black, 0.05);
 $hover-light-bg-color: rgba(black, 0.05);
 $active-bg-color: rgba(black, 0.025);
-$light-border-color: rgba(black, 0.05);
-$dark-border-color: rgba(black, 0.3);
+$border-color-light: rgba(black, 0.05);
+$border-color-medium: rgba(black, 0.15);
+$border-color-dark: rgba(black, 0.3);
 $checkbox-border-color: #888888;
 
 $table-color: #bdc4cd;
@@ -26,7 +27,7 @@ $input-border-color: #aaa;
 
 $dropdown-bg-color: #f3f3f3;
 
-$focus-color: rgba(#a6cbff, 0.8);
+$focus-color: #599eff;
 $accent-color: #599eff;
 $light-accent-color: #a6cbff;
 $dark-accent-color: #003580;
@@ -76,3 +77,4 @@ $notification-size: 45px;
 
 $vertical-step: 5px;
 $line-height: 25px;
+$timeline-height: 30px;

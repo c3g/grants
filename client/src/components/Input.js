@@ -24,6 +24,10 @@ class Input extends React.Component {
     this.element.focus()
   }
 
+  select() {
+    this.element.select()
+  }
+
   accept(ev) {
     this.props.onEnter && this.props.onEnter(ev.target.value, ev)
     if (this.props.clearOnEnter)

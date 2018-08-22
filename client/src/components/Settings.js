@@ -229,7 +229,7 @@ class Settings extends React.Component {
             </Group>
           </div>
 
-          <Gap fill='10px' />
+          <Gap fill='40px' />
 
           <div className='Settings__right fill'>
 

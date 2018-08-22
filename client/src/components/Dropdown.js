@@ -1,4 +1,5 @@
 import React from 'react'
+import Prop from 'prop-types'
 import { createPortal, findDOMNode } from 'react-dom'
 import pure from 'recompose/pure'
 import classname from 'classname'
@@ -15,82 +16,13 @@ document.addEventListener('click', ev => {
 })
 
 
-function Item({ icon, disabled, className, children, ...rest }) {
-  return (
-    <button className={classname('item', className, { disabled })} disabled={disabled} { ...rest }>
-      { icon && <Icon name={icon} className='menu' /> }
-      { children }
-    </button>
-  )
-}
-
-function SegmentedItem({ icon, children, className, ...rest }) {
-  return (
-    <div className={classname('item segmented hbox', className)} { ...rest }>
-      { children }
-    </div>
-  )
-}
-
-function SegmentMain({ icon, className, children, disabled, ...rest }) {
-  return (
-    <button className={classname('main-button segment fill', className, { disabled })} disabled={disabled} {...rest}>
-      { icon && <Icon name={icon} className='menu' /> }
-      { children }
-    </button>
-  )
-}
-
-function Segment({ icon, className, children, center, tooltip, disabled, ...rest }) {
-  const segment = (
-    <button className={classname('segment', className, { 'text-center': center, disabled })} disabled={disabled} { ...rest }>
-      { icon && <Icon name={icon} className='menu' /> }
-      { children }
-    </button>
-  )
-
-  if (!tooltip)
-    return segment
-
-  return (
-    <Tooltip content={tooltip}>
-      { segment }
-    </Tooltip>
-  )
-}
-
-function Content({ icon, className, text, children, ...rest }) {
-  const contentClassName = classname(
-    'content',
-    className,
-    {
-      'text-overflow': text || typeof children === 'string',
-    }
-  )
-  return (
-    <div className={contentClassName} { ...rest }>
-      { icon && <Icon name={icon} className='menu' /> }
-      { children }
-    </div>
-  )
-}
-
-function Group({ className, children }) {
-  return (
-    <div className={classname('group', className)}>
-      { children }
-    </div>
-  )
-}
-
-function Separator() {
-  return (
-    <div className='separator' />
-  )
-}
-
 
 class Dropdown extends React.Component {
+  static propTypes = {
+    className: Prop.string,
+    position: Prop.oneOf(['bottom left', 'right']),
+  }
+
   constructor(props) {
     super(props)
     this.state = {
@@ -153,8 +85,8 @@ class Dropdown extends React.Component {
 
     if (this.props.position === 'bottom left')
       style = {
-        top:  element.top + element.height,
-        left: element.left - inner.width + element.width,
+        top:  element.top  + element.height,
+        left: element.left - (inner.width - element.width),
       }
     else if (this.props.position === 'right')
       style = {
@@ -280,6 +212,79 @@ class Dropdown extends React.Component {
   }
 }
 
+function Item({ icon, disabled, className, children, ...rest }) {
+  return (
+    <button className={classname('item', className, { disabled })} disabled={disabled} { ...rest }>
+      { icon && <Icon name={icon} className='menu' /> }
+      { children }
+    </button>
+  )
+}
+
+function SegmentedItem({ icon, children, className, ...rest }) {
+  return (
+    <div className={classname('item segmented hbox', className)} { ...rest }>
+      { children }
+    </div>
+  )
+}
+
+function SegmentMain({ icon, className, children, disabled, ...rest }) {
+  return (
+    <button className={classname('main-button segment fill', className, { disabled })} disabled={disabled} {...rest}>
+      { icon && <Icon name={icon} className='menu' /> }
+      { children }
+    </button>
+  )
+}
+
+function Segment({ icon, className, children, center, tooltip, disabled, ...rest }) {
+  const segment = (
+    <button className={classname('segment', className, { 'text-center': center, disabled })} disabled={disabled} { ...rest }>
+      { icon && <Icon name={icon} className='menu' /> }
+      { children }
+    </button>
+  )
+
+  if (!tooltip)
+    return segment
+
+  return (
+    <Tooltip content={tooltip}>
+      { segment }
+    </Tooltip>
+  )
+}
+
+function Content({ icon, className, text, children, ...rest }) {
+  const contentClassName = classname(
+    'content',
+    className,
+    {
+      'text-overflow': text || typeof children === 'string',
+    }
+  )
+  return (
+    <div className={contentClassName} { ...rest }>
+      { icon && <Icon name={icon} className='menu' /> }
+      { children }
+    </div>
+  )
+}
+
+function Group({ className, children }) {
+  return (
+    <div className={classname('group', className)}>
+      { children }
+    </div>
+  )
+}
+
+function Separator() {
+  return (
+    <div className='separator' />
+  )
+}
 
 const defaultExport = pure(Dropdown)
 export default defaultExport

@@ -56,14 +56,14 @@ class FilteringDropdown extends React.Component {
 
   onClickItem = (item) => {
     if (!this.props.selectedItems.includes(item))
-      this.props.selectItem(item)
+      this.props.setItems(this.props.selectedItems.concat(item))
     else
-      this.props.deselectItem(item)
+      this.props.setItems(this.props.selectedItems.filter(i => i !== item))
     // this.clearValue()
   }
 
   render() {
-    const { items, selectedItems, renderItem, getItemText, label, className } = this.props
+    const { items, selectedItems, renderItem, getItemText, label, className, ...rest } = this.props
     const { value } = this.state
 
     const visibleItems = matchSorter(
@@ -80,6 +80,7 @@ class FilteringDropdown extends React.Component {
           (selectedItems.join(', ') || <span>&nbsp;</span>) :
           (label || <span>&nbsp;</span>)}
         onOpen={this.clearValue}
+        {...rest}
       >
         <Dropdown.Content className='FilterItems__input'>
           <Input

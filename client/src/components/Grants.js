@@ -20,15 +20,16 @@ import Color from 'color'
 import { decay, pointer, value } from 'popmotion'
 import { clamp, groupBy, path, lensPath, set } from 'ramda'
 
-import {formatISO} from '../utils/time'
 import Global from '../actions/global'
 import UI from '../actions/ui'
 import Grant from '../actions/grants'
 import Funding from '../actions/fundings'
 import Category from '../actions/categories'
 
+import {formatISO} from '../utils/time'
 import filterTags from '../utils/filter-tags'
 import uniq from '../utils/uniq'
+import Status from '../constants/status'
 import { getNewGrant, getNewFunding } from '../models'
 import Button from './Button'
 import Checkbox from './Checkbox'
@@ -39,6 +40,7 @@ import GrantEditor from './GrantEditor'
 import Input from './Input'
 import Label from './Label'
 import Spinner from './Spinner'
+import Text from './Text'
 import Title from './Title'
 
 
@@ -99,6 +101,13 @@ class Grants extends React.Component {
     super(props)
 
     sortByStartDate(props.grants)
+
+    const filters = {
+      categories: [],
+      applicants: [],
+      status: ['SUBMITTED', 'ACCEPTED', 'FINISHED'] // 'NOT_ACCEPTED'
+    }
+
     this.state = {
       width: window.innerWidth || 500,
       height: 200,
@@ -110,15 +119,15 @@ class Grants extends React.Component {
 
       grantMode: false,
       grant: null,
-
       fundingMode: false,
       funding: null,
 
+      filters: filters,
+
       // derived
-      grants: props.grants.reduce((acc, grant) => {
-        acc[grant.data.id] = {
-          hover: false,
-        }
+      grants: filterGrants(filters, props.grants),
+      grantsHover: props.grants.reduce((acc, grant) => {
+        acc[grant.data.id] = false
         return acc
       }, {}),
     }
@@ -159,15 +168,15 @@ class Grants extends React.Component {
   }
 
   componentWillReceiveProps(props, state) {
-    if (props.grants !== this.props.grants) {
+    if (props.grants !== this.state.grants) {
       sortByStartDate(props.grants)
+
       this.setState({
-        grants: props.grants.reduce((acc, grant) => {
-          acc[grant.data.id] = {
-            hover: false,
-          }
+        grants: filterGrants(this.state.filters, props.grants),
+        grantsHover: props.grants.reduce((acc, grant) => {
+          acc[grant.data.id] = false
           return acc
-        }, {})
+        }, {}),
       })
     }
   }
@@ -220,12 +229,12 @@ class Grants extends React.Component {
   }
 
   getMaxScrollHeight() {
-    const grantsHeight = this.props.grants.length * (GRANT_HEIGHT + GRANT_MARGIN) + 3 * GRANT_MARGIN
+    const grantsHeight = this.state.grants.length * (GRANT_HEIGHT + GRANT_MARGIN) + 3 * GRANT_MARGIN
     return Math.abs(this.state.height - grantsHeight)
   }
 
   getGrantByID(id) {
-    return this.props.grants.find(g => g.data.id === id)
+    return this.state.grants.find(g => g.data.id === id)
   }
 
   getGrantHeight(i) {
@@ -233,7 +242,7 @@ class Grants extends React.Component {
       2 * GRANT_PADDING
       + TITLE_HEIGHT
       + 3 * TEXT_HEIGHT
-      + this.props.grants[i].data.fields.length * TEXT_HEIGHT
+      + this.state.grants[i].data.fields.length * TEXT_HEIGHT
     )
   }
 
@@ -287,7 +296,7 @@ class Grants extends React.Component {
   getClickedGrant(event) {
     // We use this.space.pointer.x/y rather than event.clientX/clientY
     const index = this.grantsDimensions.findIndex(d => this.isMouseInRect(d))
-    const grant = index !== -1 ? this.props.grants[index] : undefined
+    const grant = index !== -1 ? this.state.grants[index] : undefined
     return grant
   }
 
@@ -418,7 +427,7 @@ class Grants extends React.Component {
 
     this.grantsDimensions = []
 
-    this.props.grants.forEach((grant, i) => {
+    this.state.grants.forEach((grant, i) => {
       const cofunding = this.getGrantCofunding(grant)
 
       const startX = this.dateToX(grant.data.start)
@@ -441,25 +450,27 @@ class Grants extends React.Component {
       this.grantsDimensions.push(rect)
 
       const isHover = this.isMouseInRect(rect)
-      const {hover} = this.state.grants[grant.data.id]
+      const {hover} = this.state.grantsHover[grant.data.id]
 
       if (isHover && !hover)
         this.onMouseEnterGrant(grant)
       else if (!isHover && hover)
         this.onMouseLeaveGrant(grant)
 
-      this.state.grants[grant.data.id].hover = isHover
+      this.state.grantsHover[grant.data.id] = isHover
 
       const isPickingFrom = this.state.fundingMode && !this.state.funding
       const isActive = !this.state.fundingMode ? isHover : (cofunding > 0 || !isPickingFrom) ? isHover : false
+      const isDisabled = this.state.fundingMode && isPickingFrom && cofunding <= 0
 
       const color =
-        this.state.fundingMode && isPickingFrom && cofunding <= 0 ?
-          Color(this.getGrantColor(grant)).lighten(0.3).desaturate(0.1) :
+        isDisabled ?
+          Color(this.getGrantColor(grant)).fade(0.7) :
         isActive ?
           Color(this.getGrantColor(grant)).lighten(0.2) :
           Color(this.getGrantColor(grant))
-      const borderColor = Color(this.getGrantColor(grant)).darken(0.5).toString()
+      const borderColor =
+        Color(this.getGrantColor(grant)).darken(0.5).fade(isDisabled ? 0.7 : 0).toString()
       const matchingTextColor =
         color.isDark() ?
           TEXT_COLOR_LIGHT :
@@ -471,20 +482,10 @@ class Grants extends React.Component {
 
       // Box
 
-      if (!this.state.fundingMode)
-        this.form
-          .stroke(borderColor, 2)
-          .fill(color.toString())
-          .rect(rect)
-      else if (cofunding > 0 || !isPickingFrom)
-        this.form
-          .stroke(borderColor, 3)
-          .fill(color.toString())
-          .rect(rect)
-      else
-        this.form
-          .fillOnly(color.toString())
-          .rect(rect)
+      this.form
+        .stroke(borderColor, 2)
+        .fill(color.toString())
+        .rect(rect)
 
       // Text
 
@@ -567,7 +568,7 @@ class Grants extends React.Component {
     const toGrant   = groupBy(path(['data', 'toGrantID']),   fundings)
 
     const detailsByGrant = {}
-    this.props.grants.forEach((grant, i) => {
+    this.state.grants.forEach((grant, i) => {
       const dimension = this.grantsDimensions[i]
       const height = dimension[1].y - dimension[0].y
       const availableHeight = height - 2 * GRANT_PADDING
@@ -604,6 +605,11 @@ class Grants extends React.Component {
 
         if (funding.data.toGrantID === null) {
           links.push({ funding, start, end: null, detail })
+          return
+        }
+
+        if (!(funding.data.toGrantID in detailsByGrant)) {
+          // Grant might not be visible
           return
         }
 
@@ -1113,6 +1119,12 @@ class Grants extends React.Component {
     this.setState({ grantMode: false, grant: null })
   }
 
+  setFilters(patch) {
+    const filters = { ...this.state.filters, ...patch }
+    const grants = filterGrants(filters, this.props.grants)
+    this.setState({ filters, grants })
+  }
+
   renderInput() {
     const {funding} = this.state
 
@@ -1183,8 +1195,58 @@ class Grants extends React.Component {
           position: 'absolute',
           transform: `translate(${dimension[1].x - 35}px, ${dimension[0].y + 5}px)`,
         }}
-        onClick={() => this.onDeleteGrant(this.props.grants[i]) }
+        onClick={() => this.onDeleteGrant(this.state.grants[i]) }
       />
+    )
+  }
+
+  renderFilters() {
+    const {filters: {categories, applicants, status}} = this.state
+
+    const getCategoryText = id => this.props.categories.data[id].data.name
+    const getApplicantText = id => this.props.applicants.data[id].data.name
+
+    return (
+      <div className='Grants__filters'>
+        <FilteringDropdown
+          className='full-width'
+          position='bottom left'
+          label={
+            categories.length > 0 ?
+              categories.map(getCategoryText).join(', ') :
+              <Text>Filter by category</Text>
+          }
+          items={Object.values(this.props.categories.data).map(a => a.data.id)}
+          selectedItems={categories}
+          getItemText={getCategoryText}
+          setItems={categories => this.setFilters({ categories })}
+        />
+        <FilteringDropdown
+          className='full-width'
+          position='bottom left'
+          label={
+            applicants.length > 0 ?
+              applicants.map(getApplicantText).join(', ') :
+              <Text>Filter by applicant</Text>
+          }
+          items={Object.values(this.props.applicants.data).map(a => a.data.id)}
+          selectedItems={applicants}
+          getItemText={getApplicantText}
+          setItems={applicants => this.setFilters({ applicants })}
+        />
+        <FilteringDropdown
+          className='full-width'
+          position='bottom left'
+          label={
+            status.length > 0 ?
+              status.join(', ') :
+              <Text>Filter by status</Text>
+          }
+          items={Object.values(Status)}
+          selectedItems={status}
+          setItems={status => this.setFilters({ status })}
+        />
+      </div>
     )
   }
 
@@ -1221,6 +1283,7 @@ class Grants extends React.Component {
           { hasPointer ? format(this.getMouseDate(), 'MMM D, YYYY') : null }
         </div>
 
+        { this.renderFilters() }
         { this.renderInput() }
         { this.renderGrantEditor() }
         { this.renderGrantButtons() }
@@ -1306,6 +1369,28 @@ function isEscapeKey(event) {
 
 function sortByStartDate(/* mutable */ grants) {
   grants.sort((a, b) => new Date(a.data.start) - new Date(b.data.start))
+}
+
+function filterGrants(filters, grants) {
+  return grants.filter(grant => {
+
+    if (filters.categories.length > 0
+        && !filters.categories.some(id => id === grant.data.categoryID)) {
+      return false
+    }
+
+    if (filters.applicants.length > 0
+        && !filters.applicants.some(id => grant.data.applicants.some(applicantID => applicantID === id))) {
+      return false
+    }
+
+    if (filters.status.length > 0
+        && !filters.status.some(status => grant.data.status === status)) {
+      return false
+    }
+
+    return true
+  })
 }
 
 export default withRouter(pure(Grants))
