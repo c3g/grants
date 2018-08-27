@@ -387,6 +387,8 @@ class Grants extends React.Component {
       monthsAfterYear++
     }
 
+    this.form.alignText('left', 'top')
+
     if (monthsAfterYear <= 6) {
       const monthsByYear = groupBy(d => d.getFullYear(), months)
 
