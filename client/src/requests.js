@@ -96,9 +96,3 @@ function createError(data) {
   e.fromServer = true
   return e
 }
-
-function createFormData(file) {
-  const formData = new FormData()
-  formData.append('file', file)
-  return formData
-}

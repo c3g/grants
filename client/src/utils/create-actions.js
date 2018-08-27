@@ -138,7 +138,11 @@ export function createAction(type, payloadCreator = identity, metaCreator) {
 }
 
 export function createAsyncAction(fn) {
-  return (...args) => store.dispatch(fn(...args))
+  return (...args) => {
+    const result = fn(...args)
+    const dispatchResult = store.dispatch(result)
+    return dispatchResult
+  }
 }
 
 

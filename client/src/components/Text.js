@@ -20,6 +20,7 @@ function Text(props) {
     muted,
     subtle,
     highlight,
+    tag,
     ...rest
   } = props
 
@@ -45,9 +46,11 @@ function Text(props) {
   )
 
   return (
-    <span className={labelClassName} { ...rest }>
-      { children }
-    </span>
+    React.createElement(
+      tag || 'span',
+      { className: labelClassName, ...rest },
+      children
+    )
   )
 }
 

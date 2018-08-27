@@ -243,13 +243,12 @@ class ColorPicker extends React.Component {
               />
 
               {
-                groupByNumber(COLORS, 4).map(colors =>
-                  <div>
+                groupByNumber(COLORS, 4).map((colors, i) =>
+                  <div key={i}>
                     {
                       colors.map(color =>
                         <button
-                          flat
-                          square
+                          key={color}
                           className='ColorPicker__color ColorPicker__color--button'
                           style={{ backgroundColor: color }}
                           onClick={() => this.change(color)}

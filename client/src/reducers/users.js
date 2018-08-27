@@ -1,10 +1,8 @@
 import {
-  get,
   set,
   lensPath,
   indexBy,
   prop,
-  assoc,
   dissoc
 } from 'ramda'
 import { USERS } from '../constants/ActionTypes'

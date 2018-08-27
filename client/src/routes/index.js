@@ -1,6 +1,5 @@
 import React from 'react'
 import prop from 'prop-types'
-import { bindActionCreators } from 'redux'
 import {
   BrowserRouter as Router,
   Route,
@@ -10,7 +9,7 @@ import {
 import { connect } from 'react-redux'
 import { createStructuredSelector, createSelector } from 'reselect'
 
-import GlobalActions from '../actions/global'
+import Global from '../actions/global'
 import Navbar from '../components/Navbar'
 // import CompletionFunctionsContainer from '../containers/CompletionFunctionsContainer'
 import FAQContainer from '../containers/FAQContainer'
@@ -27,7 +26,7 @@ const items = [
 ]
 const indexRoute = items.find(i => i.index).path
 
-function Routes({ isLoggedIn, isLoggingIn, logOut, showFAQ }) {
+function Routes({ isLoggedIn, isLoggingIn }) {
 
   // Redirect on certain conditions
   const checkLocation = (props) =>
@@ -57,8 +56,8 @@ function Routes({ isLoggedIn, isLoggingIn, logOut, showFAQ }) {
                   Grants Application
                 </Title>
               </Navbar.Title>
-              <Navbar.Button icon='question-circle' title='Help'    onClick={showFAQ} />
-              <Navbar.Button icon='sign-out'        title='Log Out' onClick={logOut} />
+              <Navbar.Button icon='question-circle' title='Help'    onClick={Global.showFAQ} />
+              <Navbar.Button icon='sign-out'        title='Log Out' onClick={Global.logOut} />
             </Navbar>
 
           }/>
@@ -103,8 +102,4 @@ const mapStateToProps = createStructuredSelector({
   isLoggingIn: createSelector(state => state.ui.loggedIn.isLoading, state => state),
 })
 
-function mapDispatchToProps(dispatch) {
-  return bindActionCreators(GlobalActions, dispatch)
-}
-
-export default connect(mapStateToProps, mapDispatchToProps)(Routes)
+export default connect(mapStateToProps)(Routes)

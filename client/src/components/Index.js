@@ -1,29 +1,24 @@
 import React from 'react'
 import PropTypes from 'prop-types'
 import pure from 'recompose/pure'
-import styled from 'styled-components'
-import { withRouter } from 'react-router'
 
+import Global from '../actions/global'
 import Button from './Button'
-import Checkbox from './Checkbox'
-import Dropdown from './Dropdown'
-import Gap from './Gap'
-import Icon from './Icon'
-import Input from './Input'
-import Label from './Label'
 import Modal from './Modal'
-import Spinner from './Spinner'
+import Text from './Text'
 import Title from './Title'
-import EditableLabel from './EditableLabel'
 
 
 class Index extends React.Component {
+  static propTypes = {
+    isLoading: PropTypes.bool.isRequired,
+    isLoggedIn: PropTypes.any.isRequired,
+  }
 
   render() {
     const {
       isLoading,
       isLoggedIn,
-      logIn
     } = this.props
 
     return (
@@ -36,12 +31,10 @@ class Index extends React.Component {
             </Title>
           </h1>
 
-          <div className='fill center'>
-
-            <Button icon='google' error onClick={logIn}>
+          <div className='fill center flex-column'>
+            <Button icon='google' error onClick={Global.logIn} loading={isLoading}>
               Log in with Google
             </Button>
-
           </div>
 
         </div>

@@ -37,17 +37,24 @@ if (process.env.NODE_ENV === 'development') {
 }
 else /* production */ {
   global.checkIsLoggedIn()
-  .then(() => global.fetchAll())
+  .then(isLoggedIn => {
+    if (isLoggedIn)
+      global.fetchAll()
+  })
 }
 
-setInterval(() => global.fetchAll(), 60 * 1000)
+setInterval(() => {
+  const state = store.getState()
+  if (state.ui.loggedIn.value)
+    global.fetchAll()
+}, 60 * 1000)
 
 
 
 // Register service worker
 
 if (process.env.NODE_ENV !== 'development'
-    && location.protocol === 'https:'
+    && window.location.protocol === 'https:'
     && !isLocalhost(window.location.href))
   registerServiceWorker()
 

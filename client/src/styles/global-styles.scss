@@ -87,6 +87,9 @@ input, textarea, select, button {
   min-width:    -moz-max-content !important;;
   min-width:         max-content !important;;
 }
+.flex-column {
+  flex-direction: column;
+}
 .text-center {
   text-align: center !important;
 }
@@ -665,8 +668,14 @@ a.link.text-normal:visited {
 }
 .Navbar:not(.visible) {
   flex-basis: 0;
-  width: 0;
   transform: translateX(calc(-1 * $sidebar-size));
+  overflow: hidden;
+  &.vertical {
+    width: 0;
+  }
+  &.horizontal {
+    height: 0;
+  }
 }
 .Navbar.visible {
   flex-basis: $sidebar-size;

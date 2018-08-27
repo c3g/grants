@@ -1,14 +1,11 @@
 import React from 'react'
 import Prop from 'prop-types'
 import pure from 'recompose/pure'
-import styled from 'styled-components'
-import { withRouter } from 'react-router'
 import {CanvasSpace, Pt, Group, Curve} from 'pts/dist/es5.js'
 import {
   startOfYear,
   endOfYear,
   startOfMonth,
-  endOfMonth,
   startOfDay,
   addDays,
   addYears,
@@ -20,33 +17,24 @@ import Color from 'color'
 import { decay, pointer, value } from 'popmotion'
 import { clamp, groupBy, path, lensPath, set } from 'ramda'
 
-import Global from '../actions/global'
-import UI from '../actions/ui'
 import Grant from '../actions/grants'
 import Funding from '../actions/fundings'
-import Category from '../actions/categories'
 
 import {formatISO} from '../utils/time'
-import filterTags from '../utils/filter-tags'
-import uniq from '../utils/uniq'
 import Status from '../constants/status'
 import { getNewGrant, getNewFunding } from '../models'
 import Button from './Button'
-import Checkbox from './Checkbox'
-import Dropdown from './Dropdown'
 import FilteringDropdown from './FilteringDropdown'
-import Gap from './Gap'
 import GrantEditor from './GrantEditor'
 import Input from './Input'
-import Label from './Label'
-import Spinner from './Spinner'
 import Text from './Text'
-import Title from './Title'
 
 
 const formatAmount = n => `$ ${Number(n).toLocaleString()}`
-const parseAmount = s => parseInt(s.replace(/,/g, ''))
+const parseAmount = s => parseInt(s.replace(/,/g, ''), 10)
 
+
+const STORAGE_KEY = 'GRANTS_TIMELINE_VIEW'
 
 const I = () => {}
 
@@ -108,12 +96,14 @@ class Grants extends React.Component {
       status: ['SUBMITTED', 'ACCEPTED', 'FINISHED'] // 'NOT_ACCEPTED'
     }
 
+    const savedView = window.localStorage[STORAGE_KEY] ? JSON.parse(window.localStorage[STORAGE_KEY]) : {}
+
     this.state = {
       width: window.innerWidth || 500,
       height: 200,
       scrollTop: 0,
-      startDate: INITIAL_DATE,
-      endDate: endOfYear(addYears(INITIAL_DATE, 2)),
+      startDate: savedView.startDate ? new Date(savedView.startDate) : INITIAL_DATE,
+      endDate:   savedView.endDate   ? new Date(savedView.endDate)   : endOfYear(addYears(INITIAL_DATE, 2)),
 
       mouseHover: false,
 
@@ -164,7 +154,13 @@ class Grants extends React.Component {
     window.removeEventListener('resize', this.onWindowResize)
     document.removeEventListener('mouseup', this.onDocumentMouseUp)
     document.removeEventListener('touchend', this.onDocumentTouchEnd)
+    document.removeEventListener('keydown', this.onDocumentKeyDown)
+    document.removeEventListener('keyup', this.onDocumentKeyUp)
     this.canvas.removeEventListener('mousewheel', this.onMouseWheel)
+    window.localStorage[STORAGE_KEY] = JSON.stringify({
+      startDate: this.state.startDate,
+      endDate: this.state.endDate,
+    })
   }
 
   componentWillReceiveProps(props, state) {
@@ -1393,4 +1389,4 @@ function filterGrants(filters, grants) {
   })
 }
 
-export default withRouter(pure(Grants))
+export default pure(Grants)

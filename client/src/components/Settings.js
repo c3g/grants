@@ -178,7 +178,7 @@ class Settings extends React.Component {
                 <tbody>
                   {
                     sortBy(prop('id'), users).map(user =>
-                      <tr>
+                      <tr key={user.id}>
                         <td>
                           {
                             user.googleID === null ?
@@ -249,7 +249,7 @@ class Settings extends React.Component {
                 <tbody>
                   {
                     sortBy(prop('id'), applicants).map(applicant =>
-                      <tr>
+                      <tr key={applicant.id}>
                         <td>
                           <EditableLabel
                             value={applicant.data.name}
@@ -320,7 +320,7 @@ class Settings extends React.Component {
                 <tbody>
                   {
                     sortBy(prop('id'), categories).map(category =>
-                      <tr>
+                      <tr key={category.id}>
                         <td>
                           <EditableLabel
                             value={category.data.name}
