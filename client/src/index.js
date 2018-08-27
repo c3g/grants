@@ -46,7 +46,9 @@ setInterval(() => global.fetchAll(), 60 * 1000)
 
 // Register service worker
 
-if (process.env.NODE_ENV !== 'development' && !isLocalhost(window.location.href))
+if (process.env.NODE_ENV !== 'development'
+    && location.protocol === 'https:'
+    && !isLocalhost(window.location.href))
   registerServiceWorker()
 
 
