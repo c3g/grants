@@ -18,7 +18,7 @@ import Text from './Text'
 class FilteringDropdown extends React.Component {
   static propTypes = {
     items: Prop.arrayOf(Prop.object).isRequired,
-    selectedItems: Prop.arrayOf(Prop.object).isRequired,
+    selectedItems: Prop.arrayOf(Prop.any).isRequired,
     setItems: Prop.func.isRequired,
     selectItem: Prop.func.isRequired,
     deselectItem: Prop.func.isRequired,

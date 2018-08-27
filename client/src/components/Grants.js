@@ -151,6 +151,8 @@ class Grants extends React.Component {
   }
 
   componentWillUnmount() {
+    this.scrollSlider.stop()
+    this.xSlider.stop()
     window.removeEventListener('resize', this.onWindowResize)
     document.removeEventListener('mouseup', this.onDocumentMouseUp)
     document.removeEventListener('touchend', this.onDocumentTouchEnd)
