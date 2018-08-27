@@ -1,12 +1,13 @@
 import React from 'react'
 import { render } from 'react-dom'
 import { Provider } from 'react-redux'
+import 'font-awesome/css/font-awesome.min.css'
 
 import store from './store'
 import Routes from './routes'
 import registerServiceWorker from './utils/registerServiceWorker'
+import isLocalhost from './utils/is-localhost.js'
 
-import 'font-awesome/css/font-awesome.min.css'
 import './styles/badges.css'
 import './styles/button.css'
 import './styles/export-variables.css'
@@ -45,7 +46,7 @@ setInterval(() => global.fetchAll(), 60 * 1000)
 
 // Register service worker
 
-if (process.env.NODE_ENV !== 'development')
+if (process.env.NODE_ENV !== 'development' && !isLocalhost(window.location.href))
   registerServiceWorker()
 
 
