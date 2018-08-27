@@ -3,7 +3,7 @@ import Prop from 'prop-types'
 import pure from 'recompose/pure'
 import styled from 'styled-components'
 import { withRouter } from 'react-router'
-import {CanvasSpace, Pt, Group, Curve} from 'pts'
+import {CanvasSpace, Pt, Group, Curve} from 'pts/dist/es5.js'
 import {
   startOfYear,
   endOfYear,
