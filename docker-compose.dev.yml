@@ -13,7 +13,7 @@ services:
     ports:
       - '3001:3001'
     volumes:
-      - ./config:/usr/etc
+      - ./data/config:/usr/etc
       - .:/usr/src/app
     links:
       - grant_db
