@@ -1,8 +1,10 @@
 <!doctype html>
 <html>
 <body>
-<script>
-window.opener.oauthDone()
-</script>
+  <% if (locals.user) { %>
+    <script>window.opener.oauthDone(true)</script>
+  <% } else { %>
+    <script>window.opener.oauthDone(false)</script>
+  <% } %>
 </body>
 </html>

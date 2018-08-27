@@ -147,12 +147,15 @@ input, textarea, select, button {
   height: 0;
   width: 0;
 }
-
 .column {
   display: flex;
   flex-direction: column;
   padding: 2*$padding;
 }
+.no-padding {
+  padding: 0;
+}
+
 
 .clickable {
   cursor: pointer;
@@ -262,7 +265,6 @@ input.label.editable:focus {
 .text {
   --line-height: 20px;
   font-family: $font-family-text;
-  font-size: 12px;
   line-height: $line-height;
   font-weight: normal;
 }
@@ -283,7 +285,7 @@ input.label.editable:focus {
 .text.editable {
   position: relative;
   width: 100%;
-  height: calc(3 * $line-height);
+  height: calc(3 * var(--line-height));
 }
 div.text.editable {
   transition: all .25s;
@@ -299,7 +301,7 @@ div.text.editable > div {
   flex: 1;
   text-overflow: ellipsis;
   overflow: auto;
-  height: calc(3 * $line-height);
+  height: calc(3 * var(--line-height));
 }
 div.text.editable > .Icon {
   position: absolute;
@@ -564,6 +566,13 @@ a.link.text-normal:visited {
   font-weight: bold;
   color: $text-color-muted;
 }
+.table td.input-cell {
+  padding: 0;
+  & input {
+    border: none;
+    border-radius: 0;
+  }
+}
 
 
 
@@ -766,13 +775,6 @@ section {
 .Settings__table__first td:first-child {
   width: 100%;
 }
-td.Settings__table__inputCell {
-  padding: 0;
-  & input {
-    border: none;
-    border-radius: 0;
-  }
-}
 
 
 .FilterCategories__input {
@@ -833,14 +835,22 @@ td.Settings__table__inputCell {
   transform: translate(-50%, -50%);
   width: 500px;
   height: 600px;
-  padding: 2 * $padding;
-  border: 3px solid #333;
+  border: 1px solid #333;
   border-radius: 2px;
   background-color: $bg-color-default;
 }
+.GrantEditor__top {
+  padding: 5px 4*$padding;
+  background-color: rgb(255, 153, 0);
+}
+.GrantEditor__title {
+  font-size: 23px;
+  color: rgba(0, 0, 0, 0.4);
+  text-transform: none;
+}
 .GrantEditor__inner {
-  background-color: rgba(white, 0.5);
-  padding: 2 * $padding;
+  padding: 4 * $padding;
+  padding-top: 2 * $padding;
   height: 100%;
 }
 .GrantEditor__table {
@@ -852,13 +862,13 @@ td.Settings__table__inputCell {
 }
 .GrantEditor__fields {
   width: 100%;
+  background-color: transparent;
 
-  & th {
+  & th, & td, & .empty td {
     text-align: left;
   }
-  & td {
-    // padding: 0 $padding;
-    // border: 1px solid $border-color;
+  & tr:not(.empty) td {
+    padding: 0;
   }
 }
 

@@ -39,6 +39,7 @@ module.exports = {
   client,
   query,
   selectOne,
+  selectOneOrZero,
   selectAll,
   insert,
   NOW,
@@ -97,6 +98,15 @@ function selectOne(q, params, field) {
         `Couldnt find record in query ${q} with params ${JSON.stringify(params)}`,
         k.ROW_NOT_FOUND
       ) :
+    field ?
+      result.rows[0][field] :
+      result.rows[0])
+}
+
+function selectOneOrZero(q, params, field) {
+  return query(q, params).then(result =>
+    result.rows.length === 0 ?
+      undefined :
     field ?
       result.rows[0][field] :
       result.rows[0])

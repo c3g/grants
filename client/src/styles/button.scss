@@ -8,7 +8,7 @@
   padding: 0 2 * $padding;
   font-weight: bold;
   color: $color;
-  border: 1px solid $border-color-light;
+  border: 1px solid $border-color-medium;
   border-radius: 2px;
   transition: all .15s;
   overflow: hidden;
@@ -29,17 +29,18 @@
 .Button.active,
 .Button:active,
 .Button:focus,
+.Dropdown.input-like > .Button:focus,
 .activable.active,
 .activable:active,
 .activable:focus {
   outline: none;
-  box-shadow: 0 0 0 1px $focus-color;
+  border-color: $focus-color;
 }
 .Button.active,
 .Button:active {
-  background-color: $hover-bg-color;
+  background-color: opacify($hover-bg-color, 0.1);
   &:hover {
-    background-color: $hover-bg-color;
+    background-color: opacify($hover-bg-color, 0.1);
   }
 }
 .Button > .Icon:not(:first-child):last-child {
@@ -50,10 +51,8 @@
   overflow: hidden;
   text-overflow: ellipsis;
 }
-.Button > .Button__icon {
-}
-.Button > .Button__iconAfter {
-}
+.Button > .Button__icon {}
+.Button > .Button__iconAfter {}
 
 .Button.flat {
   background-color: transparent;
@@ -154,15 +153,17 @@
   background-color: darken($bg-color-default, 10%);
 }
 
+.Button.muted {
+  color: $text-color-muted;
+}
+
 @each $level, $values in $colors {
   .Button.#{$level} {
     color: #fff;
     background: map-get($values, bg);
-    border-color: lighten(map-get($values, bg), 10%);
+    border-color: darken(map-get($values, bg), 10%);
 
-    & .Spinner::after {
-
-    }
+    & .Spinner::after {}
   }
   .Button.#{$level}:hover {
     color: #fff;
@@ -180,7 +181,7 @@
   .Button.#{$level}:active {
     color: mix(map-get($values, bg), #fff, 30%);
     box-shadow: 0 0 0 1px mix(map-get($values, bg), #fff, 75%);
-    background-color: darken(map-get($values, bg), 8%);
+    background-color: darken(map-get($values, bg), 10%);
   }
   .Button.#{$level}.highlight {
     background-color: lighten(map-get($values, bg), 10%);

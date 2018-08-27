@@ -53,11 +53,14 @@ export const logIn = createAsyncAction(() => (dispatch, getState) => {
     let popup
     let interval
 
-    window.oauthDone = () => {
+    window.oauthDone = (success) => {
       popup.close()
       window.isPopupOpen = false
       clearInterval(interval)
-      resolve()
+      if (success)
+        resolve()
+      else
+        reject()
     }
 
     window.isPopupOpen = true
@@ -74,6 +77,7 @@ export const logIn = createAsyncAction(() => (dispatch, getState) => {
   return didAuth
     .then(() => checkIsLoggedIn())
     .then(isLoggedIn => isLoggedIn ? fetchAll() : undefined)
+    .catch(() => showError('Authentication failed'))
 })
 
 export const logOut = createAsyncAction(() => (dispatch, getState) => {
@@ -86,11 +90,14 @@ export const logOut = createAsyncAction(() => (dispatch, getState) => {
     let popup
     let interval
 
-    window.oauthDone = () => {
+    window.oauthDone = (success) => {
       popup.close()
       window.isPopupOpen = false
       clearInterval(interval)
-      resolve()
+      if (success)
+        resolve()
+      else
+        reject()
     }
 
     window.isPopupOpen = true
@@ -104,7 +111,9 @@ export const logOut = createAsyncAction(() => (dispatch, getState) => {
     }, 200)
   })
 
-  return didLogout.then(() => checkIsLoggedIn())
+  return didLogout
+  .then(() => checkIsLoggedIn())
+  .catch(() => showError('Logout failed'))
 })
 
 export default {

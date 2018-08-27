@@ -21,3 +21,8 @@
   border-radius: 2px;
   box-shadow: 1px 2px 10px 1px rgba(0, 0, 0, 0.3);
 }
+
+@mixin focus {
+  box-shadow: 0 0 3px 1px rgba($focus-color, 0.5);
+  border-color: $focus-color;
+}

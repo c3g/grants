@@ -40,7 +40,7 @@ function update(key, value) {
 function canLogin(email) {
   if (email === config.authorizedEmail)
     return Promise.resolve()
-  return db.selectOne("SELECT value FROM settings WHERE key = 'whitelist' AND value ? @email", { email })
+  return db.selectOneOrZero("SELECT value FROM settings WHERE key = 'whitelist' AND value ? @email", { email })
     .then(result => result === undefined ?
         Promise.reject(new Error('Email not in whitelist'))
       : Promise.resolve())

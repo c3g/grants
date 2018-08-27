@@ -278,7 +278,7 @@ class Settings extends React.Component {
                       </tr>
                   }
                   <tr>
-                    <td className='Settings__table__inputCell'>
+                    <td className='input-cell'>
                       <Input
                         placeholder='Create new applicant'
                         className='fill-width'
@@ -355,7 +355,7 @@ class Settings extends React.Component {
                       </tr>
                   }
                   <tr>
-                    <td className='Settings__table__inputCell'>
+                    <td className='input-cell'>
                       <Input
                         placeholder='Create new category'
                         className='fill-width'

@@ -29,6 +29,7 @@ import FilteringDropdown from './FilteringDropdown'
 import Input from './Input'
 import Label from './Label'
 import Text from './Text'
+import Title from './Title'
 
 
 const formatAmount = n => `$ ${Number(n).toLocaleString()}`
@@ -193,7 +194,10 @@ class GrantEditor extends React.Component {
     const color = this.getGrantColor(grant)
 
     return (
-      <div className='GrantEditor vbox' style={{ backgroundColor: color }}>
+      <div className='GrantEditor vbox'>
+        <div className='GrantEditor__top' style={{ backgroundColor: color }}>
+          <Title className='GrantEditor__title'>{ grant.data.name }&nbsp;</Title>
+        </div>
         <div className='GrantEditor__inner vbox'>
           <table className='GrantEditor__table'>
           <tbody>
@@ -311,12 +315,13 @@ class GrantEditor extends React.Component {
 
           <br/>
 
-          <table className='GrantEditor__fields'>
+          <Title>Fields</Title>
+          <table className='table GrantEditor__fields'>
           <thead>
             <tr>
-              <th colSpan='3'>
-                Fields:
-              </th>
+              <th>Name</th>
+              <th>Amount</th>
+              <th/>
             </tr>
           </thead>
           <tbody>
@@ -339,7 +344,6 @@ class GrantEditor extends React.Component {
                     <Button
                       flat
                       square
-                      small
                       icon='close'
                       onClick={() => this.onDeleteField(i)}
                     />
@@ -347,8 +351,18 @@ class GrantEditor extends React.Component {
                 </tr>
               )
             }
+            {
+              grant.data.fields.length === 0 &&
+                <tr className='empty'>
+                  <td colSpan='3'>
+                    <Text medium muted>
+                      No fields
+                    </Text>
+                  </td>
+                </tr>
+            }
             <tr>
-              <td>
+              <td className='input-cell'>
                 <Input
                   placeholder='Name'
                   className='fill-width'
@@ -357,7 +371,7 @@ class GrantEditor extends React.Component {
                   onEnter={this.onAddField}
                 />
               </td>
-              <td>
+              <td className='input-cell'>
                 <Input
                   placeholder='Amount'
                   className='fill-width'
@@ -370,7 +384,6 @@ class GrantEditor extends React.Component {
                 <Button
                   flat
                   square
-                  small
                   icon='plus'
                   onClick={this.onAddField}
                 />
@@ -381,9 +394,9 @@ class GrantEditor extends React.Component {
 
           <div className='fill' />
 
-          <div className='row'>
+          <div className='row no-padding'>
             <div className='fill' />
-            <Button onClick={this.onCancel} disabled={grant.isLoading}>
+            <Button muted onClick={this.onCancel} disabled={grant.isLoading}>
               Cancel
             </Button>
             <Button className='default' onClick={this.onDone} loading={grant.isLoading}>

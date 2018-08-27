@@ -59,7 +59,12 @@ passport.use(new OAuth2Strategy(config.google.auth, (token, refreshToken, profil
         Settings.canLogin(newUser.email)
         .then(() => User.create(newUser))
         .then(user => done(undefined, user))
-        .catch(err => done(err))
+        .catch(err => {
+          if (err.message.includes('not in whitelist'))
+            done(undefined, null)
+          else
+            done(err)
+        })
       }
       // if some other error happens
       else {

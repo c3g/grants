@@ -19,6 +19,8 @@ function Button(props) {
     center,
     small,
     large,
+    // Styles:
+    default: default_,
     normal,
     info,
     success,
@@ -27,6 +29,7 @@ function Button(props) {
     muted,
     subtle,
     highlight,
+    // Other:
     loading,
     disabled,
     children,
@@ -50,6 +53,8 @@ function Button(props) {
       'center': center,
       'small': small,
       'large': large,
+      // Styles:
+      'default': default_,
       'normal': normal,
       'info': info,
       'success': success,

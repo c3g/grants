@@ -1214,7 +1214,7 @@ class Grants extends React.Component {
           label={
             categories.length > 0 ?
               categories.map(getCategoryText).join(', ') :
-              <Text>Filter by category</Text>
+              <Text muted>Filter by category</Text>
           }
           items={Object.values(this.props.categories.data).map(a => a.data.id)}
           selectedItems={categories}
@@ -1227,7 +1227,7 @@ class Grants extends React.Component {
           label={
             applicants.length > 0 ?
               applicants.map(getApplicantText).join(', ') :
-              <Text>Filter by applicant</Text>
+              <Text muted>Filter by applicant</Text>
           }
           items={Object.values(this.props.applicants.data).map(a => a.data.id)}
           selectedItems={applicants}
@@ -1240,7 +1240,7 @@ class Grants extends React.Component {
           label={
             status.length > 0 ?
               status.join(', ') :
-              <Text>Filter by status</Text>
+              <Text muted>Filter by status</Text>
           }
           items={Object.values(Status)}
           selectedItems={status}

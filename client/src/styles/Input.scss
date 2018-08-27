@@ -1,14 +1,14 @@
 /*
  * Input
  */
- 
 @import './_variables.scss';
+@import './_mixins.scss';
 
 
 .Input {
   display: inline-block;
   position: relative;
-  color: $light-color;
+  color: $color;
   width: 180px;
 }
 .Input__icon {
@@ -31,7 +31,7 @@
 .Input__element:active,
 .Input__element:focus {
   outline: none;
-  box-shadow: 0 0 0 1px $focus-color;
+  @include focus();
 }
 .Input.fill-width {
   width: 100%;
