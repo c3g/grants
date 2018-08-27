@@ -104,7 +104,7 @@ export const logOut = createAsyncAction(() => (dispatch, getState) => {
     }, 200)
   })
 
-  return didLogout.then(() => dispatch(checkIsLoggedIn()))
+  return didLogout.then(() => checkIsLoggedIn())
 })
 
 export default {
