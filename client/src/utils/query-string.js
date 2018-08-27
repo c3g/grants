@@ -4,7 +4,7 @@
 
 export default function queryString(params) {
   return Object.entries(params)
-    .filter(([key, value]) => value !== undefined)
+    .filter(([key, value]) => value !== undefined) // eslint-disable-line no-unused-vars
     .map(([key, value]) =>
       `${encodeURIComponent(key)}=${encodeURIComponent(asString(value))}`)
     .join('&');
