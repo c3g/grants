@@ -231,6 +231,7 @@ button.label.editable {
 button.label.editable.inline {
   display: inline-flex;
 }
+button.label.editable:focus,
 button.label.editable:hover {
   background-color: $hover-light-bg-color;
 }
@@ -795,13 +796,6 @@ section {
   position: absolute;
   width: 100%;
   height: 100%;
-}
-.Grants__mouseDate {
-  position: absolute;
-  color: $text-color-white;
-  background-color: rgba(black, 0.6);
-  padding: 2px 5px;
-  pointer-events: none;
 }
 .Grants__shadow {
   position: absolute;

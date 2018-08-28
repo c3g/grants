@@ -1,7 +1,7 @@
 import React from 'react'
 import Prop from 'prop-types'
 import pure from 'recompose/pure'
-import {CanvasSpace, Pt, Group, Curve} from 'pts/dist/es5.js'
+import {CanvasSpace, Pt, Group, Curve, Rectangle} from 'pts/dist/es5.js'
 import {
   startOfYear,
   endOfYear,
@@ -42,16 +42,19 @@ const MAX_SCROLL_VELOCITY = 900
 const clampScrollVelocity = clamp(-MAX_SCROLL_VELOCITY, MAX_SCROLL_VELOCITY)
 
 const BLACK = '#000'
+const WHITE = '#fff'
 const BACKGROUND_COLOR = '#f7f7f7'
 const TEXT_COLOR = '#333'
 const TEXT_COLOR_DARK = TEXT_COLOR
-const TEXT_COLOR_LIGHT = '#ddd'
+const TEXT_COLOR_LIGHT = '#eee'
 const LINE_COLOR  = '#999'
 const YEAR_LINE_COLOR  = LINE_COLOR
 const MONTH_LINE_COLOR = '#ddd'
 const CURSOR_LINE_COLOR = '#ffa0a0'
 const TIMELINE_BACKGROUND = BACKGROUND_COLOR
 const SELECTION_COLOR = 'rgba(166, 203, 255, 0.4)'
+const TOOLTIP_BACKGROUND = 'rgba(0, 0, 0, 0.6)'
+
 
 const TIMELINE_HEIGHT = 30
 const GRANT_HEIGHT = 100
@@ -62,6 +65,8 @@ const TEXT_SIZE = 14
 const TEXT_SIZE_SMALL = 12
 const TITLE_HEIGHT = TITLE_SIZE * 1.2
 const TEXT_HEIGHT  = TEXT_SIZE * 1.5
+
+const FONT_FAMILY = 'Ubuntu'
 
 const INITIAL_DATE = startOfYear(new Date())
 
@@ -280,8 +285,7 @@ class Grants extends React.Component {
   }
 
   isMouseInRect(rect) {
-    const {x, y} = this.space.pointer
-    return x >= rect[0][0] && x <= rect[1][0] && y >= rect[0][1] && y <= rect[1][1]
+    return Rectangle.withinBound(rect, this.space.pointer)
   }
 
   isMouseInCircle(center, radius) {
@@ -368,10 +372,44 @@ class Grants extends React.Component {
     )
   }
 
+  drawTooltip() {
+    const {mouseHover} = this.state
+    const hasPointer = this.space.pointer
+    const showTooltip = hasPointer && mouseHover
+
+    if (!showTooltip)
+      return
+
+    const {pointer = {x: -100, y: -100}} = this.space
+    const text = format(this.getMouseDate(), 'MMM D, YYYY')
+
+    this.form.font(TEXT_SIZE, 'normal')
+
+    const x = pointer.x + 20
+    const y = pointer.y
+    const textWidth = this.form.getTextWidth(text)
+    const paddingH = 5
+    const paddingV = 2
+    const width = textWidth + 2 * paddingH
+    const height = 30
+
+    const box = [
+      new Pt([x, y]),
+      new Pt([x + width, y + height])
+    ]
+    const innerBox = [
+      new Pt([x + paddingH, y]),
+      new Pt([x + width - paddingH, y + height])
+    ]
+
+    this.form.fillOnly(TOOLTIP_BACKGROUND).rect(box)
+    this.form.fill(WHITE).textBox(innerBox, text)
+  }
+
   drawTimeline(years, months) {
     const { width } = this.state
 
-    this.form.fillOnly(TIMELINE_BACKGROUND).rect([[0, 0], [width, TIMELINE_HEIGHT]])
+    this.form.fillOnly(TIMELINE_BACKGROUND).rect([[0, -1], [width, TIMELINE_HEIGHT]])
     this.drawLine([[0, TIMELINE_HEIGHT], [width, TIMELINE_HEIGHT]])
 
     this.form.font(14, 'bold')
@@ -384,7 +422,7 @@ class Grants extends React.Component {
 
     let monthsAfterYear = 0
     while (yearTextWidth + 10 > minMonthWidth * monthsAfterYear) {
-      monthsAfterYear++
+      monthsAfterYear += 1
     }
 
     this.form.alignText('left', 'top')
@@ -446,6 +484,7 @@ class Grants extends React.Component {
           visibleRect
         )
       )
+      const innerWidth = getRectangleWidth(innerRect)
 
       this.grantsDimensions.push(rect)
 
@@ -502,12 +541,12 @@ class Grants extends React.Component {
           const valueWidth = this.form.getTextWidth(value)
           if (valueStyle)
             valueStyle()
-          this.form.alignText('right').textBox(innerRect, value, 'top', '…')
+          this.form.alignText('right').textBox(innerRect, value, 'top', '...')
           innerRect[1].x -= valueWidth + 5
 
           if (labelStyle)
             labelStyle()
-          this.form.alignText('left').textBox(innerRect, label, 'top', '…')
+          this.form.alignText('left').textBox(innerRect, label, 'top', '...')
           innerRect[1].x = originalRight
           innerRect[0].y += height
         }
@@ -516,12 +555,12 @@ class Grants extends React.Component {
           const labelWidth = this.form.getTextWidth(label)
           if (labelStyle)
             labelStyle()
-          this.form.alignText('left').textBox(innerRect, label, 'top', '…')
+          this.form.alignText('left').textBox(innerRect, label, 'top', '...')
           innerRect[0].x += labelWidth + 5
 
           if (valueStyle)
             valueStyle()
-          this.form.alignText('right').textBox(innerRect, value, 'top', '…')
+          this.form.alignText('right').textBox(innerRect, value, 'top', '...')
           innerRect[0].x = originalLeft
           innerRect[0].y += height
         }
@@ -537,7 +576,7 @@ class Grants extends React.Component {
       })
 
       this.form.fill(textColor).font(TEXT_SIZE, 'normal').alignText('left')
-        .textBox(innerRect, `${formatISO(grant.data.start)} - ${formatISO(grant.data.end)}`, "top", '…')
+        .textBox(innerRect, `${formatISO(grant.data.start)} - ${formatISO(grant.data.end)}`, "top", '...')
       innerRect[0].y += TEXT_HEIGHT
 
       this.form.fill(textColor).font(TEXT_SIZE, 'normal')
@@ -696,14 +735,14 @@ class Grants extends React.Component {
   }
 
   onUpdateSpace = (time, ftime) => {
-    const {height} = this.state
-
     const years = this.getVisibleYears()
     const months = this.getVisibleMonths()
 
     /*
      * Drawing
      */
+
+    this.form.font(TEXT_SIZE, undefined, undefined, undefined, FONT_FAMILY)
 
     this.setCursor('default')
 
@@ -716,6 +755,8 @@ class Grants extends React.Component {
     this.drawFundings()
 
     this.drawTimeline(years, months)
+
+    this.drawTooltip()
   }
 
   onMouseEnterGrant = (grant) => {
@@ -835,8 +876,6 @@ class Grants extends React.Component {
       this.didDrag = true
     if (!this.state.mouseHover)
       this.setState({ mouseHover: true })
-    else
-      this.forceUpdate()
   }
 
   onMouseDown = (event) => {
@@ -1251,11 +1290,7 @@ class Grants extends React.Component {
   }
 
   render() {
-    const {width, height, mouseHover} = this.state
-
-    const hasPointer = this.space.pointer
-    const showTooltip = hasPointer && mouseHover
-    const {pointer = {x: -100, y: -100}} = this.space
+    const {width, height} = this.state
 
     return (
       <div className='Grants' ref={this.onRef}>
@@ -1272,16 +1307,6 @@ class Grants extends React.Component {
           onMouseEnter={this.onMouseEnter}
           onMouseLeave={this.onMouseLeave}
         />
-
-        <div className='Grants__mouseDate'
-          style={{
-            display: showTooltip ? 'block' : 'none',
-            top:  pointer.y,
-            left: pointer.x + 20,
-          }}
-        >
-          { hasPointer ? format(this.getMouseDate(), 'MMM D, YYYY') : null }
-        </div>
 
         { this.renderFilters() }
         { this.renderInput() }
@@ -1311,6 +1336,10 @@ function clipHorizontalRect(inner, outer) {
       inner[1][1]
     ],
   ]
+}
+
+function getRectangleWidth(rect) {
+  return rect[1].x - rect[0].x
 }
 
 function calculateBezierPoint(t, p) {

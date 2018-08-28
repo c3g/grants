@@ -32,8 +32,8 @@ import Text from './Text'
 import Title from './Title'
 
 
-const formatAmount = n => `$ ${Number(n).toLocaleString()}`
-const parseAmount = s => parseInt(s.replace(/,/g, ''))
+const formatAmount = n => `${Number(n).toLocaleString()}`
+const parseAmount = s => typeof s === 'number' ? s : parseInt(s.replace(/,/g, ''))
 
 
 
@@ -123,6 +123,14 @@ class GrantEditor extends React.Component {
 
   onChangeCofunding = cofunding => {
     this.setState({ grant: set(lensPath(['data', 'cofunding']), cofunding, this.state.grant) })
+  }
+
+  onBlurTotal = () => {
+    this.setState({ grant: over(lensPath(['data', 'total']), parseAmount, this.state.grant) })
+  }
+
+  onBlurCofunding = () => {
+    this.setState({ grant: over(lensPath(['data', 'cofunding']), parseAmount, this.state.grant) })
   }
 
   onAddField = (index) => {
@@ -279,8 +287,9 @@ class GrantEditor extends React.Component {
               <td>
                 <Input
                   className='fill-width'
-                  value={''+grant.data.total}
+                  value={typeof grant.data.total === 'number' ? formatAmount(grant.data.total) : grant.data.total}
                   onChange={this.onChangeTotal}
+                  onBlur={this.onBlurTotal}
                 />
               </td>
             </tr>
@@ -289,8 +298,9 @@ class GrantEditor extends React.Component {
               <td>
                 <Input
                   className='fill-width'
-                  value={''+grant.data.cofunding}
+                  value={typeof grant.data.cofunding === 'number' ? formatAmount(grant.data.cofunding) : grant.data.cofunding}
                   onChange={this.onChangeCofunding}
+                  onBlur={this.onBlurCofunding}
                 />
               </td>
             </tr>
