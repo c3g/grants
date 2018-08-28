@@ -3,6 +3,7 @@ const router = express.Router()
 
 const { dataHandler, errorHandler } = require('../helpers/handlers.js')
 const Category = require('../models/category.js')
+const History = require('../models/history.js')
 
 /* GET category list */
 router.get('/list', (req, res, next) => {
@@ -21,6 +22,7 @@ router.get('/get/:id', (req, res, next) => {
 /* POST create template */
 router.use('/create', (req, res, next) => {
   Category.create(req.body)
+  .then(History.handler(req, 'categories', 'created'))
   .then(dataHandler(res))
   .catch(errorHandler(res))
 })
@@ -28,6 +30,7 @@ router.use('/create', (req, res, next) => {
 /* POST update template */
 router.use('/update/:id', (req, res, next) => {
   Category.update({ ...req.body, id: req.params.id })
+  .then(History.handler(req, 'categories', 'updated'))
   .then(dataHandler(res))
   .catch(errorHandler(res))
 })
@@ -35,6 +38,7 @@ router.use('/update/:id', (req, res, next) => {
 /* POST delete template */
 router.use('/delete/:id', (req, res, next) => {
   Category.delete(req.params.id)
+  .then(History.handler(req, 'categories', 'deleted'))
   .then(dataHandler(res))
   .catch(errorHandler(res))
 })

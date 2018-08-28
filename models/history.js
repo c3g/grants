@@ -11,6 +11,7 @@ module.exports = {
   findByEntity,
   create,
   deleteByEntity,
+  handler,
 }
 
 function findAll() {
@@ -37,7 +38,6 @@ function create(entry) {
       VALUES (
         @userID,
         @description,
-        @date,
         ${db.NOW},
         @table,
         @targetID
@@ -55,4 +55,17 @@ function deleteByEntity(table, targetID) {
        WHERE "table"    = @table
          AND "targetID" = @targetID
     `, { table, targetID })
+}
+
+function handler(req, table, description) {
+  return (data) => {
+    const entry = {}
+    entry.userID = req.user.id
+    entry.table = table
+    entry.description = typeof description === 'function' ? description(data) : description
+    entry.targetID = data.id || req.params.key || req.params.id
+    console.log(data, entry)
+    create(entry)
+    return data
+  }
 }

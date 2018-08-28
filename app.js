@@ -49,6 +49,7 @@ app.use('/api/applicant',          apiProtected, require('./routes/applicant'))
 app.use('/api/grant',              apiProtected, require('./routes/grant'))
 app.use('/api/funding',            apiProtected, require('./routes/funding'))
 app.use('/api/category',           apiProtected, require('./routes/category'))
+app.use('/api/history',            apiProtected, require('./routes/history'))
 app.use('/api', (req, res) => {
   res.status(404)
   res.json({ ok: false, message: '404', url: req.originalUrl })

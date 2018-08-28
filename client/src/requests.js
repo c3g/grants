@@ -55,6 +55,10 @@ export const categories = {
   delete: (id) => POST(`/category/delete/${id}`),
 }
 
+export const history = {
+  list: () => GET('/history/list'),
+  listByEntity: (table, id) => GET(`/history/list/${table}/${id}`),
+}
 
 
 

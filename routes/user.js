@@ -3,6 +3,7 @@ const router = express.Router()
 
 const { dataHandler, errorHandler } = require('../helpers/handlers.js')
 const User = require('../models/user.js')
+const History = require('../models/history.js')
 
 /* GET users list */
 router.get('/list', (req, res, next) => {
@@ -21,6 +22,7 @@ router.get('/get/:id', (req, res, next) => {
 /* POST update user */
 router.use('/update/:id', (req, res, next) => {
   User.update({ ...req.body, id: req.params.id })
+  .then(History.handler(req, 'users', 'updated'))
   .then(dataHandler(res))
   .catch(errorHandler(res))
 })
@@ -28,6 +30,7 @@ router.use('/update/:id', (req, res, next) => {
 /* POST delete user */
 router.use('/delete/:id', (req, res, next) => {
   User.delete(req.params.id)
+  .then(History.handler(req, 'users', 'deleted'))
   .then(dataHandler(res))
   .catch(errorHandler(res))
 })

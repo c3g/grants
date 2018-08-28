@@ -64,12 +64,12 @@ CREATE TABLE categories (
 );
 
 CREATE TABLE history (
-    id          serial      primary key,
-    "userID"    integer     not null,
-    description text        not null,
-    "date"      timestamp   not null,
-    "table"     varchar(50)     null,
-    "targetID"  integer         null
+    id          serial       primary key,
+    "userID"    integer      not null,
+    description text         not null,
+    "date"      timestamp    not null,
+    "table"     varchar(50)      null,
+    "targetID"  varchar(100)     null
 );
 
 
