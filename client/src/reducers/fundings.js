@@ -49,28 +49,44 @@ export default function fundings(state = initialState, action) {
     case FUNDINGS.DELETE.ERROR:
       return set(lensPath(['data', action.meta.id, 'isLoading']), true, state)
 
+    case GRANTS.UPDATE.RECEIVE: {
+      /*
+       * Setting grant status to NOT_ACCEPTED deletes associated fundings
+       */
+
+      if (action.payload.status === 'NOT_ACCEPTED') {
+        return { ...state, data: deleteGrantID(state.data, action.meta.id) }
+      }
+
+      return state
+    }
+
     case GRANTS.DELETE.RECEIVE: {
       /*
        * Deleting a grant deletes associated fundings
        */
-       
-      const fundings = Object.values(state.data)
-      const deletedFundingsID =
-        new Set(fundings
-          .filter(f => f.data.fromGrantID === action.meta.id || f.data.toGrantID === action.meta.id)
-          .map(f => f.id))
-
-      const newData = {}
-      fundings.forEach(f => {
-        if (!deletedFundingsID.has(f.data.id)) {
-          newData[f.data.id] = f
-        }
-      })
-
-      return { ...state, data: newData }
+      return { ...state, data: deleteGrantID(state.data, action.meta.id) }
     }
 
     default:
       return state
   }
+}
+
+function deleteGrantID(data, id) {
+  const fundings = Object.values(data)
+
+  const deletedFundingsID =
+    new Set(fundings
+      .filter(f => f.data.fromGrantID === id || f.data.toGrantID === id)
+      .map(f => f.data.id))
+
+  const newData = {}
+  fundings.forEach(f => {
+    if (!deletedFundingsID.has(f.data.id)) {
+      newData[f.data.id] = f
+    }
+  })
+
+  return newData
 }

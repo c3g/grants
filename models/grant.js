@@ -18,12 +18,10 @@ function findAll() {
     SELECT *
       FROM grants
   `)
-  // .then(rows => rows.map(deserialize))
 }
 
 function findById(id) {
-  return db.selectOne(`SELECT * FROM grants WHERE id = @id`, { id })
-    // .then(deserialize)
+  return db.selectOne('SELECT * FROM grants WHERE id = @id', { id })
 }
 
 function update(grant) {
@@ -42,6 +40,16 @@ function update(grant) {
     serialize(grant)
   )
   .then(() => findById(grant.id))
+  .then(async grant => {
+    if (grant.status === 'NOT_ACCEPTED') {
+      await db.query(`
+        DELETE FROM fundings
+              WHERE "fromGrantID" = @id
+                 OR "toGrantID" = @id
+      `, { id: grant.id })
+    }
+    return grant
+  })
 }
 
 function create(grant) {
