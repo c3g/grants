@@ -43,6 +43,9 @@
     background-color: opacify($hover-bg-color, 0.1);
   }
 }
+.Button.has-icon {
+  text-align: left;
+}
 .Button > .Icon:not(:first-child):last-child {
   margin-left: $padding;
 }
@@ -160,10 +163,15 @@
 @each $level, $values in $colors {
   .Button.#{$level} {
     color: #fff;
-    background: map-get($values, bg);
+    background-color: map-get($values, bg);
     border-color: darken(map-get($values, bg), 10%);
 
-    & .Spinner::after {}
+    & .loading-spinner-tiny::before {
+      border-color: #fff transparent transparent transparent;
+    }
+    & .loading-spinner-tiny::after {
+      border-color: transparent rgba(white, 0.6) transparent transparent;
+    }
   }
   .Button.#{$level}:hover {
     color: #fff;
@@ -187,8 +195,8 @@
     background-color: lighten(map-get($values, bg), 10%);
   }
   .Button.#{$level}[disabled] {
-    color: #bbb;
-    border-color: mix(grey, map-get($values, bg), 50%);
-    background-color: mix(grey, map-get($values, bg), 50%);
+    color: #ddd;
+    border-color:     mix(grey, map-get($values, bg), 50%);
+    background-color: lighten(mix(grey, map-get($values, bg), 30%), 20%); // mix(grey, map-get($values, bg), 50%);
   }
 }

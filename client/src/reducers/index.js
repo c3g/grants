@@ -7,6 +7,7 @@ import applicants from './applicants.js'
 import grants from './grants.js'
 import fundings from './fundings.js'
 import categories from './categories.js'
+import history from './history.js'
 
 const rootReducer = combineReducers({
   ui,
@@ -16,6 +17,7 @@ const rootReducer = combineReducers({
   grants,
   fundings,
   categories,
+  history,
 })
 
 export default rootReducer

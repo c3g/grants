@@ -43,6 +43,8 @@ class Navbar extends React.Component {
   state = {
     borderTop: undefined,
     borderLeft: undefined,
+    borderWidth: undefined,
+    borderHeight: undefined,
   }
 
   componentDidMount() {
@@ -96,10 +98,10 @@ class Navbar extends React.Component {
 
     return isVertical ? {
       top: this.state.borderTop,
-      height: rect.height
+      height: this.state.borderHeight,
     } : {
       left: this.state.borderLeft,
-      width: rect.width
+      width: this.state.borderWidth,
     }
   }
 

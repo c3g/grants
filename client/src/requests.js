@@ -57,7 +57,8 @@ export const categories = {
 
 export const history = {
   list: () => GET('/history/list'),
-  listByEntity: (table, id) => GET(`/history/list/${table}/${id}`),
+  findByEntity: (table, id) => GET(`/history/find-by-entity/${table}/${id}`),
+  findByRange: (start, end) => GET(`/history/find-by-range/${start}/${end}`),
 }
 
 

@@ -12,8 +12,15 @@ router.get('/list', (req, res, next) => {
 })
 
 /* GET history for a single item */
-router.get('/list/:table/:id', (req, res, next) => {
+router.get('/find-by-entity/:table/:id', (req, res, next) => {
   History.findByEntity(req.params.table, req.params.id)
+  .then(dataHandler(res))
+  .catch(errorHandler(res))
+})
+
+/* GET history for a range */
+router.get('/find-by-range/:start/:end', (req, res, next) => {
+  History.findByRange(req.params.start, req.params.end)
   .then(dataHandler(res))
   .catch(errorHandler(res))
 })

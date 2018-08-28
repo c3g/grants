@@ -63,6 +63,7 @@ function Button(props) {
       'muted': muted,
       'subtle': subtle,
       'highlight': highlight,
+      'has-icon': icon !== undefined,
     }
   )
 

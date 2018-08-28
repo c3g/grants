@@ -9,17 +9,18 @@ module.exports = {
   findAll,
   findById,
   findByEntity,
+  findByRange,
   create,
   deleteByEntity,
   handler,
 }
 
 function findAll() {
-  return db.selectAll(`SELECT * FROM history`)
+  return db.selectAll('SELECT * FROM history')
 }
 
 function findById(id) {
-  return db.selectOne(`SELECT * FROM history WHERE id = @id`, { id })
+  return db.selectOne('SELECT * FROM history WHERE id = @id', { id })
 }
 
 function findByEntity(table, targetID) {
@@ -30,6 +31,16 @@ function findByEntity(table, targetID) {
          AND "targetID" = @targetID
     ORDER BY date DESC
     `, { table, targetID })
+}
+
+function findByRange(start, end) {
+  return db.selectAll(`
+      SELECT *
+        FROM history
+       WHERE date >= @start
+         AND date < @end
+    ORDER BY date DESC
+    `, { start, end })
 }
 
 function create(entry) {
@@ -62,7 +73,7 @@ function handler(req, table, description) {
     const entry = {}
     entry.userID = req.user.id
     entry.table = table
-    entry.description = typeof description === 'function' ? description(data) : description
+    entry.description = typeof description === 'function' ? description(data, req.params) : description
     entry.targetID = data.id || req.params.key || req.params.id
     console.log(data, entry)
     create(entry)

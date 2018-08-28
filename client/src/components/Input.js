@@ -101,6 +101,7 @@ class Input extends React.Component {
       clearOnBlur,
       onEnter,
       validate,
+      disabled,
       ...rest
     } = this.props
     /* eslint-enable no-unused-vars */
@@ -119,6 +120,7 @@ class Input extends React.Component {
         small,
         large,
         'has-icon': icon !== undefined,
+        disabled,
       }
     )
 
@@ -129,6 +131,7 @@ class Input extends React.Component {
           { ...rest }
           className='Input__element'
           value={actualValue}
+          disabled={disabled}
           onChange={this.onChange}
           onKeyDown={this.props.onKeyDown || this.onKeyDown}
           onFocus={this.onFocus}

@@ -17,12 +17,13 @@ import IndexContainer from '../containers/IndexContainer'
 import NotificationsContainer from '../containers/NotificationsContainer'
 import GrantsContainer from '../containers/GrantsContainer'
 import SettingsContainer from '../containers/SettingsContainer'
-// import TemplatesContainer from '../containers/TemplatesContainer'
+import HistoryContainer from '../containers/HistoryContainer'
 import Title from '../components/Title'
 
 const items = [
-  { type: 'item', icon: 'cogs',  label: 'Settings', path: '/settings' },
-  { type: 'item', icon: 'table', label: 'Grants',   path: '/grants', index: true },
+  { type: 'item', icon: 'cogs',    label: 'Settings', path: '/settings' },
+  { type: 'item', icon: 'table',   label: 'Grants',   path: '/grants',     index: true },
+  { type: 'item', icon: 'history', label: 'History',  path: '/history' },
 ]
 const indexRoute = items.find(i => i.index).path
 
@@ -81,7 +82,8 @@ function Routes({ isLoggedIn, isLoggingIn }) {
 
           <Switch>
             <Route path='/settings' component={SettingsContainer} />
-            <Route path='/grants/:id?/:stepIndex?' component={GrantsContainer} />
+            <Route path='/grants'   component={GrantsContainer} />
+            <Route path='/history'  component={HistoryContainer} />
           </Switch>
         </div>
 

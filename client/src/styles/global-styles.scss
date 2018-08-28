@@ -868,6 +868,20 @@ section {
 
 
 /*
+ * History
+ */
+
+.History {
+  padding: (4 * $padding) (6 * $padding);
+}
+.History__table {
+  & td, & th {
+    padding: 0 $padding;
+  }
+}
+
+
+/*
  * FAQ
  */
 

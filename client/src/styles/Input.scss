@@ -18,7 +18,6 @@
   transform: translate(0, -50%);
 }
 .Input__element {
-  color: inherit;
   background-color: $input-bg-color;
   outline: none;
   border: 1px solid $input-border-color;
@@ -32,6 +31,12 @@
 .Input__element:focus {
   outline: none;
   @include focus();
+}
+.Input__element:disabled {
+  border-color: lighten($input-border-color, 20%);
+  color: lighten($color, 20%);
+  background-color: darken($input-bg-color, 5%);
+  cursor: not-allowed;
 }
 .Input.fill-width {
   width: 100%;
@@ -56,16 +61,28 @@
   height: 40px;
 }
 .Input.info .Input__element {
-  box-shadow: 0 0 0 1px $bg-color-info;
+  border-color: $bg-color-info;
+  &:focus {
+    @include focus($bg-color-info);
+  }
 }
 .Input.warning .Input__element {
-  box-shadow: 0 0 0 1px $bg-color-warning;
+  border-color: $bg-color-warning;
+  &:focus {
+    @include focus($bg-color-warning);
+  }
 }
 .Input.error .Input__element {
-  box-shadow: 0 0 0 1px $bg-color-error;
+  border-color: $bg-color-error;
+  &:focus {
+    @include focus($bg-color-error);
+  }
 }
 .Input.success .Input__element {
-  box-shadow: 0 0 0 1px $bg-color-success;
+  border-color: $bg-color-success;
+  &:focus {
+    @include focus($bg-color-success);
+  }
 }
 .Input.badge {
   height: 22px;
