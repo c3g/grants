@@ -55,7 +55,6 @@ const TIMELINE_BACKGROUND = BACKGROUND_COLOR
 const SELECTION_COLOR = 'rgba(166, 203, 255, 0.4)'
 const TOOLTIP_BACKGROUND = 'rgba(0, 0, 0, 0.6)'
 
-
 const TIMELINE_HEIGHT = 30
 const GRANT_HEIGHT = 100
 const GRANT_MARGIN = 15
@@ -138,7 +137,7 @@ class Grants extends React.Component {
     document.addEventListener('keydown', this.onDocumentKeyDown)
     document.addEventListener('keyup', this.onDocumentKeyUp)
 
-    this.canvas.addEventListener('mousewheel', this.onMouseWheel)
+    this.canvas.addEventListener('wheel', this.onMouseWheel)
 
     this.space = new CanvasSpace(this.canvas)
     this.space.setup({ bgcolor: BACKGROUND_COLOR })
@@ -163,7 +162,7 @@ class Grants extends React.Component {
     document.removeEventListener('touchend', this.onDocumentTouchEnd)
     document.removeEventListener('keydown', this.onDocumentKeyDown)
     document.removeEventListener('keyup', this.onDocumentKeyUp)
-    this.canvas.removeEventListener('mousewheel', this.onMouseWheel)
+    this.canvas.removeEventListener('wheel', this.onMouseWheel)
     window.localStorage[STORAGE_KEY] = JSON.stringify({
       startDate: this.state.startDate,
       endDate: this.state.endDate,
