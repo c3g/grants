@@ -41,7 +41,7 @@ CREATE TABLE grants (
     id           serial    primary key,
     name         text      not null,
     applicants   integer[]     null,
-    "categoryID" integer   not null,
+    "categoryID" integer       null,
     start        timestamp not null,
     "end"        timestamp not null,
     status       Status    not null,

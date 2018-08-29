@@ -88,6 +88,7 @@ module.exports.delete = function(id) {
 
 function serialize(grant) {
   grant.fields = JSON.stringify(grant.fields)
+  grant.categoryID = grant.categoryID || null
   return grant
 }
 
