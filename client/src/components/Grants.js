@@ -1226,9 +1226,9 @@ class Grants extends React.Component {
 
     return this.grantsDimensions.map((dimension, i) =>
       <Button
+        default
         square
         icon='close'
-        className='default'
         style={{
           position: 'absolute',
           transform: `translate(${dimension[1].x - 35}px, ${dimension[0].y + 5}px)`,
