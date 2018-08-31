@@ -1,9 +1,13 @@
 #!/bin/bash
 
-APPLICATION_DIRECTORY=/home/rgregoir/projects/grants
-BACKUP_FILE="backup-$(date +%Y-%m-%d).zip"
-BACKUP_DIRECTORY=/home/rgregoir
+APPLICATION_DIRECTORY=/home/rgregoir/workspace/grants
+BACKUP_DUMP="grants-backup-$(date +%Y-%m-%d).sql"
+BACKUP_FILE="grants-backup-$(date +%Y-%m-%d).zip"
+BACKUP_DIRECTORY=/home/rgregoir/backups
 
 cd $APPLICATION_DIRECTORY
-zip $BACKUP_FILE -r data
+docker exec -t -u postgres grants_grant_db_1 pg_dumpall -c > $BACKUP_DUMP
+zip $BACKUP_FILE $BACKUP_DUMP
+rm $BACKUP_DUMP
 mv $BACKUP_FILE $BACKUP_DIRECTORY
+# /home/rgregoir/genap-rsync/rsync $BACKUP_DIRECTORY/$BACKUP_FILE genapbackup@ihec-backup.vhost38:/ihec-backup-data/
