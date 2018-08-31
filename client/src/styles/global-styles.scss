@@ -873,6 +873,8 @@ section {
 
 .History {
   padding: (4 * $padding) (6 * $padding);
+  height: 100%;
+  overflow: auto;
 }
 .History__table {
   & td, & th {
