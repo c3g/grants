@@ -63,10 +63,10 @@ class FAQ extends React.Component {
             To delete a grant, hold the <code>Shift</code> key down and delete
             buttons will appear in the top right corners of each grant.
             <br />
-            To create a new funding, hold the <code>Control</code> key down and
+            To create a new funding, hold the <code>Alt</code> key down and
             click on the grants from then to which you want to create a funding.
             <br />
-            To delete a funding, hold the <code>Control</code> key down and close
+            To delete a funding, hold the <code>Alt</code> key down and close
             buttons will appear.
           </Question>
 

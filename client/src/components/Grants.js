@@ -988,7 +988,7 @@ class Grants extends React.Component {
         }
       })
     }
-    else if (event.ctrlKey) {
+    else if (event.altKey) {
       // Create new funding
       if (grant && !this.state.funding && this.getGrantCofunding(grant) > 0) {
         this.setState({
@@ -1018,7 +1018,7 @@ class Grants extends React.Component {
     if (fundingMode || grantMode)
       return
 
-    if (isControlKey(event)) {
+    if (isAltKey(event)) {
       this.setState({ fundingMode: true })
     }
     if (isShiftKey(event)) {
@@ -1027,7 +1027,7 @@ class Grants extends React.Component {
   }
 
   onDocumentKeyUp = (event) => {
-    if (isControlKey(event) && !this.state.funding) {
+    if (isAltKey(event) && !this.state.funding) {
       this.setState({ fundingMode: false })
     }
     if (isShiftKey(event) && !this.state.grant) {
@@ -1376,6 +1376,14 @@ function isControlKey(event) {
     || event.key === 'Control'
     || event.which === 17 /* Control */
     || event.which === 20 /* CapsLock */
+  )
+}
+
+function isAltKey(event) {
+  return (
+    event.code.startsWith('Alt')
+    || event.key === 'Alt'
+    || event.which === 18 /* Alt */
   )
 }
 
