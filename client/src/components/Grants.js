@@ -1298,6 +1298,7 @@ class Grants extends React.Component {
           className='Grants__canvas'
           width={width}
           height={height}
+          style={{ width, height }}
           ref={this.onRefCanvas}
           onClick={this.onClick}
           onMouseMove={this.onMouseMove}
