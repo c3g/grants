@@ -1303,7 +1303,7 @@ class Grants extends React.Component {
         />
         <div className='hbox'>
           <div className='fill' />
-          <Button active={fundingMode} onClick={this.toggleFundingMode}>
+          <Button className='font-weight-normal' active={fundingMode} onClick={this.toggleFundingMode}>
             Edit Fundings
           </Button>
         </div>
