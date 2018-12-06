@@ -8,6 +8,7 @@ import Routes from './routes'
 import registerServiceWorker from './utils/registerServiceWorker'
 import isLocalhost from './utils/is-localhost.js'
 
+import './styles/alerts.css'
 import './styles/badges.css'
 import './styles/button.css'
 import './styles/export-variables.css'

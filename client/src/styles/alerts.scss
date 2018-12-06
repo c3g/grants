@@ -1,0 +1,15 @@
+@import './_variables.scss';
+@import './_mixins.scss';
+
+.alert {
+  margin-bottom: 1rem;
+}
+
+@each $level, $values in $colors {
+  .alert.#{$level} {
+    color:            darken(map-get($values, text), 20%);
+    background-color: lighten(map-get($values, text), 25%);
+    border: 1px solid darken(map-get($values, text), 10%);
+    border-radius: 2px;
+  }
+}

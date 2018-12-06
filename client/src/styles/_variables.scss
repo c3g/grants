@@ -64,11 +64,11 @@ $bg-light-color-warning: #f3bf44;
 $bg-light-color-error:   #e89d96;
 
 $colors: (
-  normal:  (text: $text-color-normal,  bg: $bg-color-normal),
-  info:    (text: $text-color-info,    bg: $bg-color-info),
-  success: (text: $text-color-success, bg: $bg-color-success),
-  warning: (text: $text-color-warning, bg: $bg-color-warning),
-  error:   (text: $text-color-error,   bg: $bg-color-error),
+  normal:  (text: $text-color-normal,  bg: $bg-color-normal,  bg-light: $bg-color-normal, ),
+  info:    (text: $text-color-info,    bg: $bg-color-info,    bg-light: $bg-light-color-info,   ),
+  success: (text: $text-color-success, bg: $bg-color-success, bg-light: $bg-light-color-success,),
+  warning: (text: $text-color-warning, bg: $bg-color-warning, bg-light: $bg-light-color-warning,),
+  error:   (text: $text-color-error,   bg: $bg-color-error,   bg-light: $bg-light-color-error,  ),
 );
 
 $padding: 5px;

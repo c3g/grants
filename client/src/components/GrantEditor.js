@@ -51,11 +51,12 @@ class GrantEditor extends React.Component {
     super(props)
 
     this.state = {
+      errorMessage: undefined,
       fieldName: '',
       fieldAmount: '',
       grant: props.grant,
       start: formatISO(props.grant.data.start),
-      end: formatISO(props.grant.data.end)
+      end: formatISO(props.grant.data.end),
     }
   }
 
@@ -73,6 +74,25 @@ class GrantEditor extends React.Component {
     if (!category)
       return '#f7f7f7'
     return category.data.color
+  }
+
+  validate() {
+    const start = new Date(this.state.start)
+    const end = new Date(this.state.end)
+
+    if (+start === +end) {
+      this.setState({ errorMessage: 'Start date must be different than end date'})
+      return false
+    }
+
+    if (start > end) {
+      this.setState({ errorMessage: 'Start date must be before end date'})
+      return false
+    }
+
+    this.setState({ errorMessage: undefined })
+
+    return true
   }
 
   onChangeName = name => {
@@ -133,16 +153,25 @@ class GrantEditor extends React.Component {
     this.setState({ grant: over(lensPath(['data', 'cofunding']), parseAmount, this.state.grant) })
   }
 
-  onAddField = (index) => {
+  onAddField = () => {
     const {fieldName, fieldAmount} = this.state
     if (!fieldName || !fieldAmount)
       return
+
+    const amount = parseAmount(fieldAmount)
+
+    if (Number.isNaN(amount)) {
+      this.setState({ errorMessage: 'Invalid amount' })
+      return
+    }
+
     this.setState({
       fieldName: '',
       fieldAmount: '',
+      errorMessage: '',
       grant: over(
         lensPath(['data', 'fields']),
-        fields => fields.concat({ name: fieldName, amount: Number(fieldAmount) }),
+        fields => fields.concat({ name: fieldName, amount: amount }),
         this.state.grant
       )
     })
@@ -181,7 +210,34 @@ class GrantEditor extends React.Component {
   }
 
   onDone = () => {
-    this.props.onDone(this.state.grant)
+    const {fieldName, fieldAmount} = this.state
+    let {grant} = this.state
+
+    if (fieldName && fieldAmount) {
+      const amount = parseAmount(fieldAmount)
+
+      if (Number.isNaN(amount)) {
+        this.setState({ errorMessage: 'Invalid amount' })
+        return
+      }
+
+      grant = over(
+        lensPath(['data', 'fields']),
+        fields => fields.concat({ name: fieldName, amount: amount }),
+        grant
+      )
+
+      this.setState({
+        fieldName: '',
+        fieldAmount: '',
+        grant: grant,
+      })
+    }
+
+    if (!this.validate())
+      return
+
+    this.props.onDone(grant)
   }
 
   onCancel = () => {
@@ -196,7 +252,7 @@ class GrantEditor extends React.Component {
   }
 
   render() {
-    const {fieldName, fieldAmount, grant} = this.state
+    const {errorMessage, fieldName, fieldAmount, grant} = this.state
 
     const category = this.props.categories.data[grant.data.categoryID]
     const color = this.getGrantColor(grant)
@@ -403,6 +459,13 @@ class GrantEditor extends React.Component {
           </table>
 
           <div className='fill' />
+
+          {
+            errorMessage &&
+              <div className='row alert error'>
+                {errorMessage}
+              </div>
+          }
 
           <div className='row no-padding'>
             <div className='fill' />
