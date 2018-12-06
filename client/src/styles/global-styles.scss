@@ -792,6 +792,12 @@ section {
   height: 100%;
   position: relative;
 }
+.Grants__shadow {
+  position: absolute;
+  width: 100%;
+  height: 100%;
+  background-color: rgba(black, 0.5);
+}
 .Grants__canvas {
   position: absolute;
   width: 100%;
@@ -801,13 +807,13 @@ section {
   position: absolute;
   width: 250px;
 }
-.Grants__filters {
+.Grants__controls {
   position: absolute;
   top: $timeline-height + 2 * $padding;
   right: 2 * $padding;
   width: 200px;
 }
-.Grants__filters > *:not(:last-child) {
+.Grants__controls > *:not(:last-child) {
   margin-bottom: 2 * $padding;
 }
 

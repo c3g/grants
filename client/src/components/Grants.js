@@ -974,23 +974,23 @@ class Grants extends React.Component {
   }
 
   onClickGrant = (event, grant) => {
-    if (this.state.funding) {
-      if (grant.data.id === this.state.funding.data.fromGrantID) {
-        this.setState({ funding: null })
-        return
-      }
-
-      this.setState({
-        funding: {
-          isPartial: true,
-          isLoading: false,
-          data: { ...this.state.funding.data, toGrantID: grant.data.id },
+    if (this.state.fundingMode) {
+      if (this.state.funding) {
+        if (grant.data.id === this.state.funding.data.fromGrantID) {
+          this.setState({ funding: null })
+          return
         }
-      })
-    }
-    else if (event.altKey) {
+
+        this.setState({
+          funding: {
+            isPartial: true,
+            isLoading: false,
+            data: { ...this.state.funding.data, toGrantID: grant.data.id },
+          }
+        })
+      }
       // Create new funding
-      if (grant && !this.state.funding && this.getGrantCofunding(grant) > 0) {
+      else if (grant && this.getGrantCofunding(grant) > 0) {
         this.setState({
           funding: {
             isPartial: true,
@@ -1019,7 +1019,7 @@ class Grants extends React.Component {
       return
 
     if (isAltKey(event)) {
-      this.setState({ fundingMode: true })
+      this.enterFundingMode()
     }
     if (isShiftKey(event)) {
       this.setState({ grantMode: true })
@@ -1153,6 +1153,21 @@ class Grants extends React.Component {
     .catch(() => { /* FIXME(assert we're showing the message) */})
   }
 
+  enterFundingMode = () => {
+    this.setState({ fundingMode: true })
+  }
+
+  exitFundingMode = () => {
+    this.setState({ fundingMode: false })
+  }
+
+  toggleFundingMode = () => {
+    if (!this.state.fundingMode)
+      this.enterFundingMode()
+    else
+      this.exitFundingMode()
+  }
+
   exitGrantMode = () => {
     this.setState({ grantMode: false, grant: null })
   }
@@ -1241,13 +1256,13 @@ class Grants extends React.Component {
   }
 
   renderFilters() {
-    const {filters: {categories, applicants, status}} = this.state
+    const {filters: {categories, applicants, status}, fundingMode} = this.state
 
     const getCategoryText = id => this.props.categories.data[id].data.name
     const getApplicantText = id => this.props.applicants.data[id].data.name
 
     return (
-      <div className='Grants__filters'>
+      <div className='Grants__controls'>
         <FilteringDropdown
           className='full-width'
           position='bottom left'
@@ -1286,6 +1301,12 @@ class Grants extends React.Component {
           selectedItems={status}
           setItems={status => this.setFilters({ status })}
         />
+        <div className='hbox'>
+          <div className='fill' />
+          <Button active={fundingMode} onClick={this.toggleFundingMode}>
+            Edit Fundings
+          </Button>
+        </div>
       </div>
     )
   }
