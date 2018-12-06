@@ -4,7 +4,7 @@
 
 
 const db = require('../database.js')
-const config = require('/usr/etc/config.js')
+const config = require('/usr/etc/grants/config.js')
 
 module.exports = {
   findAll,

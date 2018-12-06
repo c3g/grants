@@ -7,7 +7,7 @@ const { OAuth2Strategy } = require('passport-google-oauth')
 
 const Settings = require('./models/settings.js')
 const User = require('./models/user.js')
-const config = require('/usr/etc/config.js')
+const config = require('/usr/etc/grants/config.js')
 const k = require('./constants')
 
 module.exports = passport

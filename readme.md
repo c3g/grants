@@ -126,7 +126,7 @@ docker-compose run \
 
 docker-compose run \
   -d \
-  -v $CONFIG_DIRECTORY:/usr/etc \
+  -v $CONFIG_DIRECTORY:/usr/etc/grants \
   -p $PORT:3001 \
   web
 ```

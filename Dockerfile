@@ -10,12 +10,8 @@ WORKDIR /usr/src/app
 # Copy application data
 COPY . .
 
-# Expose files volume
-RUN mkdir -p /usr/share/app
-VOLUME [ "/usr/share/app" ]
-
 # Expose config volume
-RUN mkdir -p /usr/etc
-VOLUME [ "/usr/etc" ]
+RUN mkdir -p /usr/etc/grants
+VOLUME [ "/usr/etc/grants" ]
 
 #CMD ["./wait_for_it.sh", "postgres:5432", "--", "npm", "run", "start:dev"]

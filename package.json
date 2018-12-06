@@ -14,9 +14,9 @@
     "build:server": "docker-compose build",
     "run:all": "npm run docker:db:daemon && npm run docker:web:daemon",
     "docker:db": "docker-compose run  -v `pwd`/data/db:/var/lib/postgresql/data  grant_db",
-    "docker:web": "docker-compose run  -v `pwd`/data/config:/usr/etc -p 3001:3001  grant_app",
-    "docker:db:daemon": "docker-compose run  -d  -v `pwd`/data/db:/var/lib/postgresql/data grant_db",
-    "docker:web:daemon": "docker-compose run  -d  -v `pwd`/config:/usr/etc -p 3001:3001     grant_app",
+    "docker:web": "docker-compose run  -v `pwd`/data/config:/usr/etc/grants -p 3001:3001  grant_app",
+    "docker:db:daemon": "docker-compose run  -d -v `pwd`/data/db:/var/lib/postgresql/data              grant_db",
+    "docker:web:daemon": "docker-compose run -d -v `pwd`/data/config:/usr/etc/grants      -p 3001:3001 grant_app",
     "docker": "docker-compose build && docker-compose up",
     "docker:dev": "docker-compose -f docker-compose.dev.yml build && docker-compose -f docker-compose.dev.yml up"
   },
