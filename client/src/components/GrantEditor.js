@@ -15,6 +15,7 @@ import {
 } from 'date-fns'
 import Color from 'color'
 import { over, lensPath, set } from 'ramda'
+import cx from 'classname'
 
 import Status from '../constants/status'
 import Applicant from '../actions/applicants'
@@ -33,13 +34,21 @@ import Title from './Title'
 
 
 const formatAmount = n => `${Number(n).toLocaleString()}`
-const parseAmount = s => typeof s === 'number' ? s : parseInt(s.replace(/,/g, ''))
+const parseAmount = s => typeof s === 'number' ? s : parseInt(s.replace(/,/g, ''), 10)
 
 
+
+const EMPTY_GRANT = {
+  data: {
+    applicants: [],
+    fields: [],
+  },
+}
 
 
 class GrantEditor extends React.Component {
   static propTypes = {
+    open: Prop.bool.isRequired,
     grant: Prop.object.isRequired,
     categories: Prop.object.isRequired,
     applicants: Prop.object.isRequired,
@@ -50,23 +59,30 @@ class GrantEditor extends React.Component {
   constructor(props) {
     super(props)
 
+    const grant = this.getGrant(props)
+
     this.state = {
       errorMessage: undefined,
       fieldName: '',
       fieldAmount: '',
-      grant: props.grant,
-      start: formatISO(props.grant.data.start),
-      end: formatISO(props.grant.data.end),
+      grant: grant,
+      start: formatISO(grant.data.start),
+      end: formatISO(grant.data.end),
     }
   }
 
   componentWillReceiveProps(props, state) {
-    if (props.grant !== this.props.grant)
+    if (props.grant && props.grant !== this.props.grant)
       this.setState({
         grant: props.grant,
         start: formatISO(props.grant.data.start),
         end: formatISO(props.grant.data.end)
       })
+  }
+
+  getGrant(props = this.props) {
+    const grant = props.open ? this.props.grant : EMPTY_GRANT
+    return grant
   }
 
   getGrantColor(grant) {
@@ -252,13 +268,19 @@ class GrantEditor extends React.Component {
   }
 
   render() {
-    const {errorMessage, fieldName, fieldAmount, grant} = this.state
+    const {open} = this.props
+    const {errorMessage, fieldName, fieldAmount} = this.state
+    const grant = this.state.grant ? this.state.grant : EMPTY_GRANT
 
     const category = this.props.categories.data[grant.data.categoryID]
     const color = this.getGrantColor(grant)
 
-    return (
-      <div className='GrantEditor vbox'>
+    const className = cx('GrantEditor vbox', { open })
+
+    return [
+      <div className={cx('GrantEditor__shadow', { open })} onClick={this.onCancel} />,
+      <div className={className}>
+
         <div className='GrantEditor__top' style={{ backgroundColor: color }}>
           <Title className='GrantEditor__title'>{ grant.data.name }&nbsp;</Title>
         </div>
@@ -479,7 +501,7 @@ class GrantEditor extends React.Component {
 
         </div>
       </div>
-    )
+    ]
   }
 }
 

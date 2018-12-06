@@ -1196,26 +1196,28 @@ class Grants extends React.Component {
   renderGrantEditor() {
     const {grantMode, grant} = this.state
 
+    let open = true
+
     if  (grantMode === false)
-      return null
+      open = false
 
     if  (grantMode === true)
-      return null
+      open = false
 
     if (grantMode === 'new' && grant.data.end === null)
-      return null
+      open = false
 
-    return [
-      <div className='Grants__shadow' onClick={this.onEscape} />,
+    return (
       <GrantEditor
+        open={open}
         grant={grant}
         categories={this.props.categories}
         applicants={this.props.applicants}
-        availableCofunding={this.getGrantCofunding(grant)}
+        availableCofunding={open ? this.getGrantCofunding(grant) : 0}
         onDone={grantMode === 'new' ? this.onCreateGrant : this.onUpdateGrant}
         onCancel={this.exitGrantMode}
       />
-    ]
+    )
   }
 
   renderGrantButtons() {
