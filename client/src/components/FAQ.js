@@ -26,7 +26,7 @@ function Question({ label, children }) {
   return (
     <div className='Question'>
       <Icon name='question-circle' />
-      <Label medium>{ label }</Label>
+      <h3 medium>{ label }</h3>
       <Text medium block>
         { children }
       </Text>
@@ -48,6 +48,13 @@ class FAQ extends React.Component {
         title='Help & Frequently Asked Questions'
       >
         <Modal.Content>
+
+          <Question label='How can I filter grants?'>
+            Use the dropdown filters in the top right corner of the screen.
+            <br />
+            You can also select which grant you want to view in particular by
+            pressing <code>Shift</code>. Related grants will also be shown.
+          </Question>
 
           <Question label='How can I view a different region of time?'>
             You can move the timeline along the X axis by dragging it or
