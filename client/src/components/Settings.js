@@ -304,9 +304,9 @@ class Settings extends React.Component {
             </Group>
 
             <Group>
-              <Title>Categories</Title>
+              <Title>Funding Sources</Title>
               <Text block muted>
-                This is the list of grant categories. <br/>
+                This is the list of funding sources. <br/>
               </Text>
 
               <table className='table Settings__table Settings__table__first'>
@@ -350,14 +350,14 @@ class Settings extends React.Component {
                     categories.length === 0 &&
                       <tr className='empty'>
                         <td colSpan='3'>
-                          No categories yet
+                          No sources yet
                         </td>
                       </tr>
                   }
                   <tr>
                     <td className='input-cell'>
                       <Input
-                        placeholder='Create new category'
+                        placeholder='Create new source'
                         className='fill-width'
                         disabled={categories.isCreating || categories.isLoading}
                         value={newCategory.name}
