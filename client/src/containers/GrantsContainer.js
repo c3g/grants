@@ -25,7 +25,7 @@ class GrantsContainer extends React.Component {
         grants={Object.values(this.props.grants.data)}
         ui={this.props.ui}
         applicants={this.props.applicants}
-        fundings={this.props.fundings}
+        fundings={Object.values(this.props.fundings.data)}
         categories={this.props.categories}
         users={this.props.users}
       />

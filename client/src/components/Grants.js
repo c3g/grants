@@ -26,6 +26,7 @@ import { getNewGrant, getNewFunding } from '../models'
 import Button from './Button'
 import FilteringDropdown from './FilteringDropdown'
 import GrantEditor from './GrantEditor'
+import Icon from './Icon'
 import Input from './Input'
 import Text from './Text'
 
@@ -69,11 +70,19 @@ const FONT_FAMILY = 'Ubuntu'
 
 const INITIAL_DATE = startOfYear(new Date())
 
+const DEFAULT_FILTERS = {
+  categories: [],
+  applicants: [],
+  status: ['SUBMITTED', 'ACCEPTED', 'FINISHED'], // 'NOT_ACCEPTED'
+  grants: [],
+}
+
 
 class Grants extends React.Component {
   static propTypes = {
     grants: Prop.arrayOf(Prop.object).isRequired,
-    fundings: Prop.object.isRequired,
+    applicants: Prop.object.isRequired,
+    fundings: Prop.arrayOf(Prop.object).isRequired,
     categories: Prop.object.isRequired,
   }
 
@@ -94,11 +103,7 @@ class Grants extends React.Component {
 
     sortByStartDate(props.grants)
 
-    const filters = {
-      categories: [],
-      applicants: [],
-      status: ['SUBMITTED', 'ACCEPTED', 'FINISHED'] // 'NOT_ACCEPTED'
-    }
+    const filters = DEFAULT_FILTERS
 
     const savedView = window.localStorage[STORAGE_KEY] ? JSON.parse(window.localStorage[STORAGE_KEY]) : {}
 
@@ -119,7 +124,7 @@ class Grants extends React.Component {
       filters: filters,
 
       // derived
-      grants: filterGrants(filters, props.grants),
+      grants: filterGrants(filters, props.grants, props.fundings),
       grantsHover: props.grants.reduce((acc, grant) => {
         acc[grant.data.id] = false
         return acc
@@ -174,7 +179,7 @@ class Grants extends React.Component {
       sortByStartDate(props.grants)
 
       this.setState({
-        grants: filterGrants(this.state.filters, props.grants),
+        grants: filterGrants(this.state.filters, props.grants, props.fundings),
         grantsHover: props.grants.reduce((acc, grant) => {
           acc[grant.data.id] = false
           return acc
@@ -258,7 +263,7 @@ class Grants extends React.Component {
   getGrantCofunding(grant) {
     return (
       grant.data.cofunding
-      - Object.values(this.props.fundings.data).reduce((total, f) =>
+      - this.props.fundings.reduce((total, f) =>
           total + (f.data.fromGrantID === grant.data.id ? f.data.amount : 0), 0)
     )
   }
@@ -457,7 +462,7 @@ class Grants extends React.Component {
   }
 
   drawGrants() {
-    const {width, height, scrollTop} = this.state
+    const {width, height, scrollTop, mouseHover} = this.state
 
     const visibleRect = addPadding([[0, 0], [width, height]], 10)
     let currentY = 0 + TIMELINE_HEIGHT + GRANT_MARGIN
@@ -487,7 +492,7 @@ class Grants extends React.Component {
 
       this.grantsDimensions.push(rect)
 
-      const isHover = this.isMouseInRect(rect)
+      const isHover = mouseHover && this.isMouseInRect(rect)
       const {hover} = this.state.grantsHover[grant.data.id]
 
       if (isHover && !hover)
@@ -598,7 +603,7 @@ class Grants extends React.Component {
   }
 
   drawFundings() {
-    const fundings = Object.values(this.props.fundings.data)
+    const fundings = this.props.fundings
     if (this.state.funding)
       fundings.push(this.state.funding)
 
@@ -1173,9 +1178,13 @@ class Grants extends React.Component {
   }
 
   setFilters(patch) {
-    const filters = { ...this.state.filters, ...patch }
-    const grants = filterGrants(filters, this.props.grants)
+    const filters = patch === DEFAULT_FILTERS ? DEFAULT_FILTERS : { ...this.state.filters, ...patch }
+    const grants = filterGrants(filters, this.props.grants, this.props.fundings)
     this.setState({ filters, grants })
+  }
+
+  resetFilters = () => {
+    this.setFilters(DEFAULT_FILTERS)
   }
 
   renderInput() {
@@ -1242,34 +1251,57 @@ class Grants extends React.Component {
       return null
 
     return this.grantsDimensions.map((dimension, i) =>
-      <Button
-        default
-        square
-        icon='close'
+      <div
+        className='row'
         style={{
           position: 'absolute',
-          transform: `translate(${dimension[1].x - 35}px, ${dimension[0].y + 5}px)`,
+          transform: `translate(${dimension[1].x - 85}px, ${dimension[0].y + 0}px)`,
         }}
-        onClick={() => this.onDeleteGrant(this.state.grants[i]) }
-      />
+      >
+        <Button
+          default
+          square
+          icon='eye'
+          onClick={() => this.setFilters({ grants: this.state.filters.grants.concat(this.state.grants[i].data.id) }) }
+        />
+        <Button
+          default
+          square
+          icon='close'
+          onClick={() => this.onDeleteGrant(this.state.grants[i]) }
+        />
+      </div>
     )
   }
 
-  renderFilters() {
-    const {filters: {categories, applicants, status}, fundingMode} = this.state
+  renderControls() {
+    const {filters: {categories, applicants, status, grants}, fundingMode} = this.state
 
     const getCategoryText = id => this.props.categories.data[id].data.name
     const getApplicantText = id => this.props.applicants.data[id].data.name
+    const getGrantText = id => this.props.grants.find(g => g.data.id === id).data.name 
 
     return (
       <div className='Grants__controls'>
+        <div className='hbox'>
+          <div className='fill' />
+          <Button
+            default
+            className='font-weight-normal'
+            disabled={this.state.filters === DEFAULT_FILTERS}
+            onClick={this.resetFilters}
+          >
+            <Icon name='close' /> Reset Filters
+          </Button>
+        </div>
         <FilteringDropdown
           className='full-width'
           position='bottom left'
+          clearInputOnSelect
           label={
             categories.length > 0 ?
               categories.map(getCategoryText).join(', ') :
-              <Text muted>Filter by category</Text>
+              <Text muted>Filter by source</Text>
           }
           items={Object.values(this.props.categories.data).map(a => a.data.id)}
           selectedItems={categories}
@@ -1279,6 +1311,7 @@ class Grants extends React.Component {
         <FilteringDropdown
           className='full-width'
           position='bottom left'
+          clearInputOnSelect
           label={
             applicants.length > 0 ?
               applicants.map(getApplicantText).join(', ') :
@@ -1292,6 +1325,21 @@ class Grants extends React.Component {
         <FilteringDropdown
           className='full-width'
           position='bottom left'
+          clearInputOnSelect
+          label={
+            grants.length > 0 ?
+              grants.map(getGrantText).join(', ') :
+              <Text muted>Filter by grant</Text>
+          }
+          items={this.props.grants.map(g => g.data.id)}
+          selectedItems={grants}
+          getItemText={getGrantText}
+          setItems={grants => this.setFilters({ grants })}
+        />
+        <FilteringDropdown
+          className='full-width'
+          position='bottom left'
+          clearInputOnSelect
           label={
             status.length > 0 ?
               status.join(', ') :
@@ -1303,7 +1351,7 @@ class Grants extends React.Component {
         />
         <div className='hbox'>
           <div className='fill' />
-          <Button className='font-weight-normal' active={fundingMode} onClick={this.toggleFundingMode}>
+          <Button default className='font-weight-normal' active={fundingMode} onClick={this.toggleFundingMode}>
             Edit Fundings
           </Button>
         </div>
@@ -1331,7 +1379,7 @@ class Grants extends React.Component {
           onMouseLeave={this.onMouseLeave}
         />
 
-        { this.renderFilters() }
+        { this.renderControls() }
         { this.renderInput() }
         { this.renderGrantEditor() }
         { this.renderGrantButtons() }
@@ -1431,7 +1479,7 @@ function sortByStartDate(/* mutable */ grants) {
   grants.sort((a, b) => new Date(a.data.start) - new Date(b.data.start))
 }
 
-function filterGrants(filters, grants) {
+function filterGrants(filters, grants, fundings) {
   return grants.filter(grant => {
 
     if (filters.categories.length > 0
@@ -1444,6 +1492,15 @@ function filterGrants(filters, grants) {
       return false
     }
 
+    if (filters.grants.length > 0
+        && !filters.grants.some(id =>
+                 grant.data.id === id
+              || fundings.some(f =>
+                     isFundingRelated(f, id)
+                  && isFundingRelated(f, grant.data.id)))) {
+      return false
+    }
+
     if (filters.status.length > 0
         && !filters.status.some(status => grant.data.status === status)) {
       return false
@@ -1451,6 +1508,10 @@ function filterGrants(filters, grants) {
 
     return true
   })
+}
+
+function isFundingRelated(funding, id) {
+  return funding.data.fromGrantID === id || funding.data.toGrantID === id
 }
 
 export default pure(Grants)

@@ -137,11 +137,11 @@ class GrantEditor extends React.Component {
     this.setState({ grant: set(lensPath(['data', 'end']), date.toISOString(), this.state.grant) })
   }
 
-  onChangeFieldName = fieldName => {
+  onChangeNewFieldName = fieldName => {
     this.setState({ fieldName })
   }
 
-  onChangeFieldAmount = fieldAmount => {
+  onChangeNewFieldAmount = fieldAmount => {
     this.setState({ fieldAmount })
   }
 
@@ -199,9 +199,24 @@ class GrantEditor extends React.Component {
     })
   }
 
+  onChangeFieldName = (index, name) => {
+    this.setState({
+      grant: set(lensPath(['data', 'fields', index, 'name']), name, this.state.grant)
+    })
+  }
+
+  onChangeFieldAmount = (index, string) => {
+    const amount = parseAmount(string)
+    if (Number.isNaN(amount))
+      return
+    this.setState({
+      grant: set(lensPath(['data', 'fields', index, 'amount']), amount, this.state.grant)
+    })
+  }
+
   onChangeApplicants = (applicants) => {
     this.setState({
-      grant: set(lensPath(['data', 'applicants']), applicants, this.state.grant )
+      grant: set(lensPath(['data', 'applicants']), applicants, this.state.grant)
     })
   }
 
@@ -420,12 +435,14 @@ class GrantEditor extends React.Component {
                     <EditableLabel
                       className='fill-width'
                       value={field.name}
+                      onEnter={name => this.onChangeFieldName(i, name)}
                     />
                   </td>
                   <td>
                     <EditableLabel
                       className='fill-width'
-                      value={field.amount}
+                      value={formatAmount(field.amount)}
+                      onEnter={amount => this.onChangeFieldAmount(i, amount)}
                     />
                   </td>
                   <td>
@@ -455,7 +472,7 @@ class GrantEditor extends React.Component {
                   placeholder='Name'
                   className='fill-width'
                   value={fieldName}
-                  onChange={this.onChangeFieldName}
+                  onChange={this.onChangeNewFieldName}
                   onEnter={this.onAddField}
                 />
               </td>
@@ -464,7 +481,7 @@ class GrantEditor extends React.Component {
                   placeholder='Amount'
                   className='fill-width'
                   value={fieldAmount}
-                  onChange={this.onChangeFieldAmount}
+                  onChange={this.onChangeNewFieldAmount}
                   onEnter={this.onAddField}
                 />
               </td>

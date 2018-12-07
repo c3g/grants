@@ -27,10 +27,12 @@ class FilteringDropdown extends React.Component {
     renderItem: Prop.func,
     getItemText: Prop.func,
     onCreate: Prop.func,
+    clearInputOnSelect: Prop.boolean,
   }
 
   static defaultProps = {
     getItemText: x => x,
+    clearInputOnSelect: false,
   }
 
   constructor(props) {
@@ -59,7 +61,9 @@ class FilteringDropdown extends React.Component {
       this.props.setItems(this.props.selectedItems.concat(item))
     else
       this.props.setItems(this.props.selectedItems.filter(i => i !== item))
-    // this.clearValue()
+
+    if (this.props.clearInputOnSelect)
+      this.clearValue()
   }
 
   render() {
@@ -82,7 +86,7 @@ class FilteringDropdown extends React.Component {
         onOpen={this.clearValue}
         {...rest}
       >
-        <Dropdown.Content className='FilterItems__input'>
+        <Dropdown.Content className='FilteringDropdown__input'>
           <Input
             showClearButton
             className='fill-width'
@@ -107,6 +111,8 @@ class FilteringDropdown extends React.Component {
               <Text muted>No items</Text>
             </Dropdown.Content>
         }
+
+        <div className='FilteringDropdown__items'>
         {
           alphabeticalSort(visibleItems, getItemText).map(item =>
             <Dropdown.Item key={item}
@@ -125,6 +131,8 @@ class FilteringDropdown extends React.Component {
             </Dropdown.Item>
           )
         }
+        </div>
+
         {
 
           (this.props.onCreate && value && !items.some(i => getItemText(i) === value)) &&

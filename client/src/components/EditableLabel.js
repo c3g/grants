@@ -1,10 +1,16 @@
 import React from 'react'
-import pure from 'recompose/pure'
+import prop from 'prop-types'
 import classname from 'classname'
 
 import Icon from './Icon'
 
 class EditableLabel extends React.Component {
+  static propTypes = {
+    value: prop.string.isRequired,
+    onChange: prop.func.isRequired,
+    onEnter: prop.func.isRequired,
+  }
+
   constructor() {
     super()
     this.state = {
@@ -13,7 +19,8 @@ class EditableLabel extends React.Component {
   }
 
   onChange = (ev) => {
-    this.props.onChange && this.props.onChange(ev.target.value, ev)
+    if (this.props.onChange)
+      this.props.onChange(ev.target.value, ev)
   }
 
   onKeyDown = (ev) => {
@@ -48,8 +55,8 @@ class EditableLabel extends React.Component {
   }
 
   accept = (ev) => {
-    if (ev.target.value !== this.props.value)
-      this.props.onEnter && this.props.onEnter(ev.target.value, ev)
+    if (ev.target.value !== this.props.value && this.props.onEnter)
+      this.props.onEnter(ev.target.value, ev)
     this.setNotEditing()
     this.shouldFocusButton = true
   }

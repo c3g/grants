@@ -23,21 +23,24 @@
   color: $hover-color;
   background-color: $hover-bg-color;
 }
+.Button[disabled] {
+  cursor: not-allowed;
+}
 .activable {
   transition: all .15s;
 }
-.Button.active,
-.Button:active,
-.Button:focus,
+.Button:not([disabled]).active,
+.Button:not([disabled]):active,
+.Button:not([disabled]):focus,
 .Dropdown.input-like > .Button:focus,
-.activable.active,
-.activable:active,
-.activable:focus {
+.activable:not([disabled]).active,
+.activable:not([disabled]):active,
+.activable:not([disabled]):focus {
   outline: none;
   border-color: $focus-color;
 }
-.Button.active,
-.Button:active {
+.Button:not([disabled]).active,
+.Button:not([disabled]):active {
   background-color: opacify($hover-bg-color, 0.1);
   &:hover {
     background-color: opacify($hover-bg-color, 0.1);
@@ -66,14 +69,14 @@
   color: $hover-color;
   background-color: $hover-light-bg-color;
 }
-.Button.flat.active,
-.Button.flat:active,
-.Button.flat:focus {
+.Button.flat:not([disabled]).active,
+.Button.flat:not([disabled]):active,
+.Button.flat:not([disabled]):focus {
   outline: none;
   box-shadow: 0 0 0 1px $focus-color;
 }
-.Button.flat.active,
-.Button.flat:active {
+.Button.flat:not([disabled]).active,
+.Button.flat:not([disabled]):active {
   background-color: rgba(black, 0.1);
   &:hover {
     background-color: rgba(black, 0.1);
@@ -147,13 +150,18 @@
 .Button.default {
   background-color: $bg-color-default;
 }
-.Button.default:hover {
+.Button.default:not([disabled]):hover {
   background-color: darken($bg-color-default, 5%);
 }
-.Button.default.active,
-.Button.default:active,
-.Button.default:focus {
+.Button.default:not([disabled]).active,
+.Button.default:not([disabled]):active,
+.Button.default:not([disabled]):focus {
   background-color: darken($bg-color-default, 10%);
+}
+.Button.default[disabled] {
+  color: #aaa;
+  // border-color:     mix(grey, map-get($values, bg), 50%);
+  // background-color: lighten(mix(grey, map-get($values, bg), 30%), 20%); // mix(grey, map-get($values, bg), 50%);
 }
 
 .Button.muted {
@@ -173,20 +181,20 @@
       border-color: transparent rgba(white, 0.6) transparent transparent;
     }
   }
-  .Button.#{$level}:hover {
+  .Button.#{$level}:not([disabled]):hover {
     color: #fff;
     background-color: lighten(map-get($values, bg), 5%);
   }
-  .Button.#{$level}.active,
-  .Button.#{$level}:active,
-  .Button.#{$level}:focus {
+  .Button.#{$level}:not([disabled]).active,
+  .Button.#{$level}:not([disabled]):active,
+  .Button.#{$level}:not([disabled]):focus {
     box-shadow: 0 0 0 1px mix(map-get($values, bg), #fff, 50%);
     border-color: map-get($values, bg);
     background-color: darken(map-get($values, bg), 2%);
   }
   .Dropdown.open > .Button.#{$level},
-  .Button.#{$level}.active,
-  .Button.#{$level}:active {
+  .Button.#{$level}:not([disabled]).active,
+  .Button.#{$level}:not([disabled]):active {
     color: mix(map-get($values, bg), #fff, 30%);
     box-shadow: 0 0 0 1px mix(map-get($values, bg), #fff, 75%);
     background-color: darken(map-get($values, bg), 10%);
