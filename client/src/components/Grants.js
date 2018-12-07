@@ -139,6 +139,7 @@ class Grants extends React.Component {
     this.updateDimensions()
 
     window.addEventListener('resize', this.onWindowResize)
+    window.addEventListener('unload', this.onWindowUnload)
 
     document.addEventListener('mouseup', this.onDocumentMouseUp)
     document.addEventListener('touchend', this.onDocumentTouchEnd)
@@ -166,6 +167,7 @@ class Grants extends React.Component {
     this.scrollSlider.stop()
     this.xSlider.stop()
     window.removeEventListener('resize', this.onWindowResize)
+    window.removeEventListener('unload', this.onWindowUnload)
     document.removeEventListener('mouseup', this.onDocumentMouseUp)
     document.removeEventListener('touchend', this.onDocumentTouchEnd)
     document.removeEventListener('keydown', this.onDocumentKeyDown)
@@ -175,6 +177,7 @@ class Grants extends React.Component {
       startDate: this.state.startDate,
       endDate: this.state.endDate,
     })
+    this.space.stop()
   }
 
   componentWillReceiveProps(props, state) {
@@ -193,10 +196,12 @@ class Grants extends React.Component {
 
   updateDimensions() {
     const { width, height } = this.element.getBoundingClientRect()
+
     if (width !== this.state.width || height !== this.state.height) {
       this.setState({ width, height })
       return true
     }
+
     return false
   }
 
@@ -777,6 +782,13 @@ class Grants extends React.Component {
 
   onWindowResize = () => {
     this.updateDimensions()
+  }
+
+  onWindowUnload = () => {
+    window.localStorage[STORAGE_KEY] = JSON.stringify({
+      startDate: this.state.startDate,
+      endDate: this.state.endDate,
+    })
   }
 
   onMouseWheel = (event) => {
