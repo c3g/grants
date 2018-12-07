@@ -39,7 +39,7 @@ const STORAGE_KEY = 'GRANTS_TIMELINE_VIEW'
 
 const I = () => {}
 
-const MAX_SCROLL_VELOCITY = 900
+const MAX_SCROLL_VELOCITY = 1200
 const clampScrollVelocity = clamp(-MAX_SCROLL_VELOCITY, MAX_SCROLL_VELOCITY)
 
 const BLACK = '#000'
@@ -260,7 +260,7 @@ class Grants extends React.Component {
     return category.data.color
   }
 
-  getGrantCofunding(grant) {
+  getAvailableCofunding(grant) {
     return (
       grant.data.cofunding
       - this.props.fundings.reduce((total, f) =>
@@ -470,7 +470,7 @@ class Grants extends React.Component {
     this.grantsDimensions = []
 
     this.state.grants.forEach((grant, i) => {
-      const cofunding = this.getGrantCofunding(grant)
+      const availableCofunding = this.getAvailableCofunding(grant)
 
       const startX = this.dateToX(grant.data.start)
       const endX   = this.dateToX(grant.data.end)
@@ -488,7 +488,7 @@ class Grants extends React.Component {
           visibleRect
         )
       )
-      const innerWidth = getRectangleWidth(innerRect)
+      // const innerWidth = getRectangleWidth(innerRect)
 
       this.grantsDimensions.push(rect)
 
@@ -503,8 +503,8 @@ class Grants extends React.Component {
       this.state.grantsHover[grant.data.id] = isHover
 
       const isPickingFrom = this.state.fundingMode && !this.state.funding
-      const isActive = !this.state.fundingMode ? isHover : (cofunding > 0 || !isPickingFrom) ? isHover : false
-      const isDisabled = this.state.fundingMode && isPickingFrom && cofunding <= 0
+      const isActive = !this.state.fundingMode ? isHover : (availableCofunding > 0 || !isPickingFrom) ? isHover : false
+      const isDisabled = this.state.fundingMode && isPickingFrom && availableCofunding <= 0
 
       const color =
         isDisabled ?
@@ -519,7 +519,7 @@ class Grants extends React.Component {
           TEXT_COLOR_LIGHT :
           TEXT_COLOR_DARK
       const textColor =
-        this.state.fundingMode && isPickingFrom && cofunding <= 0 ?
+        this.state.fundingMode && isPickingFrom && availableCofunding <= 0 ?
           'rgba(0, 0, 0, 0.3)' :
           matchingTextColor
 
@@ -591,7 +591,10 @@ class Grants extends React.Component {
       })
 
       this.form.fill(textColor).font(TEXT_SIZE, 'bold')
-      drawLabel({ label: `Available co-funding:`, value: formatAmount(cofunding) })
+      drawLabel({
+        label: `Co-funding:`,
+        value: `${formatAmount(availableCofunding)} / ${formatAmount(grant.data.cofunding)}`
+      })
 
       if (isHover) {
         if (isActive)
@@ -802,11 +805,11 @@ class Grants extends React.Component {
        */
 
       const direction = -event.deltaY / Math.abs(event.deltaY)
-      const delta = direction * 50
+      const delta = direction * 150
       const scrollTop = this.scrollSlider.get()
       const velocity =  this.scrollSlider.getVelocity()
       const isOpposed = (delta < 0 && velocity > 0) || (delta > 0 && velocity < 0)
-      let newVelocity =
+      const newVelocity =
         clampScrollVelocity(isOpposed ?
           delta :
           delta + this.scrollSlider.getVelocity())
@@ -833,7 +836,7 @@ class Grants extends React.Component {
           if (this.state.height < this.getMaxScrollHeight()) {
             return clamp(0, this.getMaxScrollHeight(), scrollTop)
           }
-          //const diffHeight = this.state.heigth - this.getMaxScrollHeight()
+          // const diffHeight = this.state.heigth - this.getMaxScrollHeight()
           return scrollTop // clamp(-diffHeight, diffHeight, scrollTop)
         })
         .start(this.scrollSlider)
@@ -995,7 +998,7 @@ class Grants extends React.Component {
         })
       }
       // Create new funding
-      else if (grant && this.getGrantCofunding(grant) > 0) {
+      else if (grant && this.getAvailableCofunding(grant) > 0) {
         this.setState({
           funding: {
             isPartial: true,
@@ -1117,7 +1120,7 @@ class Grants extends React.Component {
     }
 
     const grant = this.getGrantByID(funding.data.fromGrantID)
-    const maximum = this.getGrantCofunding(grant)
+    const maximum = this.getAvailableCofunding(grant)
 
     if (amount > maximum) {
       return false
@@ -1195,7 +1198,7 @@ class Grants extends React.Component {
 
     const {position} = funding
     const grant = this.getGrantByID(funding.data.fromGrantID)
-    const maximum = this.getGrantCofunding(grant)
+    const maximum = this.getAvailableCofunding(grant)
 
     return [
       <div className='Grants__shadow' onClick={this.onEscape} />,
@@ -1237,7 +1240,7 @@ class Grants extends React.Component {
         grant={grant}
         categories={this.props.categories}
         applicants={this.props.applicants}
-        availableCofunding={open ? this.getGrantCofunding(grant) : 0}
+        availableCofunding={open ? this.getAvailableCofunding(grant) : 0}
         onDone={grantMode === 'new' ? this.onCreateGrant : this.onUpdateGrant}
         onCancel={this.exitGrantMode}
       />
