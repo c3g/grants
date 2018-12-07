@@ -606,9 +606,7 @@ class Grants extends React.Component {
   }
 
   drawFundings() {
-    const fundings = this.props.fundings
-    if (this.state.funding)
-      fundings.push(this.state.funding)
+    const fundings = this.state.funding ? this.props.fundings.concat(this.state.funding) : this.props.fundings
 
     const fromGrant = groupBy(path(['data', 'fromGrantID']), fundings)
     const toGrant   = groupBy(path(['data', 'toGrantID']),   fundings)
