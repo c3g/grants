@@ -4,7 +4,6 @@ import { createPortal, findDOMNode } from 'react-dom'
 import pure from 'recompose/pure'
 import classname from 'classname'
 
-import size from '../utils/size'
 import Button from './Button'
 import Icon from './Icon'
 import Tooltip from './Tooltip'
@@ -21,12 +20,18 @@ class Dropdown extends React.Component {
   static propTypes = {
     className: Prop.string,
     position: Prop.oneOf(['bottom left', 'right']),
+    mountNode: Prop.node,
+  }
+
+  static defaultProps = {
+    mountNode: document.body,
   }
 
   constructor(props) {
     super(props)
     this.state = {
       open: false,
+      close: false,
       position: {
         top: 0,
         left: 0
@@ -35,7 +40,7 @@ class Dropdown extends React.Component {
   }
 
   componentWillMount() {
-    this.mountNode = this.props.mountNode || document.body
+    this.mountNode = this.props.mountNode
     this.domNode = document.createElement('div')
     this.mountNode.appendChild(this.domNode)
   }
@@ -55,6 +60,13 @@ class Dropdown extends React.Component {
     if (position.left !== this.state.position.left
       || position.top !== this.state.position.top)
       this.setState({ position })
+  }
+
+  componentWillReceiveProps(props) {
+    if (this.props.open === true && props.open === false) {
+      this.setState({ close: true })
+      setTimeout(() => this.setState({ close: false }), 250)
+    }
   }
 
   onDocumentClick(ev) {
@@ -109,15 +121,17 @@ class Dropdown extends React.Component {
   close = (ev) => {
     const isControlled = 'open' in this.props
 
-    if (isControlled)
+    if (isControlled) {
       this.props.onClose && this.props.onClose(ev)
-    else
-      this.setState({ open: false })
+    } else {
+      this.setState({ open: false, close: true })
+      setTimeout(() => this.setState({ close: false }), 250)
+    }
   }
 
   toggle = () => {
     const open = !this.state.open
-    this.setState({ open })
+    this.setState({ open, close: open === false })
 
     if (open && this.props.onOpen)
       this.props.onOpen()
@@ -131,12 +145,13 @@ class Dropdown extends React.Component {
       value,
       loading,
       inline,
-      trigger = <Button iconAfter='chevron-down'>{ this.props.label }</Button>,
+      trigger = <Button default iconAfter='chevron-down'>{ this.props.label }</Button>,
       closeOnClick = true,
     } = this.props
 
     const isControlled = 'open' in this.props
     const open = isControlled ? this.props.open : this.state.open
+    const close = this.state.close
 
     const dropdownClassName = classname(
       'Dropdown',
@@ -153,6 +168,7 @@ class Dropdown extends React.Component {
       position,
       {
         'open': open,
+        'close': close,
         'compact': compact,
         'with-icons': this.props.icons,
       })
@@ -170,7 +186,7 @@ class Dropdown extends React.Component {
         }
       )
 
-    const children = React.Children.map(this.props.children, child => {
+    const children = recursiveMap(this.props.children, child => {
       return child === null || (child.type !== Item && child.type !== SegmentedItem) ?
         child :
         React.cloneElement(
@@ -285,6 +301,23 @@ function Separator() {
     <div className='separator' />
   )
 }
+
+function recursiveMap(children, fn) {
+  return React.Children.map(children, child => {
+    if (!React.isValidElement(child)) {
+      return child;
+    }
+
+    if (child.props.children) {
+      child = React.cloneElement(child, {
+        children: recursiveMap(child.props.children, fn)
+      });
+    }
+
+    return fn(child);
+  });
+}
+
 
 const defaultExport = pure(Dropdown)
 export default defaultExport
