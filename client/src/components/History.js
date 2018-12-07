@@ -76,7 +76,7 @@ class History extends React.Component {
         </Text>
 
         <div className='row'>
-          <Label for='start'>
+          <Label htmlFor='start'>
             From
           </Label>
           <Input
@@ -87,7 +87,7 @@ class History extends React.Component {
             onEnter={this.onSearch}
             onChange={this.onChangeStart}
           />
-          <Label for='end'>
+          <Label htmlFor='end'>
             To
           </Label>
           <Input
@@ -113,7 +113,7 @@ class History extends React.Component {
           <tbody>
             {
               data.map(entry =>
-                <tr>
+                <tr key={entry.id}>
                   <td className='text-muted'>{ formatISO(entry.date) }</td>
                   <td>
                     { getUserName(users, entry.userID) }{' '}
