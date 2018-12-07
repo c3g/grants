@@ -27,6 +27,7 @@ import Button from './Button'
 import FilteringDropdown from './FilteringDropdown'
 import GrantEditor from './GrantEditor'
 import Icon from './Icon'
+import Label from './Label'
 import Input from './Input'
 import Text from './Text'
 
@@ -122,6 +123,8 @@ class Grants extends React.Component {
       funding: null,
 
       filters: filters,
+
+      inputValue: '',
 
       // derived
       grants: filterGrants(filters, props.grants, props.fundings),
@@ -1050,6 +1053,10 @@ class Grants extends React.Component {
     }
   }
 
+  onChangeInput = (inputValue) => {
+    this.setState({ inputValue })
+  }
+
   onBlurInput = () => {
     // if (this.state.funding)
       // this.setState({ funding: null })
@@ -1109,13 +1116,8 @@ class Grants extends React.Component {
     })
   }
 
-  validateFunding = (newValue) => {
+  validateFunding = (amount) => {
     const {funding} = this.state
-    const amount = parseAmount(newValue)
-
-    if (Number.isNaN(amount)) {
-      return false
-    }
 
     const grant = this.getGrantByID(funding.data.fromGrantID)
     const maximum = this.getAvailableCofunding(grant)
@@ -1189,7 +1191,7 @@ class Grants extends React.Component {
   }
 
   renderInput() {
-    const {funding} = this.state
+    const {funding, inputValue} = this.state
 
     if (!funding || !funding.position)
       return null
@@ -1198,9 +1200,22 @@ class Grants extends React.Component {
     const grant = this.getGrantByID(funding.data.fromGrantID)
     const maximum = this.getAvailableCofunding(grant)
 
+    const amount = parseAmount(inputValue)
+
+    const isEmpty = inputValue === ''
+    const isValidAmount = !isEmpty && !Number.isNaN(amount)
+    const hasEnoughFunds = isValidAmount && this.validateFunding(amount)
+    const status = hasEnoughFunds ? 'success' : 'error'
+
+    const message =
+      isEmpty ? undefined :
+      !isValidAmount ? 'Input is not a valid number' :
+      !hasEnoughFunds ? `Not enough funds to create this co-funding (maximum: ${formatAmount(maximum)})` :
+                        undefined
+
     return [
       <div className='Grants__shadow' onClick={this.onEscape} />,
-      <div className='Grants__input'
+      <div className='Grants__input vbox'
         style={{
           top:  position.y,
           left: position.x + 20,
@@ -1209,11 +1224,19 @@ class Grants extends React.Component {
         <Input
           className='fill-width'
           placeholder={ `Enter amount (maximum: ${formatAmount(maximum)})` }
+          value={inputValue}
+          status={status}
+          onChange={this.onChangeInput}
           onBlur={this.onBlurInput}
           onEnter={this.onEnterInput}
-          validate={this.validateFunding}
           ref={e => e && e.focus()}
         />
+        {
+          message &&
+            <Label error className='no-wrap font-weight-bold'>
+              {message}
+            </Label>
+        }
       </div>
     ]
   }

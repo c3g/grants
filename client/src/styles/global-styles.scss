@@ -83,6 +83,9 @@ h4 {
 .font-weight-bold {
   font-weight: bold;
 }
+.no-wrap {
+  white-space: nowrap;
+}
 
 
 /*
@@ -825,7 +828,7 @@ section {
   position: absolute;
   width: 100%;
   height: 100%;
-  background-color: rgba(black, 0.5);
+  background-color: $shadow-color;
 }
 .Grants__canvas {
   position: absolute;
@@ -874,7 +877,7 @@ section {
   position: absolute;
   width: 100%;
   height: 100%;
-  background-color: rgba(black, 0.5);
+  background-color: $shadow-color;
   opacity: 0;
   pointer-events: none;
   transition: all 0.3s;
