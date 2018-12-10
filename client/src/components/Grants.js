@@ -600,7 +600,7 @@ class Grants extends React.Component {
 
       this.form.fill(textColor).font(TEXT_SIZE, 'bold')
       drawLabel({
-        label: `Co-funding:`,
+        label: `Co-funding (available/original):`,
         value: `${formatAmount(availableCofunding)} / ${formatAmount(grant.data.cofunding)}`
       })
 
