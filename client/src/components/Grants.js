@@ -255,8 +255,15 @@ class Grants extends React.Component {
   }
 
   getMaxScrollHeight() {
-    const grantsHeight = this.state.grants.length * (GRANT_HEIGHT + GRANT_MARGIN) + 3 * GRANT_MARGIN
-    return Math.abs(this.state.height - grantsHeight)
+    if (!this.grantsDimensions)
+      return this.state.height
+
+    const height = this.grantsDimensions.reduce((acc, cur) => acc + (cur[1][1] - cur[0][1]) + GRANT_MARGIN, 0)
+    const lastGrant = this.grantsDimensions[this.grantsDimensions.length - 1]
+    const lastHeight = this.grantsDimensions.length === 0 ? 0 : lastGrant[1][1] - lastGrant[0][1]
+
+    // Will scroll until all of last grant is visible
+    return height - lastHeight - GRANT_MARGIN
   }
 
   getGrantByID(id) {
@@ -847,20 +854,13 @@ class Grants extends React.Component {
 
       const direction = -event.deltaY / Math.abs(event.deltaY)
       const delta = direction * 150
-      const scrollTop = this.scrollSlider.get()
+      // const scrollTop = this.scrollSlider.get()
       const velocity =  this.scrollSlider.getVelocity()
       const isOpposed = (delta < 0 && velocity > 0) || (delta > 0 && velocity < 0)
       const newVelocity =
         clampScrollVelocity(isOpposed ?
           delta :
           delta + this.scrollSlider.getVelocity())
-
-      /* if ((scrollTop <= 0 && newVelocity < 0)
-          || (scrollTop >= this.getMaxScrollHeight() && newVelocity > 0))
-        newVelocity = 0 */
-
-      // console.log(delta, velocity, isOpposed)
-      console.assert(this.state.scrollTop === scrollTop, 'Invalid scrollTop')
 
       this.scrollSlider.stop()
       this.xSlider.stop()
@@ -870,15 +870,10 @@ class Grants extends React.Component {
         velocity: newVelocity,
         power: 0.3,
         timeConstant: 200,
-        // restDelta: 0.9,
-        // modifyTarget: v => Math.round(v / 10) * 10
       })
         .pipe(scrollTop => {
-          if (this.state.height < this.getMaxScrollHeight()) {
-            return clamp(0, this.getMaxScrollHeight(), scrollTop)
-          }
-          // const diffHeight = this.state.heigth - this.getMaxScrollHeight()
-          return scrollTop // clamp(-diffHeight, diffHeight, scrollTop)
+          const maxScrollHeight = this.getMaxScrollHeight()
+          return clamp(-maxScrollHeight, 0, scrollTop)
         })
         .start(this.scrollSlider)
     }
