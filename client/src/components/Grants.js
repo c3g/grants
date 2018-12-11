@@ -27,8 +27,9 @@ import Button from './Button'
 import FilteringDropdown from './FilteringDropdown'
 import GrantEditor from './GrantEditor'
 import Icon from './Icon'
-import Label from './Label'
 import Input from './Input'
+import Label from './Label'
+import Modal from './Modal'
 import Text from './Text'
 
 
@@ -126,6 +127,8 @@ class Grants extends React.Component {
       filters: filters,
 
       inputValue: '',
+
+      deleteGrantID: undefined,
 
       // derived
       grants: filterGrants(filters, props.grants, props.fundings),
@@ -1181,8 +1184,21 @@ class Grants extends React.Component {
   }
 
   onDeleteGrant = (grant) => {
-    Grant.delete(grant.data.id)
-    .then(() => { /* FIXME(anything to do here?) */ })
+    this.setState({ deleteGrantID: grant.data.id })
+  }
+
+  unsetGrantDeleteID = () => {
+    this.setState({ deleteGrantID: undefined })
+  }
+
+  deleteGrant() {
+    const {deleteGrantID} = this.state
+
+    if (deleteGrantID === undefined)
+      return
+
+    Grant.delete(deleteGrantID)
+    .then(this.unsetGrantDeleteID)
     .catch(() => { /* FIXME(assert we're showing the message) */})
   }
 
@@ -1323,6 +1339,31 @@ class Grants extends React.Component {
     )
   }
 
+  renderDeleteModal() {
+    const {deleteGrantID, grants} = this.state
+    const grant = grants.find(g => g.data.id === deleteGrantID)
+    const isOpen = deleteGrantID !== undefined
+
+    return (
+      <Modal minimal open={isOpen} onClose={this.unsetGrantDeleteID} showClose={false}>
+        <Modal.Title>
+          <Icon name='trash' size='lg' /> &nbsp;&nbsp;Confirm Grant Deletion
+        </Modal.Title>
+        <Modal.Content>
+          Are you sure you want to delete grant “{grant ? grant.data.name : ''}”?
+        </Modal.Content>
+        <Modal.Actions>
+          <Button onClick={this.unsetGrantDeleteID} muted>
+            No, cancel
+          </Button>
+          <Button onClick={this.deleteGrant} error>
+            Yes, delete
+          </Button>
+        </Modal.Actions>
+      </Modal>
+    )
+  }
+
   renderControls() {
     const {filters: {categories, applicants, status, grants}, fundingMode} = this.state
 
@@ -1427,6 +1468,8 @@ class Grants extends React.Component {
         { this.renderInput() }
         { this.renderGrantEditor() }
         { this.renderGrantButtons() }
+        { this.renderDeleteModal() }
+
       </div>
     )
   }

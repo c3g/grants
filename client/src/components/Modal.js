@@ -1,4 +1,5 @@
 import React from 'react'
+import prop from 'prop-types'
 import { createPortal } from 'react-dom'
 import pure from 'recompose/pure'
 import classname from 'classname'
@@ -7,8 +8,46 @@ import size from '../utils/size'
 import Button from './Button'
 import Icon from './Icon'
 
+function Title({ children, ...rest }) {
+  return (
+    <div className='Modal__title' { ...rest }>
+      { children }
+    </div>
+  )
+}
+
+function Content({ children }) {
+  return (
+    <div className='Modal__content'>
+      { children }
+    </div>
+  )
+}
+
+function Actions({ children }) {
+  return (
+    <div className='Modal__actions'>
+      { children }
+    </div>
+  )
+}
+
 
 class Modal extends React.Component {
+  static propTypes = {
+    className: prop.string,
+    title: prop.string,
+    open: prop.bool.isRequired,
+    onClose: prop.func.isRequired,
+    small: prop.boolean,
+    large: prop.boolean,
+    width: prop.number,
+    height: prop.number,
+    showHeader: prop.boolean,
+    showClose: prop.boolean,
+    minimal: prop.boolean,
+  }
+
   constructor(props) {
     super(props)
 
@@ -58,12 +97,12 @@ class Modal extends React.Component {
     if (ev.which === 27 /* Escape */) {
       ev.preventDefault()
       ev.stopPropagation()
-      this.props.onClose && this.props.onClose()
+      this.props.onClose()
     }
   }
 
   onClickBackground = (ev) => {
-    this.props.onClose && this.props.onClose()
+    this.props.onClose()
   }
 
   onRef = (ref) => {
@@ -101,6 +140,14 @@ class Modal extends React.Component {
       height: size(height),
     }
 
+    const children = React.Children.toArray(this.props.children)
+    const titleElement = children.find(e => e.type === Title) || (
+      <div className='Modal__title title fill hbox'>
+        { title }
+      </div>
+    )
+    const otherChildren = children.filter(e => e !== titleElement)
+
     return createPortal(
       <div id={this.id} className={modalClassName} ref={this.onRef} tabIndex='-1' onKeyDown={this.onKeyDown}>
         <div className='Modal__background' onClick={this.onClickBackground} />
@@ -110,9 +157,7 @@ class Modal extends React.Component {
             {
               showHeader &&
                 <div className='Modal__header hbox'>
-                  <div className='Modal__title title fill hbox'>
-                    { title }
-                  </div>
+                  { titleElement }
                   {
                     showClose &&
                       <Button
@@ -126,7 +171,7 @@ class Modal extends React.Component {
                 </div>
             }
 
-            { this.props.children }
+            { otherChildren }
 
           </div>
         </div>
@@ -138,27 +183,6 @@ class Modal extends React.Component {
 const defaultExport = pure(Modal)
 export default defaultExport
 
-defaultExport.Title = function Title({ children, ...rest }) {
-  return (
-    <div className='Modal__title' { ...rest }>
-      { children }
-    </div>
-  )
-}
-
-defaultExport.Content = function Content({ children }) {
-  return (
-    <div className='Modal__content'>
-      { children }
-    </div>
-  )
-}
-
-defaultExport.Actions = function Actions({ children }) {
-  return (
-    <div className='Modal__actions'>
-      { children }
-    </div>
-  )
-}
-
+defaultExport.Title = Title
+defaultExport.Content = Content
+defaultExport.Actions = Actions
