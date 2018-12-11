@@ -1203,7 +1203,7 @@ class Grants extends React.Component {
     this.setState({ deleteGrantID: undefined })
   }
 
-  deleteGrant() {
+  deleteGrant = () => {
     const {deleteGrantID} = this.state
 
     if (deleteGrantID === undefined)
