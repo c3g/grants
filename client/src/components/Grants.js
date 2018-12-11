@@ -816,7 +816,6 @@ class Grants extends React.Component {
   }
 
   onWindowBlur = () => {
-    this.exitGrantMode()
     this.exitFundingMode()
   }
 
