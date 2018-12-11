@@ -313,7 +313,7 @@ class GrantEditor extends React.Component {
               </td>
             </tr>
             <tr>
-              <td><Label>Category:</Label></td>
+              <td><Label>Funding source:</Label></td>
               <td>
                 <Dropdown
                   className='full-width input-like'
