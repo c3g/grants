@@ -20,6 +20,7 @@ import { clamp, groupBy, path, lensPath, set } from 'ramda'
 import Grant from '../actions/grants'
 import Funding from '../actions/fundings'
 
+import * as KeyEvent from '../utils/key-event'
 import {formatISO} from '../utils/time'
 import Status from '../constants/status'
 import { getNewGrant, getNewFunding } from '../models'
@@ -1055,26 +1056,26 @@ class Grants extends React.Component {
   onDocumentKeyDown = (event) => {
     const {fundingMode, grantMode} = this.state
 
-    if (isEscapeKey(event)) {
+    if (KeyEvent.isEscape(event)) {
       this.onEscape()
     }
 
     if (fundingMode || grantMode)
       return
 
-    if (isAltKey(event)) {
+    if (KeyEvent.isAlt(event)) {
       this.enterFundingMode()
     }
-    if (isShiftKey(event)) {
+    if (KeyEvent.isShift(event)) {
       this.setState({ grantMode: true })
     }
   }
 
   onDocumentKeyUp = (event) => {
-    if (isAltKey(event) && !this.state.funding) {
+    if (KeyEvent.isAlt(event) && !this.state.funding) {
       this.setState({ fundingMode: false })
     }
-    if (isShiftKey(event) && !this.state.grant) {
+    if (KeyEvent.isShift(event) && !this.state.grant) {
       this.exitGrantMode()
     }
   }
@@ -1534,39 +1535,6 @@ function calculateBezierPoint(t, p) {
     x: a * p[0].x + b * p[1].x + c * p[2].x + d * p[3].x,
     y: a * p[0].y + b * p[1].y + c * p[2].y + d * p[3].y,
   }
-}
-
-function isControlKey(event) {
-  return (
-    event.code.startsWith('Control')
-    || event.key === 'Control'
-    || event.which === 17 /* Control */
-    || event.which === 20 /* CapsLock */
-  )
-}
-
-function isAltKey(event) {
-  return (
-    event.code.startsWith('Alt')
-    || event.key === 'Alt'
-    || event.which === 18 /* Alt */
-  )
-}
-
-function isShiftKey(event) {
-  return (
-       event.code.startsWith('Shift')
-    || event.key === 'Shift'
-    || event.which === 16 /* Shift */
-  )
-}
-
-function isEscapeKey(event) {
-  return (
-       event.code === 'Escape'
-    || event.key === 'Escape'
-    || event.which === 27 /* Escape */
-  )
 }
 
 function sortByStartDate(/* mutable */ grants) {
