@@ -35,6 +35,7 @@ import Text from './Text'
 const formatAmount = n => `$ ${Number(n).toLocaleString()}`
 const parseAmount = s => parseInt(s.replace(/,/g, ''), 10)
 
+const today = () => new Date()
 
 const STORAGE_KEY = 'GRANTS_TIMELINE_VIEW'
 
@@ -46,15 +47,15 @@ const clampScrollVelocity = clamp(-MAX_SCROLL_VELOCITY, MAX_SCROLL_VELOCITY)
 const BLACK = '#000'
 const WHITE = '#fff'
 const BACKGROUND_COLOR = '#f7f7f7'
-const TEXT_COLOR = '#333'
-const TEXT_COLOR_DARK = TEXT_COLOR
+const SELECTION_COLOR = 'rgba(166, 203, 255, 0.4)'
+const TEXT_COLOR       = '#333'
+const TEXT_COLOR_DARK  = TEXT_COLOR
 const TEXT_COLOR_LIGHT = '#eee'
-const LINE_COLOR  = '#999'
-const YEAR_LINE_COLOR  = LINE_COLOR
-const MONTH_LINE_COLOR = '#ddd'
+const LINE_COLOR        = '#999'
+const YEAR_LINE_COLOR   = LINE_COLOR
+const MONTH_LINE_COLOR  = '#ddd'
 const CURSOR_LINE_COLOR = '#ffa0a0'
 const TIMELINE_BACKGROUND = BACKGROUND_COLOR
-const SELECTION_COLOR = 'rgba(166, 203, 255, 0.4)'
 const TOOLTIP_BACKGROUND = 'rgba(0, 0, 0, 0.6)'
 
 const TIMELINE_HEIGHT = 30
@@ -69,7 +70,7 @@ const TEXT_HEIGHT  = TEXT_SIZE * 1.5
 
 const FONT_FAMILY = 'Ubuntu'
 
-const INITIAL_DATE = startOfYear(new Date())
+const INITIAL_DATE = startOfYear(today())
 
 const DEFAULT_FILTERS = {
   categories: [],
@@ -330,6 +331,10 @@ class Grants extends React.Component {
     this.form.stroke(color, width).line(position)
   }
 
+  drawCircle(position, color, radius = 5, otherRadius = radius) {
+    this.form.stroke(BLACK, 1).fill(color).circle([position, [radius, otherRadius]])
+  }
+
   drawCross(position, color, width = 2, length = 5) {
     this.form.stroke(color, width, undefined, 'round')
       .line([[position.x - length, position.y - length], [position.x + length, position.y + length]])
@@ -354,7 +359,8 @@ class Grants extends React.Component {
   }
 
   drawCursorLine() {
-    const {grantMode, grant, height, mouseHover} = this.state
+    const {height} = this.space
+    const {grantMode, grant, mouseHover} = this.state
     const pointerX = this.space.pointer.x
 
     if (!mouseHover)
@@ -419,11 +425,13 @@ class Grants extends React.Component {
   }
 
   drawTimeline(years, months) {
-    const { width } = this.state
+    const { width, height } = this.space
 
+    // Background & border
     this.form.fillOnly(TIMELINE_BACKGROUND).rect([[0, -1], [width, TIMELINE_HEIGHT]])
     this.drawLine([[0, TIMELINE_HEIGHT], [width, TIMELINE_HEIGHT]])
 
+    // Months & Years
     this.form.font(14, 'bold')
 
     const visibleDays = this.getVisibleDays()
@@ -467,6 +475,11 @@ class Grants extends React.Component {
       this.drawLine([[x, 0], [x, TIMELINE_HEIGHT]], YEAR_LINE_COLOR)
     })
 
+
+    // Today's cross
+    const todayX = this.dateToX(today())
+    this.drawLine([[todayX, TIMELINE_HEIGHT - 2], [todayX, TIMELINE_HEIGHT + 2]], BLACK, 2)
+    this.drawLine([[todayX - 2, TIMELINE_HEIGHT], [todayX + 2, TIMELINE_HEIGHT]], BLACK, 2)
   }
 
   drawGrants() {
