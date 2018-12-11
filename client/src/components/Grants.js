@@ -143,6 +143,7 @@ class Grants extends React.Component {
     this.updateDimensions()
 
     window.addEventListener('resize', this.onWindowResize)
+    window.addEventListener('blur',   this.onWindowBlur)
     window.addEventListener('unload', this.onWindowUnload)
 
     document.addEventListener('mouseup', this.onDocumentMouseUp)
@@ -170,17 +171,23 @@ class Grants extends React.Component {
   componentWillUnmount() {
     this.scrollSlider.stop()
     this.xSlider.stop()
+
     window.removeEventListener('resize', this.onWindowResize)
+    window.removeEventListener('blur',   this.onWindowBlur)
     window.removeEventListener('unload', this.onWindowUnload)
+
     document.removeEventListener('mouseup', this.onDocumentMouseUp)
     document.removeEventListener('touchend', this.onDocumentTouchEnd)
     document.removeEventListener('keydown', this.onDocumentKeyDown)
     document.removeEventListener('keyup', this.onDocumentKeyUp)
+
     this.canvas.removeEventListener('wheel', this.onMouseWheel)
+
     window.localStorage[STORAGE_KEY] = JSON.stringify({
       startDate: this.state.startDate,
       endDate: this.state.endDate,
     })
+
     this.space.stop()
   }
 
@@ -798,6 +805,11 @@ class Grants extends React.Component {
 
   onWindowResize = () => {
     this.updateDimensions()
+  }
+
+  onWindowBlur = () => {
+    this.exitGrantMode()
+    this.exitFundingMode()
   }
 
   onWindowUnload = () => {
