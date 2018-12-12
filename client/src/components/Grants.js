@@ -1,7 +1,7 @@
 import React from 'react'
 import Prop from 'prop-types'
 import pure from 'recompose/pure'
-import {CanvasSpace, Pt, Group, Curve, Rectangle} from 'pts/dist/es5.js'
+import {CanvasSpace, Font, Pt, Group, Curve, Rectangle} from 'pts/dist/es5.js'
 import {
   startOfYear,
   endOfYear,
@@ -14,7 +14,7 @@ import {
   differenceInCalendarDays
 } from 'date-fns'
 import Color from 'color'
-import { decay, pointer, value } from 'popmotion'
+import { decay, easing, pointer, tween, value } from 'popmotion'
 import { clamp, groupBy, path, lensPath, set } from 'ramda'
 
 import Grant from '../actions/grants'
@@ -69,10 +69,15 @@ const TEXT_SIZE = 14
 const TEXT_SIZE_SMALL = 12
 const TITLE_HEIGHT = TITLE_SIZE * 1.2
 const TEXT_HEIGHT  = TEXT_SIZE * 1.5
+const GRANT_OVERVIEW_HEIGHT = TITLE_HEIGHT + 2 * GRANT_PADDING
 
 const FONT_FAMILY = 'Ubuntu'
 
-const INITIAL_DATE = startOfYear(today())
+const INITIAL_DATE = new Date('2015-01-01')
+const INITIAL_VIEW = {
+  startDate: addYears(today(), -3),
+  endDate:   addYears(today(), 3),
+}
 
 const DEFAULT_FILTERS = {
   categories: [],
@@ -108,6 +113,9 @@ class Grants extends React.Component {
   constructor(props) {
     super(props)
 
+    this.element = React.createRef()
+    this.canvas = React.createRef()
+
     sortByStartDate(props.grants)
 
     const filters = DEFAULT_FILTERS
@@ -118,8 +126,8 @@ class Grants extends React.Component {
       width: window.innerWidth || 500,
       height: 200,
       scrollTop: 0,
-      startDate: savedView.startDate ? new Date(savedView.startDate) : INITIAL_DATE,
-      endDate:   savedView.endDate   ? new Date(savedView.endDate)   : endOfYear(addYears(INITIAL_DATE, 2)),
+      startDate: savedView.startDate ? new Date(savedView.startDate) : INITIAL_VIEW.startDate,
+      endDate:   savedView.endDate   ? new Date(savedView.endDate)   : INITIAL_VIEW.endDate,
 
       mouseHover: false,
 
@@ -127,6 +135,8 @@ class Grants extends React.Component {
       grant: null,
       fundingMode: false,
       funding: null,
+
+      overviewMode: false,
 
       filters: filters,
 
@@ -136,16 +146,28 @@ class Grants extends React.Component {
 
       // derived
       grants: filterGrants(filters, props.grants, props.fundings),
-      grantsHover: props.grants.reduce((acc, grant) => {
-        acc[grant.data.id] = false
-        return acc
-      }, {}),
     }
 
-    this.element = React.createRef()
-    this.canvas = React.createRef()
+    this.mutableState = {
+      overviewFactor: 1,
+      grants: [],
+      grantsHover: {},
+      fundingPositions: {},
+
+      elements: [],
+      hoverID: undefined,
+      hoverGrantID: undefined,
+    }
+
+    this.isDragging = false
   }
 
+/*   setState(patch) {
+ *     if (patch.startDate !== undefined || patch.endDate !== undefined)
+ *       console.log('Updated', JSON.parse(JSON.stringify(patch)))
+ *     super.setState(patch)
+ *   }
+ *  */
   componentDidMount() {
     this.updateDimensions()
 
@@ -204,10 +226,6 @@ class Grants extends React.Component {
 
       this.setState({
         grants: filterGrants(this.state.filters, props.grants, props.fundings),
-        grantsHover: props.grants.reduce((acc, grant) => {
-          acc[grant.data.id] = false
-          return acc
-        }, {}),
       })
     }
   }
@@ -262,12 +280,12 @@ class Grants extends React.Component {
   }
 
   getMaxScrollHeight() {
-    if (!this.grantsDimensions)
+    if (!this.mutableState.grants)
       return this.state.height
 
-    const height = this.grantsDimensions.reduce((acc, cur) => acc + (cur[1][1] - cur[0][1]) + GRANT_MARGIN, 0)
-    const lastGrant = this.grantsDimensions[this.grantsDimensions.length - 1]
-    const lastHeight = this.grantsDimensions.length === 0 ? 0 : lastGrant[1][1] - lastGrant[0][1]
+    const height = this.mutableState.grants.reduce((acc, cur) => acc + (cur[1][1] - cur[0][1]) + GRANT_MARGIN, 0)
+    const lastGrant = this.mutableState.grants[this.mutableState.grants.length - 1]
+    const lastHeight = this.mutableState.grants.length === 0 ? 0 : lastGrant[1][1] - lastGrant[0][1]
 
     // Will scroll until all of last grant is visible
     return height - lastHeight - GRANT_MARGIN
@@ -330,7 +348,7 @@ class Grants extends React.Component {
 
   getClickedGrant(event) {
     // We use this.space.pointer.x/y rather than event.clientX/clientY
-    const index = this.grantsDimensions.findIndex(d => this.isMouseInRect(d))
+    const index = this.mutableState.grants.findIndex(d => this.isMouseInRect(d))
     const grant = index !== -1 ? this.state.grants[index] : undefined
     return grant
   }
@@ -338,7 +356,7 @@ class Grants extends React.Component {
   getClickedFundingID() {
     if (!this.state.fundingMode)
       return undefined
-    const entry = Object.entries(this.fundingsPositions).find(([id, { hover }]) => hover)
+    const entry = Object.entries(this.mutableState.fundingPositions).find(([id, { hover }]) => hover)
     return entry ? entry[0] : undefined
   }
 
@@ -352,15 +370,13 @@ class Grants extends React.Component {
   }
 
   setupDragging() {
-    this.initialDate = this.state.startDate
-
     this.xSlider = value(0, (x) => {
       const visibleDays = this.getVisibleDays()
       const pixelsPerDay = this.state.width / visibleDays
 
       const days = -x / pixelsPerDay
 
-      const startDate = addDays(this.initialDate, days)
+      const startDate = addDays(INITIAL_DATE, days)
       const endDate   = addDays(startDate, visibleDays)
 
       this.setState({ startDate, endDate })
@@ -383,6 +399,102 @@ class Grants extends React.Component {
   }
 
   /*
+   * State mutation
+   */
+
+  unsetGrantDeleteID = () => {
+    this.setState({ deleteGrantID: undefined })
+  }
+
+  enterOverviewMode = () => {
+    this.setState({ overviewMode: true })
+    this.exitGrantMode()
+    this.exitFundingMode()
+
+    if (this.overviewAnimation)
+      this.overviewAnimation.stop()
+    this.overviewAnimation = tween({
+      from: this.mutableState.overviewFactor,
+      to: 0,
+      duration: 250,
+      ease: easing.easeInOut,
+    })
+      .start(newValue => {
+        this.mutableState.overviewFactor = newValue
+        return newValue
+      })
+  }
+
+  exitOverviewMode = () => {
+    this.setState({ overviewMode: false })
+
+    if (this.overviewAnimation)
+      this.overviewAnimation.stop()
+
+    this.overviewAnimation = tween({
+      from: this.mutableState.overviewFactor,
+      to: 1,
+      duration: 250,
+      ease: easing.easeInOut,
+    })
+      .start(newValue => {
+        this.mutableState.overviewFactor = newValue
+        return newValue
+      })
+  }
+
+  toggleOverviewMode = () => {
+    if (!this.state.overviewMode)
+      this.enterOverviewMode()
+    else
+      this.exitOverviewMode()
+  }
+
+  enterFundingMode = () => {
+    if (this.state.overviewMode)
+      return
+    this.setState({ fundingMode: true })
+  }
+
+  exitFundingMode = () => {
+    this.setState({ fundingMode: false, funding: null })
+  }
+
+  toggleFundingMode = () => {
+    if (!this.state.fundingMode)
+      this.enterFundingMode()
+    else
+      this.exitFundingMode()
+  }
+
+  enterGrantMode = (grantMode = true, grant = null) => {
+    this.setState({ grantMode, grant })
+  }
+
+  exitGrantMode = () => {
+    this.setState({ grantMode: false, grant: null })
+  }
+
+  setFilters(patch) {
+    const filters = patch === DEFAULT_FILTERS ? DEFAULT_FILTERS : { ...this.state.filters, ...patch }
+    const grants = filterGrants(filters, this.props.grants, this.props.fundings)
+    this.setState({ filters, grants })
+  }
+
+  resetFilters = () => {
+    this.setFilters(DEFAULT_FILTERS)
+  }
+
+  setView = (view) => {
+    this.setState(view)
+    this.setupDragging()
+  }
+
+  resetView = () => {
+    this.setView(INITIAL_VIEW)
+  }
+
+  /*
    * Rendering helpers (canvas)
    */
 
@@ -391,9 +503,22 @@ class Grants extends React.Component {
       this.canvas.current.style.cursor = type
   }
 
-  drawText(position, text) {
-    this.form.fill(TEXT_COLOR).font(14, 'bold')
-      .text(position, text)
+  drawText(options) {
+    if (options.fill)
+      this.form.fill(options.fill)
+    if (options.fontSize || options.fontStyle || options.fontWeight || options.fontFamily || options.lineHeight) {
+      this.form.font(new Font(
+        options.fontSize,
+        options.fontFamily,
+        options.fontWeight,
+        options.fontStyle,
+        options.lineHeight
+      ))
+    }
+    if (options.alignment || options.baseline)
+      this.form.alignText(options.alignment, options.baseline)
+
+    this.form.text(options.position, options.text, options.verticalAlign, options.tail, options.overrideBaseline)
   }
 
   drawLine(position, color = LINE_COLOR, width = 1) {
@@ -409,6 +534,35 @@ class Grants extends React.Component {
       .line([[position.x - length, position.y - length], [position.x + length, position.y + length]])
     this.form.stroke(color, width, undefined, 'round')
       .line([[position.x + length, position.y - length], [position.x - length, position.y + length]])
+  }
+
+  drawTextBox(options) {
+    if (options.fill)
+      this.form.fill(options.fill)
+    if (options.fontSize || options.fontStyle || options.fontWeight || options.fontFamily || options.lineHeight) {
+      this.form.font(new Font(
+        options.fontSize,
+        options.fontFamily,
+        options.fontWeight,
+        options.fontStyle,
+        options.lineHeight
+      ))
+    }
+    if (options.alignment || options.baseline)
+      this.form.alignText(options.alignment, options.baseline)
+
+    this.form.textBox(options.box, options.text, options.verticalAlign, options.tail, options.overrideBaseline)
+  }
+
+  setClip(rect) {
+    this.form._ctx.save()
+    this.form._ctx.beginPath()
+    this.form._ctx.rect(...canvasRectFromPtsRect(rect))
+    this.form._ctx.clip()
+  }
+
+  unsetClip() {
+    this.form._ctx.restore()
   }
 
   /*
@@ -441,27 +595,34 @@ class Grants extends React.Component {
   }
 
   drawBackground(years, months) {
-    const { height } = this.state
+    const { overviewFactor } = this.mutableState
+    const { height } = this.space
+
+    const opacity = overviewFactor
+
+    if (opacity === 0)
+      return
 
     years.forEach(year => {
       const x = this.dateToX(year)
-      this.drawLine([[x, 0], [x, height]], YEAR_LINE_COLOR)
+      this.drawLine([[x, 0], [x, height]], alpha(YEAR_LINE_COLOR, opacity))
     })
 
     months.forEach(month => {
       if (month.getTime() === startOfYear(month).getTime())
         return
       const x = this.dateToX(month)
-      this.drawLine([[x, 0], [x, height]], MONTH_LINE_COLOR)
+      this.drawLine([[x, 0], [x, height]], alpha(MONTH_LINE_COLOR, opacity))
     })
   }
 
   drawCursorLine() {
     const {height} = this.space
-    const {grantMode, grant, mouseHover} = this.state
+    const {grantMode, grant, mouseHover, overviewMode} = this.state
     const pointerX = this.space.pointer.x
+    const showCursorLine = mouseHover && !overviewMode
 
-    if (!mouseHover)
+    if (!showCursorLine)
       return
 
     const isCreatingGrant = grantMode && grant && grant.data.end === null
@@ -489,12 +650,13 @@ class Grants extends React.Component {
   }
 
   drawGrants() {
-    const {width, height, scrollTop, mouseHover} = this.state
+    const {overviewFactor} = this.mutableState
+    const {width, height, scrollTop, mouseHover, overviewMode} = this.state
 
     const visibleRect = addPadding([[0, 0], [width, height]], 10)
     let currentY = 0 + TIMELINE_HEIGHT + GRANT_MARGIN
 
-    this.grantsDimensions = []
+    this.mutableState.grants = []
 
     this.state.grants.forEach((grant, i) => {
       const availableCofunding = this.getAvailableCofunding(grant)
@@ -502,11 +664,13 @@ class Grants extends React.Component {
       const startX = this.dateToX(grant.data.start)
       const endX   = this.dateToX(grant.data.end)
       const grantHeight = this.getGrantHeight(i)
+      const diffHeight = Math.abs(grantHeight - GRANT_OVERVIEW_HEIGHT)
+      const actualGrantHeight = GRANT_OVERVIEW_HEIGHT + diffHeight * overviewFactor
 
       const startY = currentY + scrollTop
-      const endY   = startY + grantHeight
+      const endY   = startY + actualGrantHeight
 
-      currentY += grantHeight + GRANT_MARGIN
+      currentY += actualGrantHeight + GRANT_MARGIN
 
       const rect = Group.fromArray([[startX, startY], [endX, endY]])
       const innerRect = Group.fromArray(
@@ -516,17 +680,17 @@ class Grants extends React.Component {
         )
       )
 
-      this.grantsDimensions.push(rect)
+      this.mutableState.grants.push(rect)
 
       const isHover = mouseHover && this.isMouseInRect(rect)
-      const {hover} = this.state.grantsHover[grant.data.id]
+      const hover = this.mutableState.grantsHover[grant.data.id]
 
       if (isHover && !hover)
         this.onMouseEnterGrant(grant)
       else if (!isHover && hover)
         this.onMouseLeaveGrant(grant)
 
-      this.state.grantsHover[grant.data.id] = isHover
+      this.mutableState.grantsHover[grant.data.id] = isHover
 
       const isPickingFrom = this.state.fundingMode && !this.state.funding
       const isActive = !this.state.fundingMode ? isHover : (availableCofunding > 0 || !isPickingFrom) ? isHover : false
@@ -557,6 +721,8 @@ class Grants extends React.Component {
         .rect(rect)
 
       // Text
+
+      this.setClip(innerRect)
 
       const drawLabel = ({
           label,
@@ -600,7 +766,7 @@ class Grants extends React.Component {
         label: grant.data.name,
         labelStyle: () => this.form.fill(textColor).font(TITLE_SIZE, 'bold'),
         value: `[${grant.data.status}]`,
-        valueStyle: () => this.form.fill(textColor).font(TEXT_SIZE_SMALL, 'normal'),
+        valueStyle: () => this.form.fill(alpha(textColor, overviewFactor)).font(TEXT_SIZE_SMALL, 'normal'),
         preferValue: false,
         height: TITLE_HEIGHT,
       })
@@ -628,20 +794,27 @@ class Grants extends React.Component {
         else
           this.setCursor('not-allowed')
       }
+
+      this.unsetClip()
     })
   }
 
   drawFundings() {
+    const {overviewMode} = this.state
+    const {hoverGrantID} = this.mutableState
+
     const fundings = this.state.funding ? this.props.fundings.concat(this.state.funding) : this.props.fundings
 
+    // Accumulate links' data
     const fromGrant = groupBy(path(['data', 'fromGrantID']), fundings)
     const toGrant   = groupBy(path(['data', 'toGrantID']),   fundings)
 
     const detailsByGrant = {}
     this.state.grants.forEach((grant, i) => {
-      const dimension = this.grantsDimensions[i]
+      const dimension = this.mutableState.grants[i]
       const height = dimension[1].y - dimension[0].y
-      const availableHeight = height - 2 * GRANT_PADDING
+      const padding = overviewMode ? 0 : GRANT_PADDING
+      const availableHeight = height - 2 * padding
       const links =
         (fromGrant[grant.data.id] ? fromGrant[grant.data.id].length : 0)
         + (toGrant[grant.data.id] ? toGrant[grant.data.id].length : 0)
@@ -651,7 +824,7 @@ class Grants extends React.Component {
         grant: grant,
         dimension: dimension,
         y: dimension[0].y,
-        paddingY: dimension[0].y + GRANT_PADDING,
+        paddingY: dimension[0].y + padding,
         height: height,
         sectionHeight: sectionHeight,
         links: links,
@@ -670,16 +843,18 @@ class Grants extends React.Component {
           x: this.dateToX(detail.grant.data.start),
           y: detail.paddingY
             + (detail.to.length * detail.sectionHeight)
-            + ((1 + detail.fromCount++) * detail.sectionHeight)
+            + ((1 + detail.fromCount) * detail.sectionHeight)
         }
+        detail.fromCount += 1
 
+        // Partial link (user is selecting target grant)
         if (funding.data.toGrantID === null) {
           links.push({ funding, start, end: null, detail })
           return
         }
 
+        // Grant is not visible
         if (!(funding.data.toGrantID in detailsByGrant)) {
-          // Grant might not be visible
           return
         }
 
@@ -687,15 +862,17 @@ class Grants extends React.Component {
         const end = {
           x: this.dateToX(otherDetail.grant.data.start),
           y: otherDetail.paddingY
-            + ((1 + otherDetail.toCount++) * otherDetail.sectionHeight)
+            + ((1 + otherDetail.toCount) * otherDetail.sectionHeight)
         }
+        otherDetail.toCount += 1
 
         links.push({ funding, start, end, detail })
       })
     })
 
-    this.fundingsPositions = {}
+    this.mutableState.fundingPositions = {}
 
+    // Render links
     links.forEach(link => {
 
       const {isPartial} = link.funding
@@ -722,35 +899,62 @@ class Grants extends React.Component {
         end,
       ]
 
-      const color =
-        Color(this.getGrantColor(link.detail.grant))
-          .darken(0.1)
-          .fade(isPartial ? 0.5 : 0)
+      const isHoverOtherGrant = hoverGrantID !== undefined && hoverGrantID !== link.funding.data.fromGrantID && hoverGrantID !== link.funding.data.toGrantID
+      const isHoverGrant = hoverGrantID === link.funding.data.fromGrantID || hoverGrantID === link.funding.data.toGrantID
 
-      this.form.strokeOnly(color.toString(), 2).line(Curve.bezier(points, 50))
-      this.form.strokeOnly(color.toString(), 2, undefined, 'round').line([end, end.$subtract(10, 8)])
-      this.form.strokeOnly(color.toString(), 2, undefined, 'round').line([end, end.$subtract(10, -8)])
+      const grantColor = this.getGrantColor(link.detail.grant)
+      const baseColor = Color(grantColor).darken(0.1).toString()
+      const linkColor =
+        isPartial ?
+          alpha(baseColor, 0.5) :
+        isHoverOtherGrant ?
+          alpha(baseColor, 0.5) :
+          baseColor
+
+      const lineWidth = isHoverGrant ? 2 : 1
+
+      if (isHoverOtherGrant)
+        this.form._ctx.setLineDash([5, 5])
+
+      // Curve
+      this.form.strokeOnly(linkColor, lineWidth).line(Curve.bezier(points, 50))
+      // Arrow
+      this.form.strokeOnly(linkColor, lineWidth, undefined, 'round').line([end, end.$subtract(10, 8)])
+      this.form.strokeOnly(linkColor, lineWidth, undefined, 'round').line([end, end.$subtract(10, -8)])
+
+      this.form._ctx.setLineDash([])
 
       const middlePoint = new Pt(calculateBezierPoint(0.6, points))
 
-      this.fundingsPositions[link.funding.data.id] = { position: middlePoint }
+      this.mutableState.fundingPositions[link.funding.data.id] = { position: middlePoint }
 
-      if (!isPartial) {
+      // Middle point & text
+      if (!overviewMode && !isPartial) {
+
         const text = formatAmount(link.funding.data.amount)
-        this.form.fill(TEXT_COLOR, 1).font(TEXT_SIZE, 'bold')
+        const textColor =
+          isHoverOtherGrant ?
+            alpha(TEXT_COLOR, 0.3) :
+            baseColor
+
+        this.form.fill(textColor, 1).font(TEXT_SIZE, 'bold')
           .text(middlePoint.$add(10, (2 - TEXT_HEIGHT / 2)), text)
+
+        const wasHover = this.mutableState.fundingPositions[link.funding.data.id].hover
+        const isHover = this.isMouseInCircle(middlePoint, 10)
+
         if (!this.state.fundingMode) {
-          this.form.fillOnly(BLACK).point(middlePoint, 2, 'circle')
+          this.form.fillOnly(textColor).point(middlePoint, 2, 'circle')
+        }
+        else if (isHover) {
+          this.setCursor('pointer')
+          this.drawCross(middlePoint, textColor, 3)
+          this.mutableState.fundingPositions[link.funding.data.id].hover = true
         }
         else {
-          const isHover = this.isMouseInCircle(middlePoint, 10)
-          if (!isHover) {
-            this.drawCross(middlePoint, BLACK)
-          } else {
-            this.setCursor('pointer')
-            this.drawCross(middlePoint, BLACK, 3)
-            this.fundingsPositions[link.funding.data.id].hover = true
-          }
+          this.drawCross(middlePoint, textColor)
+          if (wasHover)
+            this.mutableState.fundingPositions[link.funding.data.id].hover = false
         }
       }
 
@@ -766,11 +970,17 @@ class Grants extends React.Component {
   }
 
   drawTimeline(years, months) {
+    const { overviewFactor } = this.mutableState
     const { width, height } = this.space
 
+    const opacity = overviewFactor
+
+    if (opacity === 0)
+      return
+
     // Background & border
-    this.form.fillOnly(TIMELINE_BACKGROUND).rect([[0, -1], [width, TIMELINE_HEIGHT]])
-    this.drawLine([[0, TIMELINE_HEIGHT], [width, TIMELINE_HEIGHT]])
+    this.form.fillOnly(alpha(TIMELINE_BACKGROUND, opacity)).rect([[0, -1], [width, TIMELINE_HEIGHT]])
+    this.drawLine([[0, TIMELINE_HEIGHT], [width, TIMELINE_HEIGHT]], alpha(LINE_COLOR, opacity))
 
     // Months & Years
     this.form.font(14, 'bold')
@@ -802,8 +1012,8 @@ class Grants extends React.Component {
 
           const x = this.dateToX(month)
           const text = format(month, 'MMM')
-          this.form.fill(MONTH_LINE_COLOR).text([x + 5, 5], text)
-          this.drawLine([[x, 0], [x, TIMELINE_HEIGHT]], MONTH_LINE_COLOR)
+          this.form.fill(alpha(MONTH_LINE_COLOR, opacity)).text([x + 5, 5], text)
+          this.drawLine([[x, 0], [x, TIMELINE_HEIGHT]], alpha(MONTH_LINE_COLOR, opacity))
         })
       })
     }
@@ -812,21 +1022,25 @@ class Grants extends React.Component {
       const x = this.dateToX(year)
       const text = format(year, 'YYYY')
 
-      this.form.fill(TEXT_COLOR).text([x + 5, 5], text)
-      this.drawLine([[x, 0], [x, TIMELINE_HEIGHT]], YEAR_LINE_COLOR)
+      this.drawText({
+        fill: alpha(TEXT_COLOR, opacity),
+        position: [x + 5, 5],
+        text: text
+      })
+      this.drawLine([[x, 0], [x, TIMELINE_HEIGHT]], alpha(YEAR_LINE_COLOR, opacity))
     })
 
 
     // Today's cross
     const todayX = this.dateToX(today())
-    this.drawLine([[todayX, TIMELINE_HEIGHT - 2], [todayX, TIMELINE_HEIGHT + 2]], BLACK, 2)
-    this.drawLine([[todayX - 2, TIMELINE_HEIGHT], [todayX + 2, TIMELINE_HEIGHT]], BLACK, 2)
+    this.drawLine([[todayX, TIMELINE_HEIGHT - 2], [todayX, TIMELINE_HEIGHT + 2]], alpha(BLACK, opacity), 2)
+    this.drawLine([[todayX - 2, TIMELINE_HEIGHT], [todayX + 2, TIMELINE_HEIGHT]], alpha(BLACK, opacity), 2)
   }
 
   drawTooltip() {
-    const {mouseHover} = this.state
+    const {mouseHover, overviewMode} = this.state
     const hasPointer = this.space.pointer
-    const showTooltip = hasPointer && mouseHover
+    const showTooltip = hasPointer && mouseHover && !overviewMode
 
     if (!showTooltip)
       return
@@ -840,7 +1054,6 @@ class Grants extends React.Component {
     const y = pointer.y
     const textWidth = this.form.getTextWidth(text)
     const paddingH = 5
-    const paddingV = 2
     const width = textWidth + 2 * paddingH
     const height = 30
 
@@ -862,11 +1075,12 @@ class Grants extends React.Component {
    */
 
   onMouseEnterGrant = (grant) => {
-
+    this.mutableState.hoverGrantID = grant.data.id
   }
 
   onMouseLeaveGrant = (grant) => {
-
+    if (this.mutableState.hoverGrantID === grant.data.id)
+      this.mutableState.hoverGrantID = undefined
   }
 
   onWindowResize = () => {
@@ -902,8 +1116,7 @@ class Grants extends React.Component {
 
       this.xSlider.stop()
       this.scrollSlider.stop()
-      this.setState({ startDate, endDate })
-      this.setupDragging()
+      this.setView({ startDate, endDate })
     }
     else if (event.deltaX === 0 && event.deltaY !== 0 && !event.shiftKey) {
       /*
@@ -920,8 +1133,8 @@ class Grants extends React.Component {
           delta :
           delta + this.scrollSlider.getVelocity())
 
-      this.scrollSlider.stop()
       this.xSlider.stop()
+      this.scrollSlider.stop()
 
       decay({
         from: this.scrollSlider.get(),
@@ -942,10 +1155,10 @@ class Grants extends React.Component {
 
       const direction = -event.deltaY / Math.abs(event.deltaY)
       const delta = direction * 600
-      const scrollTop = this.scrollSlider.get()
+      // const scrollTop = this.scrollSlider.get()
       const velocity =  this.scrollSlider.getVelocity()
       const isOpposed = (delta < 0 && velocity > 0) || (delta > 0 && velocity < 0)
-      let newVelocity =
+      const newVelocity =
         clampScrollVelocity(isOpposed ?
           delta :
           delta + this.scrollSlider.getVelocity())
@@ -953,9 +1166,6 @@ class Grants extends React.Component {
       /* if ((scrollTop <= 0 && newVelocity < 0)
           || (scrollTop >= this.getMaxScrollHeight() && newVelocity > 0))
         newVelocity = 0 */
-
-      // console.log(delta, velocity, isOpposed)
-      console.assert(this.state.scrollTop === scrollTop, 'Invalid scrollTop')
 
       this.scrollSlider.stop()
       this.xSlider.stop()
@@ -989,13 +1199,10 @@ class Grants extends React.Component {
 
     const start = startOfDay(this.xToDate(this.space.pointer.x))
 
-    this.setState({
-      grantMode: 'new',
-      grant: {
-        isPartial: true,
-        isLoading: false,
-        data: getNewGrant(start, null),
-      },
+    this.enterGrantMode('new', {
+      isPartial: true,
+      isLoading: false,
+      data: getNewGrant(start, null),
     })
   }
 
@@ -1029,6 +1236,8 @@ class Grants extends React.Component {
   onDocumentTouchEnd = this.onStopDrag
 
   onStartDrag = () => {
+    this.isDragging = true
+
     this.scrollSlider.stop()
 
     pointer({ x: this.xSlider.get() })
@@ -1037,15 +1246,17 @@ class Grants extends React.Component {
   }
 
   onStopDrag = () => {
+    if (!this.isDragging)
+      return
+
+    this.isDragging = false
+
     decay({
       from: this.xSlider.get(),
       velocity: this.xSlider.getVelocity(),
       power: 0.7,
-      // timeConstant: 350,
-      // restDelta: 0.5,
-      // modifyTarget: v => v
     })
-      .start(this.xSlider);
+    .start(this.xSlider);
   }
 
   onClick = (event) => {
@@ -1103,10 +1314,7 @@ class Grants extends React.Component {
       }
     }
     else {
-      this.setState({
-        grantMode: 'edit',
-        grant: grant,
-      })
+      this.enterGrantMode('edit', grant)
     }
   }
 
@@ -1124,7 +1332,7 @@ class Grants extends React.Component {
       this.enterFundingMode()
     }
     if (KeyEvent.isShift(event)) {
-      this.setState({ grantMode: true })
+      this.enterGrantMode()
     }
   }
 
@@ -1142,7 +1350,7 @@ class Grants extends React.Component {
       this.setState({ fundingMode: false, funding: null })
     }
     if (this.state.grantMode) {
-      this.setState({ grantMode: false, grant: null })
+      this.exitGrantMode()
     }
   }
 
@@ -1182,7 +1390,6 @@ class Grants extends React.Component {
     }
   }
 
-
   onCreateGrant = (grant) => {
     Grant.create(grant.data)
     .then(() => {
@@ -1203,11 +1410,7 @@ class Grants extends React.Component {
     this.setState({ deleteGrantID: grant.data.id })
   }
 
-  unsetGrantDeleteID = () => {
-    this.setState({ deleteGrantID: undefined })
-  }
-
-  deleteGrant = () => {
+  onConfirmDeleteGrant = () => {
     const {deleteGrantID} = this.state
 
     if (deleteGrantID === undefined)
@@ -1218,34 +1421,9 @@ class Grants extends React.Component {
     .catch(() => { /* FIXME(assert we're showing the message) */})
   }
 
-  enterFundingMode = () => {
-    this.setState({ fundingMode: true })
-  }
-
-  exitFundingMode = () => {
-    this.setState({ fundingMode: false })
-  }
-
-  toggleFundingMode = () => {
-    if (!this.state.fundingMode)
-      this.enterFundingMode()
-    else
-      this.exitFundingMode()
-  }
-
-  exitGrantMode = () => {
-    this.setState({ grantMode: false, grant: null })
-  }
-
-  setFilters(patch) {
-    const filters = patch === DEFAULT_FILTERS ? DEFAULT_FILTERS : { ...this.state.filters, ...patch }
-    const grants = filterGrants(filters, this.props.grants, this.props.fundings)
-    this.setState({ filters, grants })
-  }
-
-  resetFilters = () => {
-    this.setFilters(DEFAULT_FILTERS)
-  }
+  /*
+   * Rendering (elements)
+   */
 
   renderInput() {
     const {funding, inputValue} = this.state
@@ -1326,12 +1504,12 @@ class Grants extends React.Component {
   }
 
   renderGrantButtons() {
-    const {grantMode} = this.state
+    const {grantMode, overviewMode} = this.state
 
     if (grantMode !== true)
-      return null
+      return null 
 
-    return this.grantsDimensions.map((dimension, i) =>
+    return this.mutableState.grants.map((dimension, i) =>
       <div
         className='row'
         style={{
@@ -1343,12 +1521,14 @@ class Grants extends React.Component {
           default
           square
           icon='eye'
+          small={overviewMode}
           onClick={() => this.setFilters({ grants: this.state.filters.grants.concat(this.state.grants[i].data.id) }) }
         />
         <Button
           default
           square
           icon='close'
+          small={overviewMode}
           onClick={() => this.onDeleteGrant(this.state.grants[i]) }
         />
       </div>
@@ -1372,7 +1552,7 @@ class Grants extends React.Component {
           <Button onClick={this.unsetGrantDeleteID} muted basic>
             No, cancel
           </Button>
-          <Button onClick={this.deleteGrant} error>
+          <Button onClick={this.onConfirmDeleteGrant} error>
             Yes, delete
           </Button>
         </Modal.Actions>
@@ -1381,7 +1561,7 @@ class Grants extends React.Component {
   }
 
   renderControls() {
-    const {filters: {categories, applicants, status, grants}, fundingMode} = this.state
+    const {filters: {categories, applicants, status, grants}, fundingMode, overviewMode} = this.state
 
     const getCategoryText = id => this.props.categories.data[id].data.name
     const getApplicantText = id => this.props.applicants.data[id].data.name
@@ -1389,78 +1569,101 @@ class Grants extends React.Component {
 
     return (
       <div className='Grants__controls'>
-        <div className='hbox'>
-          <div className='fill' />
+
+        <div className='hbox box--align-end'>
           <Button
             default
             className='font-weight-normal'
-            disabled={this.state.filters === DEFAULT_FILTERS}
-            onClick={this.resetFilters}
+            active={overviewMode}
+            onClick={this.toggleOverviewMode}
           >
-            <Icon name='close' /> Reset Filters
+            <Icon name='eye' /> Overview Mode
           </Button>
         </div>
-        <FilteringDropdown
-          className='full-width'
-          position='bottom left'
-          clearInputOnSelect
-          label={
-            categories.length > 0 ?
-              categories.map(getCategoryText).join(', ') :
-              <Text muted>Filter by source</Text>
-          }
-          items={Object.values(this.props.categories.data).map(a => a.data.id)}
-          selectedItems={categories}
-          getItemText={getCategoryText}
-          setItems={categories => this.setFilters({ categories })}
-        />
-        <FilteringDropdown
-          className='full-width'
-          position='bottom left'
-          clearInputOnSelect
-          label={
-            applicants.length > 0 ?
-              applicants.map(getApplicantText).join(', ') :
-              <Text muted>Filter by applicant</Text>
-          }
-          items={Object.values(this.props.applicants.data).map(a => a.data.id)}
-          selectedItems={applicants}
-          getItemText={getApplicantText}
-          setItems={applicants => this.setFilters({ applicants })}
-        />
-        <FilteringDropdown
-          className='full-width'
-          position='bottom left'
-          clearInputOnSelect
-          label={
-            grants.length > 0 ?
-              grants.map(getGrantText).join(', ') :
-              <Text muted>Filter by grant</Text>
-          }
-          items={this.props.grants.map(g => g.data.id)}
-          selectedItems={grants}
-          getItemText={getGrantText}
-          setItems={grants => this.setFilters({ grants })}
-        />
-        <FilteringDropdown
-          className='full-width'
-          position='bottom left'
-          clearInputOnSelect
-          label={
-            status.length > 0 ?
-              status.join(', ') :
-              <Text muted>Filter by status</Text>
-          }
-          items={Object.values(Status)}
-          selectedItems={status}
-          setItems={status => this.setFilters({ status })}
-        />
-        <div className='hbox'>
-          <div className='fill' />
-          <Button default className='font-weight-normal' active={fundingMode} onClick={this.toggleFundingMode}>
-            Edit Fundings
-          </Button>
-        </div>
+
+        {
+          !overviewMode && [
+            <div className='hbox box--align-end'>
+              <Button
+                default
+                className='font-weight-normal'
+                onClick={this.resetView}
+              >
+                <Icon name='close' /> Reset View
+              </Button>
+              <div className='fill' />
+              <Button
+                default
+                className='font-weight-normal'
+                disabled={this.state.filters === DEFAULT_FILTERS}
+                onClick={this.resetFilters}
+              >
+                <Icon name='close' /> Reset Filters
+              </Button>
+            </div>,
+            <FilteringDropdown
+              className='full-width'
+              position='bottom left'
+              clearInputOnSelect
+              label={
+                categories.length > 0 ?
+                  categories.map(getCategoryText).join(', ') :
+                  <Text muted>Filter by source</Text>
+              }
+              items={Object.values(this.props.categories.data).map(a => a.data.id)}
+              selectedItems={categories}
+              getItemText={getCategoryText}
+              setItems={categories => this.setFilters({ categories })}
+            />,
+            <FilteringDropdown
+              className='full-width'
+              position='bottom left'
+              clearInputOnSelect
+              label={
+                applicants.length > 0 ?
+                  applicants.map(getApplicantText).join(', ') :
+                  <Text muted>Filter by applicant</Text>
+              }
+              items={Object.values(this.props.applicants.data).map(a => a.data.id)}
+              selectedItems={applicants}
+              getItemText={getApplicantText}
+              setItems={applicants => this.setFilters({ applicants })}
+            />,
+            <FilteringDropdown
+              className='full-width'
+              position='bottom left'
+              clearInputOnSelect
+              label={
+                grants.length > 0 ?
+                  grants.map(getGrantText).join(', ') :
+                  <Text muted>Filter by grant</Text>
+              }
+              items={this.props.grants.map(g => g.data.id)}
+              selectedItems={grants}
+              getItemText={getGrantText}
+              setItems={grants => this.setFilters({ grants })}
+            />,
+            <FilteringDropdown
+              className='full-width'
+              position='bottom left'
+              clearInputOnSelect
+              label={
+                status.length > 0 ?
+                  status.join(', ') :
+                  <Text muted>Filter by status</Text>
+              }
+              items={Object.values(Status)}
+              selectedItems={status}
+              setItems={status => this.setFilters({ status })}
+            />,
+            <div className='hbox'>
+              <div className='fill' />
+              <Button default className='font-weight-normal' active={fundingMode} onClick={this.toggleFundingMode}>
+                Edit Fundings
+              </Button>
+            </div>
+          ]
+        }
       </div>
     )
   }
@@ -1491,6 +1694,10 @@ class Grants extends React.Component {
   }
 }
 
+
+function alpha(color, value) {
+  return Color(color).alpha(value).toString()
+}
 
 function addPadding(r, top, right = top, bottom = top, left = right) {
   return [
@@ -1539,6 +1746,12 @@ function calculateBezierPoint(t, p) {
     x: a * p[0].x + b * p[1].x + c * p[2].x + d * p[3].x,
     y: a * p[0].y + b * p[1].y + c * p[2].y + d * p[3].y,
   }
+}
+
+function canvasRectFromPtsRect(rect) {
+  const width  = rect[1][0] - rect[0][0]
+  const height = rect[1][1] - rect[0][1]
+  return [rect[0][0], rect[0][1], width, height]
 }
 
 function sortByStartDate(/* mutable */ grants) {
