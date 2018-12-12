@@ -2,7 +2,7 @@ import React from 'react'
 import PropTypes from 'prop-types'
 import cuid from 'cuid'
 
-import { isOlderThan, MINUTES } from '../utils/time'
+import { isOlderThan, MINUTES } from '../helpers/time'
 import Icon from './Icon'
 import Input from './Input'
 import Button from './Button'

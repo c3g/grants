@@ -9,7 +9,7 @@ import {
 
 
 import HistoryActions from '../actions/history'
-import { formatISO } from '../utils/time'
+import { formatISO } from '../helpers/time'
 
 import Button from './Button'
 import Input from './Input'

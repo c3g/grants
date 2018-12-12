@@ -1,5 +1,5 @@
 import { UI } from '../constants/ActionTypes'
-import { createAction } from '../utils/create-actions'
+import { createAction } from '../helpers/create-actions'
 
 
 export const addFilteringCategory    = createAction(UI.ADD_FILTERING_CATEGORY)

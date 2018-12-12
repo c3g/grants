@@ -3,7 +3,7 @@ import Prop from 'prop-types'
 import pure from 'recompose/pure'
 import matchSorter from 'match-sorter'
 
-import alphabeticalSort from '../utils/alphabetical-sort'
+import alphabeticalSort from '../helpers/alphabetical-sort'
 import Badge from './Badge'
 import Button from './Button'
 import Dropdown from './Dropdown'

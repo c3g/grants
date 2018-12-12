@@ -2,7 +2,7 @@ import React from 'react'
 import pure from 'recompose/pure'
 import classname from 'classname'
 
-import humanReadableTime, { humanDetailedTime } from '../utils/human-readable-time'
+import humanReadableTime, { humanDetailedTime } from '../helpers/human-readable-time'
 import Tooltip from './Tooltip'
 
 function Time(props) {

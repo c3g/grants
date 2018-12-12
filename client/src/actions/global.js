@@ -4,10 +4,10 @@ import {
   SHOW,
   SHOW_NOTIFICATION
 } from '../constants/ActionTypes'
-import { createAction, createAsyncAction, createFetchActions } from '../utils/create-actions'
+import { createAction, createAsyncAction, createFetchActions } from '../helpers/create-actions'
 import * as requests from '../requests'
 
-import openCentered from '../utils/open-centered'
+import openCentered from '../helpers/open-centered'
 import settings from './settings.js'
 import users from './users.js'
 import applicants from './applicants.js'

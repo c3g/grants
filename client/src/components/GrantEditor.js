@@ -19,7 +19,7 @@ import cx from 'classname'
 import Status from '../constants/status'
 import Applicant from '../actions/applicants'
 
-import {formatISO} from '../utils/time'
+import {formatISO} from '../helpers/time'
 import Button from './Button'
 import Dropdown from './Dropdown'
 import EditableLabel from './EditableLabel'

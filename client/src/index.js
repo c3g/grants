@@ -5,8 +5,8 @@ import 'font-awesome/css/font-awesome.min.css'
 
 import store from './store'
 import Routes from './routes'
-import registerServiceWorker from './utils/registerServiceWorker'
-import isLocalhost from './utils/is-localhost.js'
+import registerServiceWorker from './helpers/registerServiceWorker'
+import isLocalhost from './helpers/is-localhost.js'
 
 import './styles/alerts.css'
 import './styles/badges.css'

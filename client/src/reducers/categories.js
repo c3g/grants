@@ -9,7 +9,7 @@ import {
 } from 'ramda'
 import { CATEGORIES } from '../constants/ActionTypes'
 
-import toLoadable from '../utils/to-loadable'
+import toLoadable from '../helpers/to-loadable'
 
 const initialState = {
   isLoading: false,

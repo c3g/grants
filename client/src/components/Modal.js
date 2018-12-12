@@ -4,7 +4,7 @@ import { createPortal } from 'react-dom'
 import pure from 'recompose/pure'
 import classname from 'classname'
 
-import size from '../utils/size'
+import size from '../helpers/size'
 import Button from './Button'
 import Icon from './Icon'
 

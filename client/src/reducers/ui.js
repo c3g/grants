@@ -4,7 +4,7 @@ import {
   SHOW_NOTIFICATION,
   UI
 } from '../constants/ActionTypes'
-import uniq from '../utils/uniq'
+import uniq from '../helpers/uniq'
 
 const initialState = {
   showFAQ: false,

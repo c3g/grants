@@ -2,7 +2,7 @@ import {
   createModelConstants,
   createNetworkConstants,
   createConstants
-} from '../utils/create-actions.js'
+} from '../helpers/create-actions.js'
 
 // UI
 export const UI = createConstants('UI', [

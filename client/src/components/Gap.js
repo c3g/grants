@@ -2,7 +2,7 @@ import React from 'react'
 import pure from 'recompose/pure'
 import classname from 'classname'
 
-import size from '../utils/size'
+import size from '../helpers/size'
 
 function Gap(props) {
   const { className } = props

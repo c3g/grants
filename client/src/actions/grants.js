@@ -1,6 +1,6 @@
 import { GRANTS } from '../constants/ActionTypes'
 
-import { createFetchActions } from '../utils/create-actions'
+import { createFetchActions } from '../helpers/create-actions'
 import * as requests from '../requests'
 
 const grants = {

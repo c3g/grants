@@ -5,7 +5,7 @@
 
 import axios from 'axios'
 
-import queryString from './utils/query-string'
+import queryString from './helpers/query-string'
 
 
 

@@ -4,7 +4,7 @@ import { bindActionCreators } from 'redux'
 import { connect } from 'react-redux'
 import { createStructuredSelector, createSelector } from 'reselect'
 
-import { fromLoadable } from '../utils/to-loadable'
+import { fromLoadable } from '../helpers/to-loadable'
 import Grants from '../components/Grants'
 
 class GrantsContainer extends React.Component {

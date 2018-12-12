@@ -1,6 +1,6 @@
 import { SETTINGS } from '../constants/ActionTypes'
 
-import { createFetchActions } from '../utils/create-actions'
+import { createFetchActions } from '../helpers/create-actions'
 import * as requests from '../requests'
 
 const settings = {

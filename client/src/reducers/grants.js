@@ -9,8 +9,8 @@ import {
 } from 'ramda'
 import { GRANTS, APPLICANTS, CATEGORIES } from '../constants/ActionTypes'
 
-import objectMap from '../utils/object-map'
-import toLoadable from '../utils/to-loadable'
+import objectMap from '../helpers/object-map'
+import toLoadable from '../helpers/to-loadable'
 
 const initialState = {
   isLoading: false,

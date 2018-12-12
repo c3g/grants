@@ -2,7 +2,7 @@ import React from 'react'
 import pure from 'recompose/pure'
 import classname from 'classname'
 
-import * as Interval from '../utils/postgres-interval'
+import * as Interval from '../helpers/postgres-interval'
 import Input from './Input'
 
 class IntervalInput extends React.Component {

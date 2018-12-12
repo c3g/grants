@@ -3,7 +3,7 @@ import PropTypes from 'prop-types'
 import pure from 'recompose/pure'
 import classname from 'classname'
 
-import arrayEquals from '../utils/array-equals'
+import arrayEquals from '../helpers/array-equals'
 import Button from './Button'
 import Help from './Help'
 import Icon from './Icon'
