@@ -94,7 +94,7 @@ class Modal extends React.Component {
   }
 
   onKeyDown = (ev) => {
-    if (ev.which === 27 /* Escape */) {
+    if (ev.which === 27 /* Escape */ && this.props.open) {
       ev.preventDefault()
       ev.stopPropagation()
       this.props.onClose()
