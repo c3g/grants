@@ -91,15 +91,18 @@ class Grants extends React.Component {
   }
 
   /**
-   * @type HTMLCanvasElement
+   * @type React.Ref
    */
   canvas = undefined
 
   /**
-   * @type HTMLElement
+   * @type React.Ref
    */
   element = undefined
 
+  /**
+   * @type CanvasSpace
+   */
   space = {}
 
   constructor(props) {
@@ -138,6 +141,9 @@ class Grants extends React.Component {
         return acc
       }, {}),
     }
+
+    this.element = React.createRef()
+    this.canvas = React.createRef()
   }
 
   componentDidMount() {
@@ -152,9 +158,9 @@ class Grants extends React.Component {
     document.addEventListener('keydown', this.onDocumentKeyDown)
     document.addEventListener('keyup', this.onDocumentKeyUp)
 
-    this.canvas.addEventListener('wheel', this.onMouseWheel)
+    this.canvas.current.addEventListener('wheel', this.onMouseWheel)
 
-    this.space = new CanvasSpace(this.canvas)
+    this.space = new CanvasSpace(this.canvas.current)
     this.space.setup({ bgcolor: BACKGROUND_COLOR })
     this.form = this.space.getForm()
 
@@ -182,7 +188,7 @@ class Grants extends React.Component {
     document.removeEventListener('keydown', this.onDocumentKeyDown)
     document.removeEventListener('keyup', this.onDocumentKeyUp)
 
-    this.canvas.removeEventListener('wheel', this.onMouseWheel)
+    this.canvas.current.removeEventListener('wheel', this.onMouseWheel)
 
     window.localStorage[STORAGE_KEY] = JSON.stringify({
       startDate: this.state.startDate,
@@ -207,7 +213,7 @@ class Grants extends React.Component {
   }
 
   updateDimensions() {
-    const { width, height } = this.element.getBoundingClientRect()
+    const { width, height } = this.element.current.getBoundingClientRect()
 
     if (width !== this.state.width || height !== this.state.height) {
       this.setState({ width, height })
@@ -295,10 +301,6 @@ class Grants extends React.Component {
     )
   }
 
-  setCursor(type) {
-    this.canvas.style.cursor = type
-  }
-
   dateToX(date) {
     const visibleDays = this.getVisibleDays()
     const pixelsPerDay = this.state.width / visibleDays
@@ -340,6 +342,55 @@ class Grants extends React.Component {
     return entry ? entry[0] : undefined
   }
 
+  setupScrolling() {
+    this.scrollSlider = value(this.state.scrollTop, (scrollTop) => {
+      if (scrollTop !== this.state.scrollTop)
+        this.setState({ scrollTop })
+
+      return scrollTop
+    })
+  }
+
+  setupDragging() {
+    this.initialDate = this.state.startDate
+
+    this.xSlider = value(0, (x) => {
+      const visibleDays = this.getVisibleDays()
+      const pixelsPerDay = this.state.width / visibleDays
+
+      const days = -x / pixelsPerDay
+
+      const startDate = addDays(this.initialDate, days)
+      const endDate   = addDays(startDate, visibleDays)
+
+      this.setState({ startDate, endDate })
+
+      return x
+    })
+  }
+
+  validateFunding = (amount) => {
+    const {funding} = this.state
+
+    const grant = this.getGrantByID(funding.data.fromGrantID)
+    const maximum = this.getAvailableCofunding(grant)
+
+    if (amount > maximum) {
+      return false
+    }
+
+    return true
+  }
+
+  /*
+   * Rendering helpers (canvas)
+   */
+
+  setCursor(type) {
+    if (this.canvas.current)
+      this.canvas.current.style.cursor = type
+  }
+
   drawText(position, text) {
     this.form.fill(TEXT_COLOR).font(14, 'bold')
       .text(position, text)
@@ -358,6 +409,35 @@ class Grants extends React.Component {
       .line([[position.x - length, position.y - length], [position.x + length, position.y + length]])
     this.form.stroke(color, width, undefined, 'round')
       .line([[position.x + length, position.y - length], [position.x - length, position.y + length]])
+  }
+
+  /*
+   * Rendering (canvas)
+   */
+
+  onUpdateSpace = (time, ftime) => {
+    const years = this.getVisibleYears()
+    const months = this.getVisibleMonths()
+
+    /*
+     * Drawing
+     */
+
+    this.form.font(TEXT_SIZE, undefined, undefined, undefined, FONT_FAMILY)
+
+    this.setCursor('default')
+
+    this.drawBackground(years, months)
+
+    this.drawCursorLine()
+
+    this.drawGrants()
+
+    this.drawFundings()
+
+    this.drawTimeline(years, months)
+
+    this.drawTooltip()
   }
 
   drawBackground(years, months) {
@@ -408,98 +488,6 @@ class Grants extends React.Component {
     )
   }
 
-  drawTooltip() {
-    const {mouseHover} = this.state
-    const hasPointer = this.space.pointer
-    const showTooltip = hasPointer && mouseHover
-
-    if (!showTooltip)
-      return
-
-    const {pointer = {x: -100, y: -100}} = this.space
-    const text = format(this.getMouseDate(), 'MMM D, YYYY')
-
-    this.form.font(TEXT_SIZE, 'normal')
-
-    const x = pointer.x + 20
-    const y = pointer.y
-    const textWidth = this.form.getTextWidth(text)
-    const paddingH = 5
-    const paddingV = 2
-    const width = textWidth + 2 * paddingH
-    const height = 30
-
-    const box = [
-      new Pt([x, y]),
-      new Pt([x + width, y + height])
-    ]
-    const innerBox = [
-      new Pt([x + paddingH, y]),
-      new Pt([x + width - paddingH, y + height])
-    ]
-
-    this.form.fillOnly(TOOLTIP_BACKGROUND).rect(box)
-    this.form.fill(WHITE).textBox(innerBox, text)
-  }
-
-  drawTimeline(years, months) {
-    const { width, height } = this.space
-
-    // Background & border
-    this.form.fillOnly(TIMELINE_BACKGROUND).rect([[0, -1], [width, TIMELINE_HEIGHT]])
-    this.drawLine([[0, TIMELINE_HEIGHT], [width, TIMELINE_HEIGHT]])
-
-    // Months & Years
-    this.form.font(14, 'bold')
-
-    const visibleDays = this.getVisibleDays()
-    const pixelsPerDay = this.state.width / visibleDays
-
-    const yearTextWidth = this.form.getTextWidth('0000')
-    const minMonthWidth = 28 * pixelsPerDay
-
-    let monthsAfterYear = 0
-    while (yearTextWidth + 10 > minMonthWidth * monthsAfterYear) {
-      monthsAfterYear += 1
-    }
-
-    this.form.alignText('left', 'top')
-
-    if (monthsAfterYear <= 6) {
-      const monthsByYear = groupBy(d => d.getFullYear(), months)
-
-      Object.values(monthsByYear).forEach(months => {
-        const offset = months[0].getMonth() === 0 ? 0 : 12 - months.length
-        months.forEach((month, i) => {
-          if (month.getTime() === startOfYear(month).getTime())
-            return
-
-          if ((i + offset) % monthsAfterYear !== 0)
-            return
-
-          const x = this.dateToX(month)
-          const text = format(month, 'MMM')
-          this.form.fill(MONTH_LINE_COLOR).text([x + 5, 5], text)
-          this.drawLine([[x, 0], [x, TIMELINE_HEIGHT]], MONTH_LINE_COLOR)
-        })
-      })
-    }
-
-    years.forEach(year => {
-      const x = this.dateToX(year)
-      const text = format(year, 'YYYY')
-
-      this.form.fill(TEXT_COLOR).text([x + 5, 5], text)
-      this.drawLine([[x, 0], [x, TIMELINE_HEIGHT]], YEAR_LINE_COLOR)
-    })
-
-
-    // Today's cross
-    const todayX = this.dateToX(today())
-    this.drawLine([[todayX, TIMELINE_HEIGHT - 2], [todayX, TIMELINE_HEIGHT + 2]], BLACK, 2)
-    this.drawLine([[todayX - 2, TIMELINE_HEIGHT], [todayX + 2, TIMELINE_HEIGHT]], BLACK, 2)
-  }
-
   drawGrants() {
     const {width, height, scrollTop, mouseHover} = this.state
 
@@ -527,7 +515,6 @@ class Grants extends React.Component {
           visibleRect
         )
       )
-      // const innerWidth = getRectangleWidth(innerRect)
 
       this.grantsDimensions.push(rect)
 
@@ -778,30 +765,101 @@ class Grants extends React.Component {
     })
   }
 
-  onUpdateSpace = (time, ftime) => {
-    const years = this.getVisibleYears()
-    const months = this.getVisibleMonths()
+  drawTimeline(years, months) {
+    const { width, height } = this.space
 
-    /*
-     * Drawing
-     */
+    // Background & border
+    this.form.fillOnly(TIMELINE_BACKGROUND).rect([[0, -1], [width, TIMELINE_HEIGHT]])
+    this.drawLine([[0, TIMELINE_HEIGHT], [width, TIMELINE_HEIGHT]])
 
-    this.form.font(TEXT_SIZE, undefined, undefined, undefined, FONT_FAMILY)
+    // Months & Years
+    this.form.font(14, 'bold')
 
-    this.setCursor('default')
+    const visibleDays = this.getVisibleDays()
+    const pixelsPerDay = this.state.width / visibleDays
 
-    this.drawBackground(years, months)
+    const yearTextWidth = this.form.getTextWidth('0000')
+    const minMonthWidth = 28 * pixelsPerDay
 
-    this.drawCursorLine()
+    let monthsAfterYear = 0
+    while (yearTextWidth + 10 > minMonthWidth * monthsAfterYear) {
+      monthsAfterYear += 1
+    }
 
-    this.drawGrants()
+    this.form.alignText('left', 'top')
 
-    this.drawFundings()
+    if (monthsAfterYear <= 6) {
+      const monthsByYear = groupBy(d => d.getFullYear(), months)
 
-    this.drawTimeline(years, months)
+      Object.values(monthsByYear).forEach(months => {
+        const offset = months[0].getMonth() === 0 ? 0 : 12 - months.length
+        months.forEach((month, i) => {
+          if (month.getTime() === startOfYear(month).getTime())
+            return
 
-    this.drawTooltip()
+          if ((i + offset) % monthsAfterYear !== 0)
+            return
+
+          const x = this.dateToX(month)
+          const text = format(month, 'MMM')
+          this.form.fill(MONTH_LINE_COLOR).text([x + 5, 5], text)
+          this.drawLine([[x, 0], [x, TIMELINE_HEIGHT]], MONTH_LINE_COLOR)
+        })
+      })
+    }
+
+    years.forEach(year => {
+      const x = this.dateToX(year)
+      const text = format(year, 'YYYY')
+
+      this.form.fill(TEXT_COLOR).text([x + 5, 5], text)
+      this.drawLine([[x, 0], [x, TIMELINE_HEIGHT]], YEAR_LINE_COLOR)
+    })
+
+
+    // Today's cross
+    const todayX = this.dateToX(today())
+    this.drawLine([[todayX, TIMELINE_HEIGHT - 2], [todayX, TIMELINE_HEIGHT + 2]], BLACK, 2)
+    this.drawLine([[todayX - 2, TIMELINE_HEIGHT], [todayX + 2, TIMELINE_HEIGHT]], BLACK, 2)
   }
+
+  drawTooltip() {
+    const {mouseHover} = this.state
+    const hasPointer = this.space.pointer
+    const showTooltip = hasPointer && mouseHover
+
+    if (!showTooltip)
+      return
+
+    const {pointer = {x: -100, y: -100}} = this.space
+    const text = format(this.getMouseDate(), 'MMM D, YYYY')
+
+    this.form.font(TEXT_SIZE, 'normal')
+
+    const x = pointer.x + 20
+    const y = pointer.y
+    const textWidth = this.form.getTextWidth(text)
+    const paddingH = 5
+    const paddingV = 2
+    const width = textWidth + 2 * paddingH
+    const height = 30
+
+    const box = [
+      new Pt([x, y]),
+      new Pt([x + width, y + height])
+    ]
+    const innerBox = [
+      new Pt([x + paddingH, y]),
+      new Pt([x + width - paddingH, y + height])
+    ]
+
+    this.form.fillOnly(TOOLTIP_BACKGROUND).rect(box)
+    this.form.fill(WHITE).textBox(innerBox, text)
+  }
+
+  /*
+   * Event handlers
+   */
 
   onMouseEnterGrant = (grant) => {
 
@@ -1124,55 +1182,6 @@ class Grants extends React.Component {
     }
   }
 
-  setupScrolling() {
-    this.scrollSlider = value(this.state.scrollTop, (scrollTop) => {
-      if (scrollTop !== this.state.scrollTop)
-        this.setState({ scrollTop })
-
-      return scrollTop
-    })
-  }
-
-  setupDragging() {
-    this.initialDate = this.state.startDate
-
-    this.xSlider = value(0, (x) => {
-      const visibleDays = this.getVisibleDays()
-      const pixelsPerDay = this.state.width / visibleDays
-
-      const days = -x / pixelsPerDay
-
-      const startDate = addDays(this.initialDate, days)
-      const endDate   = addDays(startDate, visibleDays)
-
-      this.setState({ startDate, endDate })
-
-      return x
-    })
-  }
-
-  validateFunding = (amount) => {
-    const {funding} = this.state
-
-    const grant = this.getGrantByID(funding.data.fromGrantID)
-    const maximum = this.getAvailableCofunding(grant)
-
-    if (amount > maximum) {
-      return false
-    }
-
-    return true
-  }
-
-  onRef = (ref) => {
-    if (ref)
-      this.element = ref
-  }
-
-  onRefCanvas = (ref) => {
-    if (ref)
-      this.canvas = ref
-  }
 
   onCreateGrant = (grant) => {
     Grant.create(grant.data)
@@ -1458,11 +1467,11 @@ class Grants extends React.Component {
 
   render() {
     return (
-      <div className='Grants' ref={this.onRef}>
+      <div className='Grants' ref={this.element}>
 
         <canvas
           className='Grants__canvas'
-          ref={this.onRefCanvas}
+          ref={this.canvas}
           onClick={this.onClick}
           onMouseMove={this.onMouseMove}
           onMouseDown={this.onMouseDown}
@@ -1501,10 +1510,6 @@ function clipHorizontalRect(inner, outer) {
       inner[1][1]
     ],
   ]
-}
-
-function getRectangleWidth(rect) {
-  return rect[1].x - rect[0].x
 }
 
 function calculateBezierPoint(t, p) {
