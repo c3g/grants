@@ -75,8 +75,8 @@ const FONT_FAMILY = 'Ubuntu'
 
 const INITIAL_DATE = new Date('2015-01-01')
 const INITIAL_VIEW = {
-  startDate: addYears(today(), -3),
-  endDate:   addYears(today(), 3),
+  startDate: addYears(today(), -4),
+  endDate:   addYears(today(), 4),
 }
 
 const DEFAULT_FILTERS = {
@@ -369,14 +369,19 @@ class Grants extends React.Component {
     })
   }
 
-  setupDragging() {
+  setupDragging(startDate = this.state.startDate) {
+    this.initialDate = startDate
+
+    if (this.xSlider)
+      this.xSlider.stop()
+
     this.xSlider = value(0, (x) => {
       const visibleDays = this.getVisibleDays()
       const pixelsPerDay = this.state.width / visibleDays
 
       const days = -x / pixelsPerDay
 
-      const startDate = addDays(INITIAL_DATE, days)
+      const startDate = addDays(this.initialDate, days)
       const endDate   = addDays(startDate, visibleDays)
 
       this.setState({ startDate, endDate })
@@ -487,7 +492,7 @@ class Grants extends React.Component {
 
   setView = (view) => {
     this.setState(view)
-    this.setupDragging()
+    this.setupDragging(view.startDate)
   }
 
   resetView = () => {
@@ -1114,7 +1119,6 @@ class Grants extends React.Component {
       const startDate = addDays(this.state.startDate, deltaDays * (zoomIn ? -1 : 1))
       const endDate   = addDays(this.state.endDate,   deltaDays * (zoomIn ? 1 : -1))
 
-      this.xSlider.stop()
       this.scrollSlider.stop()
       this.setView({ startDate, endDate })
     }
