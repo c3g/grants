@@ -7,8 +7,8 @@ import Icon from './Icon'
 class EditableLabel extends React.Component {
   static propTypes = {
     value: prop.string.isRequired,
-    onChange: prop.func.isRequired,
-    onEnter: prop.func.isRequired,
+    onChange: prop.func,
+    onEnter: prop.func,
   }
 
   constructor() {
