@@ -1360,7 +1360,7 @@ class Grants extends React.Component {
           Are you sure you want to delete grant “{grant ? grant.data.name : ''}”?
         </Modal.Content>
         <Modal.Actions>
-          <Button onClick={this.unsetGrantDeleteID} muted>
+          <Button onClick={this.unsetGrantDeleteID} muted basic>
             No, cancel
           </Button>
           <Button onClick={this.deleteGrant} error>

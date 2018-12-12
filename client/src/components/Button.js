@@ -13,6 +13,7 @@ function Button(props) {
     size,
     active,
     flat,
+    basic,
     round,
     iconButton,
     square,
@@ -47,6 +48,7 @@ function Button(props) {
     {
       'active': active,
       'flat': flat,
+      'basic': basic,
       'round': round,
       'square': square,
       'iconButton': iconButton,

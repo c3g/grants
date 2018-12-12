@@ -166,15 +166,19 @@
 
 .Button.muted {
   color: $text-color-muted;
-  border: 2px solid $text-color-muted;
 }
-.Button.muted:not([disabled]):hover {
+
+.Button.muted.basic {
+  color: $text-color-muted;
+  // border: 2px solid $text-color-muted;
+}
+.Button.muted.basic:not([disabled]):hover {
   color: $text-color-white;
   background-color: $text-color-muted;
 }
-.Button.muted:not([disabled]).active,
-.Button.muted:not([disabled]):active,
-.Button.muted:not([disabled]):focus {
+.Button.muted.basic:not([disabled]).active,
+.Button.muted.basic:not([disabled]):active,
+.Button.muted.basic:not([disabled]):focus {
   color: $text-color-white;
   box-shadow: 0 0 0 1px $text-color-white;
   border: 1px solid $text-color-white;

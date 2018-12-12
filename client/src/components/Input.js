@@ -20,14 +20,6 @@ class Input extends React.Component {
     return !equals(this.props, nextProps)
   }
 
-  focus() {
-    this.element.focus()
-  }
-
-  select() {
-    this.element.select()
-  }
-
   accept(ev) {
     this.props.onEnter && this.props.onEnter(ev.target.value, ev)
     if (this.props.clearOnEnter)
@@ -102,6 +94,7 @@ class Input extends React.Component {
       onEnter,
       validate,
       disabled,
+      forwardedRef,
       ...rest
     } = this.props
     /* eslint-enable no-unused-vars */
@@ -136,7 +129,7 @@ class Input extends React.Component {
           onKeyDown={this.props.onKeyDown || this.onKeyDown}
           onFocus={this.onFocus}
           onBlur={this.onBlur}
-          ref={ref => { if (ref) this.element = ref }}
+          ref={forwardedRef}
         />
         { loading && <span className='loading-spinner-tiny'/> }
         { showClearButton && actualValue &&
@@ -153,5 +146,9 @@ class Input extends React.Component {
 }
 
 
+function forwardRef(props, ref) {
+  return <Input {...props} forwardedRef={ref} />
+}
+forwardRef.displayName = 'Input'
 
-export default Input
+export default React.forwardRef(forwardRef)

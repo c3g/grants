@@ -855,36 +855,24 @@ section {
  */
 
 .GrantEditor {
-  position: absolute;
-  top: 50%;
-  left: 50%;
-  transform: translate(-50%, -40%);
+  // position: absolute;
+  // top: 50%;
+  // left: 50%;
+  // transform: translate(-50%, -40%);
   width: 500px;
-  height: 600px;
+  min-height: 600px;
+  // background-color: $bg-color-default;
+  /* opacity: 0;
+   * pointer-events: none;
+   * transition: all 0.3s; */
+}
+.GrantEditor .Modal__background {
+  background-color: $shadow-color;
+}
+.GrantEditor .Modal__container {
+  box-shadow: none;
   border: 1px solid #333;
   border-radius: 2px;
-  background-color: $bg-color-default;
-  opacity: 0;
-  pointer-events: none;
-  transition: all 0.3s;
-}
-.GrantEditor.open {
-  opacity: 1;
-  transform: translate(-50%, -50%);
-  pointer-events: initial;
-}
-.GrantEditor__shadow { /* is outside of .GrantEditor */
-  position: absolute;
-  width: 100%;
-  height: 100%;
-  background-color: $shadow-color;
-  opacity: 0;
-  pointer-events: none;
-  transition: all 0.3s;
-}
-.GrantEditor__shadow.open {
-  opacity: 1;
-  pointer-events: initial;
 }
 .GrantEditor__top {
   padding: 5px 4*$padding;
@@ -910,6 +898,7 @@ section {
 .GrantEditor__fields {
   width: 100%;
   background-color: transparent;
+  margin-bottom: 1em;
 
   & th, & td, & .empty td {
     text-align: left;

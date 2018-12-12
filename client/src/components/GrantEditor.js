@@ -13,7 +13,6 @@ import {
   format,
   differenceInCalendarDays
 } from 'date-fns'
-import Color from 'color'
 import { over, lensPath, set } from 'ramda'
 import cx from 'classname'
 
@@ -21,14 +20,13 @@ import Status from '../constants/status'
 import Applicant from '../actions/applicants'
 
 import {formatISO} from '../utils/time'
-import filterTags from '../utils/filter-tags'
-import uniq from '../utils/uniq'
 import Button from './Button'
 import Dropdown from './Dropdown'
 import EditableLabel from './EditableLabel'
 import FilteringDropdown from './FilteringDropdown'
 import Input from './Input'
 import Label from './Label'
+import Modal from './Modal'
 import Text from './Text'
 import Title from './Title'
 
@@ -191,6 +189,8 @@ class GrantEditor extends React.Component {
         this.state.grant
       )
     })
+
+    this.name.focus()
   }
 
   onDeleteField = (index) => {
@@ -290,11 +290,13 @@ class GrantEditor extends React.Component {
     const category = this.props.categories.data[grant.data.categoryID]
     const color = this.getGrantColor(grant)
 
-    const className = cx('GrantEditor vbox', { open })
-
-    return [
-      <div className={cx('GrantEditor__shadow', { open })} onClick={this.onCancel} />,
-      <div className={className}>
+    return (
+      <Modal
+        className='GrantEditor vbox'
+        showHeader={false}
+        open={open}
+        onClose={this.onCancel}
+      >
 
         <div className='GrantEditor__top' style={{ backgroundColor: color }}>
           <Title className='GrantEditor__title'>{ grant.data.name }&nbsp;</Title>
@@ -472,6 +474,7 @@ class GrantEditor extends React.Component {
                   placeholder='Name'
                   className='fill-width'
                   value={fieldName}
+                  ref={ref => ref && (this.name = ref)}
                   onChange={this.onChangeNewFieldName}
                   onEnter={this.onAddField}
                 />
@@ -517,8 +520,8 @@ class GrantEditor extends React.Component {
           </div>
 
         </div>
-      </div>
-    ]
+      </Modal>
+    )
   }
 }
 
