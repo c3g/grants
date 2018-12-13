@@ -456,8 +456,6 @@ class Grants extends React.Component {
   }
 
   enterFundingMode = () => {
-    if (this.state.overviewMode)
-      return
     this.setState({ fundingMode: true })
   }
 
@@ -805,7 +803,7 @@ class Grants extends React.Component {
   }
 
   drawFundings() {
-    const {overviewMode} = this.state
+    const {fundingMode, overviewMode} = this.state
     const {hoverGrantID} = this.mutableState
 
     const fundings = this.state.funding ? this.props.fundings.concat(this.state.funding) : this.props.fundings
@@ -906,19 +904,20 @@ class Grants extends React.Component {
 
       const isHoverOtherGrant = hoverGrantID !== undefined && hoverGrantID !== link.funding.data.fromGrantID && hoverGrantID !== link.funding.data.toGrantID
       const isHoverGrant = hoverGrantID === link.funding.data.fromGrantID || hoverGrantID === link.funding.data.toGrantID
+      const isDimmed = !fundingMode && isHoverOtherGrant
 
       const grantColor = this.getGrantColor(link.detail.grant)
       const baseColor = Color(grantColor).darken(0.1).toString()
       const linkColor =
         isPartial ?
           alpha(baseColor, 0.5) :
-        isHoverOtherGrant ?
+        isDimmed ?
           alpha(baseColor, 0.5) :
           baseColor
 
       const lineWidth = isHoverGrant ? 2 : 1
 
-      if (isHoverOtherGrant)
+      if (isDimmed)
         this.form._ctx.setLineDash([5, 5])
 
       // Curve
@@ -934,7 +933,7 @@ class Grants extends React.Component {
       this.mutableState.fundingPositions[link.funding.data.id] = { position: middlePoint }
 
       // Middle point & text
-      if (!overviewMode && !isPartial) {
+      if (!isPartial) {
 
         const text = formatAmount(link.funding.data.amount)
         const textColor =
@@ -942,24 +941,27 @@ class Grants extends React.Component {
             alpha(TEXT_COLOR, 0.3) :
             baseColor
 
-        this.form.fill(textColor, 1).font(TEXT_SIZE, 'bold')
-          .text(middlePoint.$add(10, (2 - TEXT_HEIGHT / 2)), text)
+        if (!overviewMode)
+          this.form.fill(textColor, 1).font(TEXT_SIZE, 'bold')
+            .text(middlePoint.$add(10, (2 - TEXT_HEIGHT / 2)), text)
 
         const wasHover = this.mutableState.fundingPositions[link.funding.data.id].hover
         const isHover = this.isMouseInCircle(middlePoint, 10)
 
-        if (!this.state.fundingMode) {
+        if (fundingMode) {
+          if (isHover) {
+            this.setCursor('pointer')
+            this.drawCross(middlePoint, textColor, 3)
+            this.mutableState.fundingPositions[link.funding.data.id].hover = true
+          }
+          else {
+            this.drawCross(middlePoint, textColor)
+            if (wasHover)
+              this.mutableState.fundingPositions[link.funding.data.id].hover = false
+          }
+        }
+        else if (!overviewMode) {
           this.form.fillOnly(textColor).point(middlePoint, 2, 'circle')
-        }
-        else if (isHover) {
-          this.setCursor('pointer')
-          this.drawCross(middlePoint, textColor, 3)
-          this.mutableState.fundingPositions[link.funding.data.id].hover = true
-        }
-        else {
-          this.drawCross(middlePoint, textColor)
-          if (wasHover)
-            this.mutableState.fundingPositions[link.funding.data.id].hover = false
         }
       }
 
@@ -1584,6 +1586,17 @@ class Grants extends React.Component {
             <Icon name='eye' /> Overview Mode
           </Button>
         </div>
+        <div className='hbox box--align-end'>
+          <Button
+            default
+            className='font-weight-normal'
+            icon='edit'
+            active={fundingMode}
+            onClick={this.toggleFundingMode}
+          >
+            Edit Fundings
+          </Button>
+        </div>
 
         {
           !overviewMode && [
@@ -1660,12 +1673,6 @@ class Grants extends React.Component {
               selectedItems={status}
               setItems={status => this.setFilters({ status })}
             />,
-            <div className='hbox'>
-              <div className='fill' />
-              <Button default className='font-weight-normal' active={fundingMode} onClick={this.toggleFundingMode}>
-                Edit Fundings
-              </Button>
-            </div>
           ]
         }
       </div>
