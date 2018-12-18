@@ -61,7 +61,6 @@ const TIMELINE_BACKGROUND = BACKGROUND_COLOR
 const TOOLTIP_BACKGROUND = 'rgba(0, 0, 0, 0.6)'
 
 const TIMELINE_HEIGHT = 30
-const GRANT_HEIGHT = 100
 const GRANT_MARGIN = 15
 const GRANT_PADDING = 10
 const TITLE_SIZE = 16
@@ -73,7 +72,6 @@ const GRANT_OVERVIEW_HEIGHT = TITLE_HEIGHT + 2 * GRANT_PADDING
 
 const FONT_FAMILY = 'Ubuntu'
 
-const INITIAL_DATE = new Date('2015-01-01')
 const INITIAL_VIEW = {
   startDate: addYears(today(), -4),
   endDate:   addYears(today(), 4),
@@ -162,12 +160,6 @@ class Grants extends React.Component {
     this.isDragging = false
   }
 
-/*   setState(patch) {
- *     if (patch.startDate !== undefined || patch.endDate !== undefined)
- *       console.log('Updated', JSON.parse(JSON.stringify(patch)))
- *     super.setState(patch)
- *   }
- *  */
   componentDidMount() {
     this.updateDimensions()
 
@@ -369,9 +361,7 @@ class Grants extends React.Component {
     })
   }
 
-  setupDragging(startDate = this.state.startDate) {
-    this.initialDate = startDate
-
+  setupDragging(initialDate = this.state.startDate) {
     if (this.xSlider)
       this.xSlider.stop()
 
@@ -381,7 +371,7 @@ class Grants extends React.Component {
 
       const days = -x / pixelsPerDay
 
-      const startDate = addDays(this.initialDate, days)
+      const startDate = addDays(initialDate, days)
       const endDate   = addDays(startDate, visibleDays)
 
       this.setState({ startDate, endDate })
