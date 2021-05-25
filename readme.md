@@ -97,7 +97,7 @@ npm run build:server # builds back-end docker image
 You will need to create two directories:
 
 - `$DB_DATA_DIRECTORY`: This will contain the database data. It's an external
-     volume that persits across docker restats.
+     volume that persists across docker restats.
 - `$CONFIG_DIRECTORY`: This will contain the application configuration (e.g.
      SMTP account, Google OAuth account, etc). It must be created by copying the
      `/config` directory of this project, and modifying the

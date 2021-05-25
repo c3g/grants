@@ -4,14 +4,9 @@ import pure from 'recompose/pure'
 import matchSorter from 'match-sorter'
 
 import alphabeticalSort from '../helpers/alphabetical-sort'
-import Badge from './Badge'
-import Button from './Button'
 import Dropdown from './Dropdown'
-import Gap from './Gap'
 import Icon from './Icon'
 import Input from './Input'
-import Label from './Label'
-import Spinner from './Spinner'
 import Text from './Text'
 
 
